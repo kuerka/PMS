@@ -1,4 +1,5 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import * as path from 'path';
 
 const OrmConfig: TypeOrmModuleOptions = {
   type: 'mysql',
@@ -6,9 +7,9 @@ const OrmConfig: TypeOrmModuleOptions = {
   port: 3037,
   username: 'root',
   password: '25362565k',
-  database: 'cms',
-  autoLoadEntities: true,
-  synchronize: true,
+  database: 'pms',
+  entities: [path.join(__dirname, '../**/*.entity{.ts,.js}')],
+  synchronize: false,
 };
 
 export { OrmConfig };

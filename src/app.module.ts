@@ -6,6 +6,9 @@ import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { FileModule } from './file/file.module';
+import { ProspectModule } from './prospect/prospect.module';
+import { ContractModule } from './contract/contract.module';
+import { CostFormModule } from './cost-form/cost-form.module';
 
 @Module({
   imports: [
@@ -13,6 +16,9 @@ import { FileModule } from './file/file.module';
     UserModule,
     AuthModule,
     FileModule,
+    ProspectModule,
+    ContractModule,
+    CostFormModule,
   ],
   controllers: [AppController],
   providers: [AppService],

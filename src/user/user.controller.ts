@@ -1,9 +1,10 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Roles } from 'src/auth/auth.decorators';
+import { LimitsMap } from 'src/auth/constants';
 
 @Controller('user')
-@Roles('ADMIN')
+@Roles(LimitsMap.admin)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
