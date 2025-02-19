@@ -7,7 +7,7 @@ import {
   Request,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { JwtUserInfo } from './constants';
+import { JwtUserInfo, LimitsMap } from './constants';
 import { Public, Roles } from './auth.decorators';
 
 type Login = {
@@ -26,7 +26,7 @@ export class AuthController {
     return this.authService.login(loginDto.username, loginDto.password);
   }
 
-  @Roles('ADMIN', 'USER')
+  @Roles(LimitsMap.admin, LimitsMap.edit)
   @Post('profile')
   getProfile(@Request() req: { user: JwtUserInfo }) {
     return req.user;

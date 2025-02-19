@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { jwtConstants, JwtUserInfo, Role } from './constants';
+import { jwtConstants, JwtUserInfo, limits } from './constants';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY, ROLES_KEY } from './auth.decorators';
 
@@ -33,11 +33,11 @@ export class AuthGuard implements CanActivate {
       });
       request['user'] = payload;
 
-      const controllerRole = this.reflector.getAllAndOverride<Role[]>(
+      const controllerRole = this.reflector.getAllAndOverride<limits[]>(
         ROLES_KEY,
         [context.getHandler(), context.getClass()],
       );
-      if (!controllerRole?.includes(payload.role)) {
+      if (!controllerRole?.includes(payload.limits)) {
         throw new UnauthorizedException();
       }
     } catch {
