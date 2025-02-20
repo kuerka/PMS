@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { CollaborationCompany } from './collaboration-company.entity';
@@ -103,9 +104,9 @@ export class ProductionCostForm {
   )
   collaborationDepartments: CollaborationDepartment[];
 
-  @ManyToOne(
+  @OneToOne(
     () => ProspectProject,
-    (prospectProject) => prospectProject.productionCostForms,
+    (prospectProject) => prospectProject.productionCostForm,
     { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' },
   )
   @JoinColumn([{ name: 'prospect_project_id', referencedColumnName: 'id' }])

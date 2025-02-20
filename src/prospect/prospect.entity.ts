@@ -3,6 +3,7 @@ import {
   Entity,
   Index,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Contract } from '@/contract/entities/contract.entity.entity';
@@ -86,9 +87,9 @@ export class ProspectProject {
   @OneToMany(() => File, (file) => file.prospectProject)
   files: File[];
 
-  @OneToMany(
+  @OneToOne(
     () => ProductionCostForm,
     (productionCostForm) => productionCostForm.prospectProject,
   )
-  productionCostForms: ProductionCostForm[];
+  productionCostForm: ProductionCostForm;
 }
