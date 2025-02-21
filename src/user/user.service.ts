@@ -16,4 +16,12 @@ export class UserService {
   async findByName(username: string): Promise<Users | null> {
     return this.userRepository.findOneBy({ username });
   }
+
+  async updateInfo(id: number, data: Partial<Users>): Promise<void> {
+    await this.userRepository.update(id, data);
+  }
+
+  async updatePassword(id: number, password: string): Promise<void> {
+    await this.userRepository.update(id, { password });
+  }
 }

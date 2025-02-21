@@ -9,6 +9,7 @@ import { FileModule } from './file/file.module';
 import { ProspectModule } from './prospect/prospect.module';
 import { ContractModule } from './contract/contract.module';
 import { CostFormModule } from './cost-form/cost-form.module';
+import { ResponseFormatterModule } from './response-formatter/response-formatter.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { CostFormModule } from './cost-form/cost-form.module';
     ProspectModule,
     ContractModule,
     CostFormModule,
+    ResponseFormatterModule,
   ],
   controllers: [AppController],
   providers: [AppService],

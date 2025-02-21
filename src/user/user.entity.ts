@@ -15,6 +15,9 @@ export class Users {
   @Column('varchar', { name: 'name', nullable: true, length: 255 })
   name: string | null;
 
+  @Column('varchar', { name: 'phone', nullable: true, length: 255 })
+  phone: string | null;
+
   @Column('varchar', { name: 'department_id', nullable: true, length: 255 })
   departmentId: string | null;
 
