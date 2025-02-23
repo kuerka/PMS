@@ -66,7 +66,7 @@ export class ProductionCostForm {
   totalSettlementAmount: string | null;
 
   @Column('datetime', { name: 'created_at' })
-  createdAt: Date;
+  createdAt: Date | null;
 
   @Column('datetime', { name: 'updated_at', nullable: true })
   updatedAt: Date | null;

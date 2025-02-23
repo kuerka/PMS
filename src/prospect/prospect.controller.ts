@@ -1,8 +1,9 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ProspectService } from './prospect.service';
-import { ProspectProject } from './prospect.entity';
 import { Public } from '@/auth/auth.decorators';
-import { ProspectQueryDto } from './prospect.dto';
+import { prospectDto, ProspectQueryDto } from './prospect.dto';
+import { plainToClass } from 'class-transformer';
+import { ProspectProject } from './prospect.entity';
 
 // TODO 后续添加权限
 @Public()
@@ -11,7 +12,8 @@ export class ProspectController {
   constructor(private prospectService: ProspectService) {}
 
   @Post('add')
-  async createProspect(@Body() prospect: ProspectProject) {
+  async createProspect(@Body() prospect: prospectDto) {
+    prospect = plainToClass(prospectDto, prospect);
     return await this.prospectService.create(prospect);
   }
   @Get('detail')

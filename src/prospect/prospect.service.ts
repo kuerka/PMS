@@ -3,7 +3,9 @@ import { ProspectProject } from './prospect.entity';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { ProductionCostForm } from '@/cost-form/entities/cost-form.entity';
-import { ProspectQueryDto } from './prospect.dto';
+import { ProspectQueryDto, ProspectUpdateDto } from './prospect.dto';
+import { plainToClass } from 'class-transformer';
+import { CostFormDto, CostFormUpdateDto } from '@/cost-form/dto/cost-form.dto';
 
 @Injectable()
 export class ProspectService {
@@ -17,7 +19,8 @@ export class ProspectService {
         await manager.save(costForm);
         prospect.productionCostForm = costForm;
       }
-      const result = await manager.save(prospect);
+      const prospectRepository = manager.getRepository(ProspectProject);
+      const result = prospectRepository.save(prospect);
       return result;
     });
   }
@@ -60,16 +63,39 @@ export class ProspectService {
 
   async update(id: number, prospect: ProspectProject) {
     return await this.dataSource.manager.transaction(async (manager) => {
-      const result = await manager.update(ProspectProject, id, prospect);
-      return result;
+      const prospectRepository = manager.getRepository(ProspectProject);
+      const costFormRepository = manager.getRepository(ProductionCostForm);
+
+      const updateProspect = plainToClass(ProspectUpdateDto, prospect);
+      await prospectRepository.update(id, updateProspect);
+
+      if (!prospect.isPriorWorkStarted) {
+        await manager.delete(ProductionCostForm, { prospectProject: { id } });
+        return;
+      }
+
+      const form = await costFormRepository.findOneBy({
+        prospectProject: { id },
+      });
+      const updateForm = prospect.productionCostForm;
+      if (form) {
+        if (!updateForm) return;
+
+        const updateFormDto = plainToClass(CostFormUpdateDto, updateForm);
+        updateFormDto.id = form.id;
+        await costFormRepository.update(form.id, updateFormDto);
+      } else {
+        const costForm = plainToClass(CostFormDto, updateForm ?? {});
+        costForm.prospectProject = prospect;
+        await costFormRepository.save(costForm);
+      }
     });
   }
 
   async delete(id: number) {
     return await this.dataSource.manager.transaction(async (manager) => {
       await manager.delete(ProductionCostForm, { prospectProject: { id } });
-      const result = await manager.delete(ProspectProject, id);
-      return result;
+      await manager.delete(ProspectProject, id);
     });
   }
 }
