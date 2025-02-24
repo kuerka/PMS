@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ProspectProject } from './prospect.entity';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { ProductionCostForm } from '@/cost-form/entities/cost-form.entity';
 import { ProspectQueryDto, ProspectUpdateDto } from './prospect.dto';
@@ -15,16 +15,20 @@ export class ProspectService {
     @Inject() private costFormService: CostFormService,
   ) {}
 
-  async create(prospect: ProspectProject) {
+  async createTransaction(prospect: ProspectProject) {
     return await this.dataSource.manager.transaction(async (manager) => {
+      await this.create(manager, prospect);
       if (prospect.isPriorWorkStarted) {
-        const costForm = await this.costFormService.create();
-        prospect.productionCostForm = costForm;
+        const form = new CostFormDto();
+        form.prospectProject = prospect;
+        await this.costFormService.create(manager, form);
       }
-      const prospectRepository = manager.getRepository(ProspectProject);
-      const result = prospectRepository.save(prospect);
-      return result;
     });
+  }
+
+  async create(manager: EntityManager, prospect: ProspectProject) {
+    const prospectRepository = manager.getRepository(ProspectProject);
+    return await prospectRepository.save(prospect);
   }
 
   async findAll() {

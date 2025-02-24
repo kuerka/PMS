@@ -14,7 +14,7 @@ export class ProspectController {
   @Post('add')
   async createProspect(@Body() prospect: prospectDto) {
     prospect = plainToClass(prospectDto, prospect);
-    return await this.prospectService.create(prospect);
+    return await this.prospectService.createTransaction(prospect);
   }
   @Get('detail')
   async getProspectDetail(@Query('id') id: number) {

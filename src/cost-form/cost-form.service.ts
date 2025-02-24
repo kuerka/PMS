@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 import { ProductionCostForm } from './entities/cost-form.entity';
 import { plainToClass } from 'class-transformer';
 import { CostFormDto, CostFormUpdateDto } from './dto/cost-form.dto';
@@ -11,12 +11,10 @@ import { CompanyDto } from './dto/collaboration-company.dto';
 export class CostFormService {
   constructor(@InjectDataSource() private datasource: DataSource) {}
 
-  async create(costForm?: ProductionCostForm) {
+  async create(manager: EntityManager, costForm?: ProductionCostForm) {
     if (!costForm) costForm = new CostFormDto();
 
-    return await this.datasource.manager
-      .getRepository(ProductionCostForm)
-      .save(costForm);
+    return await manager.getRepository(ProductionCostForm).save(costForm);
   }
 
   async update(costForm: ProductionCostForm) {
