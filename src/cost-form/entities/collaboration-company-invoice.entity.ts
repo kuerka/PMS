@@ -8,11 +8,7 @@ import {
 } from 'typeorm';
 import { CollaborationCompany } from './collaboration-company.entity';
 
-@Index(
-  'collaboration_company_relation_id',
-  ['collaborationCompanyRelationId'],
-  {},
-)
+@Index('company_id', ['companyId'], {})
 @Index('id', ['id'], { unique: true })
 @Entity('collaboration_company_invoice', { schema: 'pms' })
 export class CollaborationCompanyInvoice {
@@ -24,7 +20,7 @@ export class CollaborationCompanyInvoice {
     nullable: true,
     comment: '外键，关联 t_collaboration_company_relation 表的 id 字段',
   })
-  collaborationCompanyRelationId: number | null;
+  companyId: number | null;
 
   @Column('decimal', {
     name: 'invoice_amount',

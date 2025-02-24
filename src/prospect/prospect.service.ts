@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ProspectProject } from './prospect.entity';
 import { DataSource, EntityManager } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
@@ -12,7 +12,7 @@ import { CostFormService } from '@/cost-form/cost-form.service';
 export class ProspectService {
   constructor(
     @InjectDataSource() private dataSource: DataSource,
-    @Inject() private costFormService: CostFormService,
+    private costFormService: CostFormService,
   ) {}
 
   async createTransaction(prospect: ProspectProject) {

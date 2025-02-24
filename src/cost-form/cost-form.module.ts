@@ -1,13 +1,32 @@
 import { Module } from '@nestjs/common';
 import { CostFormService } from './cost-form.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProductionCostForm } from './entities/cost-form.entity';
-import { CompanyController, CostFormController } from './cost-form.controller';
+import {
+  CompanyController,
+  CompanyInvoiceController,
+  CompanyPaymentController,
+  CostFormController,
+  DepartmentController,
+} from './cost-form.controller';
+import { CollaborationCompanyService } from './services/collaboration-company.service';
+import { CollaborationDepartmentService } from './services/collaboration-department.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ProductionCostForm])],
-  providers: [CostFormService],
-  exports: [TypeOrmModule, CostFormService],
-  controllers: [CostFormController, CompanyController],
+  providers: [
+    CostFormService,
+    CollaborationCompanyService,
+    CollaborationDepartmentService,
+  ],
+  exports: [
+    CostFormService,
+    CollaborationCompanyService,
+    CollaborationDepartmentService,
+  ],
+  controllers: [
+    CostFormController,
+    CompanyController,
+    CompanyInvoiceController,
+    CompanyPaymentController,
+    DepartmentController,
+  ],
 })
 export class CostFormModule {}
