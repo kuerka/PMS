@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ProspectService } from './prospect.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProspectProject } from './prospect.entity';
 import { ProspectController } from './prospect.controller';
+import { CostFormModule } from '@/cost-form/cost-form.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ProspectProject])],
+  imports: [CostFormModule],
   providers: [ProspectService],
   controllers: [ProspectController],
 })

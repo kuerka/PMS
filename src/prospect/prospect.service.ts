@@ -1,22 +1,24 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ProspectProject } from './prospect.entity';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { ProductionCostForm } from '@/cost-form/entities/cost-form.entity';
 import { ProspectQueryDto, ProspectUpdateDto } from './prospect.dto';
 import { plainToClass } from 'class-transformer';
-import { CostFormDto, CostFormUpdateDto } from '@/cost-form/dto/cost-form.dto';
+import { CostFormDto } from '@/cost-form/dto/cost-form.dto';
+import { CostFormService } from '@/cost-form/cost-form.service';
 
 @Injectable()
 export class ProspectService {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() private dataSource: DataSource,
+    @Inject() private costFormService: CostFormService,
+  ) {}
 
   async create(prospect: ProspectProject) {
     return await this.dataSource.manager.transaction(async (manager) => {
       if (prospect.isPriorWorkStarted) {
-        const costForm = new ProductionCostForm();
-        costForm.createdAt = new Date();
-        await manager.save(costForm);
+        const costForm = await this.costFormService.create();
         prospect.productionCostForm = costForm;
       }
       const prospectRepository = manager.getRepository(ProspectProject);
@@ -80,10 +82,8 @@ export class ProspectService {
       const updateForm = prospect.productionCostForm;
       if (form) {
         if (!updateForm) return;
-
-        const updateFormDto = plainToClass(CostFormUpdateDto, updateForm);
-        updateFormDto.id = form.id;
-        await costFormRepository.update(form.id, updateFormDto);
+        updateForm.id = form.id;
+        await this.costFormService.updateWithProspect(updateForm, prospect.id);
       } else {
         const costForm = plainToClass(CostFormDto, updateForm ?? {});
         costForm.prospectProject = prospect;
