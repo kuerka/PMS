@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ContractInvoiceRecord } from './invoice-record.entity';
@@ -128,9 +129,9 @@ export class ContractPerformance {
   )
   contractReceiptRecords: ContractReceiptRecord[];
 
-  @OneToMany(
+  @OneToOne(
     () => InvoiceHeader,
     (invoiceHeader) => invoiceHeader.contractPerformance,
   )
-  invoiceHeaders: InvoiceHeader[];
+  invoiceHeader: InvoiceHeader;
 }

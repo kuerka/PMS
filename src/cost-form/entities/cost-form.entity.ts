@@ -3,7 +3,6 @@ import {
   Entity,
   Index,
   JoinColumn,
-  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -112,7 +111,7 @@ export class ProductionCostForm {
   @JoinColumn([{ name: 'prospect_project_id', referencedColumnName: 'id' }])
   prospectProject: ProspectProject;
 
-  @ManyToOne(() => Contract, (contract) => contract.productionCostForms, {
+  @OneToOne(() => Contract, (contract) => contract.productionCostForm, {
     onDelete: 'NO ACTION',
     onUpdate: 'NO ACTION',
   })

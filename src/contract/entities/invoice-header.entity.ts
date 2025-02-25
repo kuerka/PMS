@@ -3,7 +3,7 @@ import {
   Entity,
   Index,
   JoinColumn,
-  ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ContractPerformance } from './performance.entity';
@@ -47,9 +47,9 @@ export class InvoiceHeader {
   @Column('int', { name: 'contract_performance_id', nullable: true })
   contractPerformanceId: number | null;
 
-  @ManyToOne(
+  @OneToOne(
     () => ContractPerformance,
-    (contractPerformance) => contractPerformance.invoiceHeaders,
+    (contractPerformance) => contractPerformance.invoiceHeader,
     { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' },
   )
   @JoinColumn([{ name: 'contract_performance_id', referencedColumnName: 'id' }])

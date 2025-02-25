@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ProspectProject } from '@/prospect/prospect.entity';
@@ -84,13 +85,13 @@ export class Contract {
 
   @ManyToOne(
     () => ProspectProject,
-    (prospectProject) => prospectProject.contracts,
+    (prospectProject) => prospectProject.contract,
     { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' },
   )
   @JoinColumn([{ name: 'prospect_project_id', referencedColumnName: 'id' }])
   prospectProject: ProspectProject;
 
-  @OneToMany(
+  @OneToOne(
     () => ContractPaymentMethod,
     (contractPaymentMethod) => contractPaymentMethod.contract,
   )
@@ -105,9 +106,9 @@ export class Contract {
   @OneToMany(() => File, (file) => file.contract)
   files: File[];
 
-  @OneToMany(
+  @OneToOne(
     () => ProductionCostForm,
     (productionCostForm) => productionCostForm.contract,
   )
-  productionCostForms: ProductionCostForm[];
+  productionCostForm: ProductionCostForm;
 }

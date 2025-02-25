@@ -10,7 +10,7 @@ export class prospectDto extends ProspectProject {
   updatedAt: Date = new Date();
 }
 
-export class ProspectQueryDto extends PaginationDto {
+export class ProspectQueryDto implements PaginationDto {
   page: number = 1;
   limit: number = 10;
   query: {

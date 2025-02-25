@@ -81,8 +81,8 @@ export class ProspectProject {
   })
   remark: string | null;
 
-  @OneToMany(() => Contract, (contract) => contract.prospectProject)
-  contracts: Contract[];
+  @OneToOne(() => Contract, (contract) => contract.prospectProject)
+  contract: Contract;
 
   @OneToMany(() => File, (file) => file.prospectProject)
   files: File[];
