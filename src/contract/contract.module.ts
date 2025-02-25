@@ -5,6 +5,7 @@ import { PerformanceService } from './services/performance.service';
 import { InvoiceHeaderService } from './services/invoice-header.entity';
 import { InvoiceRecordService } from './services/invoice-record.service';
 import { ReceiptRecordService } from './services/receipt-record.service';
+import { ContractController } from './contract.controller';
 
 @Module({
   providers: [
@@ -23,5 +24,6 @@ import { ReceiptRecordService } from './services/receipt-record.service';
     InvoiceRecordService,
     ReceiptRecordService,
   ],
+  controllers: [ContractController],
 })
 export class ContractModule {}

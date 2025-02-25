@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, EntityManager } from 'typeorm';
+import { DataSource, DeepPartial, EntityManager } from 'typeorm';
 import { Contract } from '../entities/contract.entity.entity';
 import { PaginationDto } from '@/pagination/pagination.dto';
 
@@ -8,7 +8,11 @@ import { PaginationDto } from '@/pagination/pagination.dto';
 export class ContractService {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  async addContract(manager: EntityManager, contract: Contract) {
+  createContract(contract: DeepPartial<Contract>) {
+    return this.dataSource.manager.create(Contract, contract);
+  }
+  async addContract(contract: Contract, manager?: EntityManager) {
+    if (!manager) manager = this.dataSource.manager;
     return await manager.getRepository(Contract).insert(contract);
   }
 
