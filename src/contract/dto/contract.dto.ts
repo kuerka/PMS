@@ -4,12 +4,19 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  ValidateNested,
 } from 'class-validator';
 import { Contract } from '../entities/contract.entity.entity';
 import { PaginationDto } from '@/pagination/pagination.dto';
-import { Exclude } from 'class-transformer';
+import { Exclude, Type } from 'class-transformer';
+import {
+  createCostFormDto,
+  updateCostFormDto,
+} from '@/cost-form/dto/cost-form.dto';
+import { ProductionCostForm } from '@/cost-form/entities/cost-form.entity';
 
 type DTO = Partial<Contract>;
+type AmountType = Contract['amountType'];
 
 export class ContractDto implements DTO {
   @IsOptional()
@@ -26,7 +33,7 @@ export class ContractDto implements DTO {
   @IsString()
   owner: string;
   @IsString()
-  amountType: '包干总价' | '固定单价';
+  amountType: AmountType;
   @IsString()
   remark: string;
   @IsBoolean()
@@ -41,6 +48,10 @@ export class ContractDto implements DTO {
   @IsOptional()
   @Exclude()
   updatedAt: Date = new Date();
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => createCostFormDto)
+  productionCostForm: ProductionCostForm;
 }
 
 export class ContractQueryDto implements PaginationDto {
@@ -62,7 +73,20 @@ export class ContractUpdateDto implements DTO {
   @IsString()
   owner: string;
   @IsString()
-  amountType: '包干总价' | '固定单价';
+  amountType: AmountType;
   @IsString()
-  remark?: string;
+  remark: string;
+  @IsBoolean()
+  isPreliminaryNumber: boolean;
+  @IsDateString()
+  projectStartDate: string;
+  @IsDateString()
+  projectEndDate: string;
+  @IsOptional()
+  @Exclude()
+  updatedAt: Date = new Date();
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => updateCostFormDto)
+  productionCostForm: ProductionCostForm;
 }

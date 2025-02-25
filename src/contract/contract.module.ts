@@ -6,8 +6,10 @@ import { InvoiceHeaderService } from './services/invoice-header.entity';
 import { InvoiceRecordService } from './services/invoice-record.service';
 import { ReceiptRecordService } from './services/receipt-record.service';
 import { ContractController } from './contract.controller';
+import { CostFormModule } from '@/cost-form/cost-form.module';
 
 @Module({
+  imports: [CostFormModule],
   providers: [
     ContractService,
     PaymentMethodService,
