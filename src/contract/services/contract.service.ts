@@ -3,17 +3,31 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, DeepPartial, EntityManager } from 'typeorm';
 import { Contract } from '../entities/contract.entity.entity';
 import { PaginationDto } from '@/pagination/pagination.dto';
+import { CostFormService } from '@/cost-form/cost-form.service';
 
 @Injectable()
 export class ContractService {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() private dataSource: DataSource,
+    private costFormService: CostFormService,
+  ) {}
 
   createContract(contract: DeepPartial<Contract>) {
     return this.dataSource.manager.create(Contract, contract);
   }
+
+  async addContractTransition(contract: Contract) {
+    return await this.dataSource.manager.transaction(async (manager) => {
+      console.log(contract);
+      const res = await this.addContract(contract, manager);
+      const costForm = this.costFormService.create(contract.productionCostForm);
+      costForm.contract = res;
+      await this.costFormService.add(costForm, manager);
+    });
+  }
   async addContract(contract: Contract, manager?: EntityManager) {
     if (!manager) manager = this.dataSource.manager;
-    return await manager.getRepository(Contract).insert(contract);
+    return await manager.getRepository(Contract).save(contract);
   }
 
   async getContractList(queryDto: PaginationDto) {

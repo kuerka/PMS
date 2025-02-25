@@ -21,7 +21,7 @@ export class ProspectService {
       if (prospect.isPriorWorkStarted) {
         const form = new CostFormDto();
         form.prospectProject = prospect;
-        await this.costFormService.create(manager, form);
+        await this.costFormService.add(form, manager);
       }
     });
   }
