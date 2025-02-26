@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, EntityManager } from 'typeorm';
+import { DataSource, DeepPartial, EntityManager } from 'typeorm';
 import { ContractPaymentMethod } from '../entities/payment-method.entity';
 
 @Injectable()
 export class PaymentMethodService {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
+
+  create(payment: DeepPartial<ContractPaymentMethod>) {
+    return this.dataSource.manager.create(ContractPaymentMethod, payment);
+  }
 
   async addPaymentMethod(
     paymentMethod: ContractPaymentMethod,
@@ -18,11 +22,14 @@ export class PaymentMethodService {
       .insert(paymentMethod);
   }
 
-  async getPaymentMethodById(id: number, manager?: EntityManager) {
+  async getPaymentMethodByContractId(
+    contractId: number,
+    manager?: EntityManager,
+  ) {
     if (!manager) manager = this.dataSource.manager;
 
     return await manager.getRepository(ContractPaymentMethod).findOne({
-      where: { id },
+      where: { contractId },
     });
   }
 

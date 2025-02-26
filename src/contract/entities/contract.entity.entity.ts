@@ -97,11 +97,11 @@ export class Contract {
   )
   contractPaymentMethods: ContractPaymentMethod[];
 
-  @OneToMany(
+  @OneToOne(
     () => ContractPerformance,
     (contractPerformance) => contractPerformance.contract,
   )
-  contractPerformances: ContractPerformance[];
+  contractPerformance: ContractPerformance;
 
   @OneToMany(() => File, (file) => file.contract)
   files: File[];

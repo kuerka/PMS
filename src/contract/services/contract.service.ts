@@ -4,12 +4,14 @@ import { DataSource, DeepPartial, EntityManager } from 'typeorm';
 import { Contract } from '../entities/contract.entity.entity';
 import { PaginationDto } from '@/pagination/pagination.dto';
 import { CostFormService } from '@/cost-form/cost-form.service';
+import { PerformanceService } from './performance.service';
 
 @Injectable()
 export class ContractService {
   constructor(
     @InjectDataSource() private dataSource: DataSource,
     private costFormService: CostFormService,
+    private performanceService: PerformanceService,
   ) {}
 
   createContract(contract: DeepPartial<Contract>) {
@@ -23,6 +25,12 @@ export class ContractService {
       const costForm = this.costFormService.create(contract.productionCostForm);
       costForm.contract = res;
       await this.costFormService.add(costForm, manager);
+      const performance = this.performanceService.create();
+      await this.performanceService.addWithContractId(
+        res.id,
+        performance,
+        manager,
+      );
     });
   }
   async addContract(contract: Contract, manager?: EntityManager) {
@@ -56,7 +64,7 @@ export class ContractService {
       relations: {
         prospectProject: true,
         productionCostForm: true,
-        contractPerformances: true,
+        contractPerformance: true,
       },
     });
   }

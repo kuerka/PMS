@@ -3,7 +3,6 @@ import {
   Entity,
   Index,
   JoinColumn,
-  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -116,7 +115,7 @@ export class ContractPerformance {
   )
   contractInvoiceRecords: ContractInvoiceRecord[];
 
-  @ManyToOne(() => Contract, (contract) => contract.contractPerformances, {
+  @OneToOne(() => Contract, (contract) => contract.contractPerformance, {
     onDelete: 'NO ACTION',
     onUpdate: 'NO ACTION',
   })

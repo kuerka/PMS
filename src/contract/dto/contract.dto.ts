@@ -14,6 +14,8 @@ import {
   updateCostFormDto,
 } from '@/cost-form/dto/cost-form.dto';
 import { ProductionCostForm } from '@/cost-form/entities/cost-form.entity';
+import { CreatePerformanceDto } from './performance.dto';
+import { ContractPerformance } from '../entities/performance.entity';
 
 type DTO = Partial<Contract>;
 type AmountType = Contract['amountType'];
@@ -48,10 +50,12 @@ export class ContractDto implements DTO {
   @IsOptional()
   @Exclude()
   updatedAt: Date = new Date();
-  @IsOptional()
   @ValidateNested()
   @Type(() => createCostFormDto)
   productionCostForm: ProductionCostForm;
+  @ValidateNested()
+  @Type(() => CreatePerformanceDto)
+  contractPerformance: ContractPerformance;
 }
 
 export class ContractQueryDto implements PaginationDto {

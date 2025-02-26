@@ -5,7 +5,14 @@ import { PerformanceService } from './services/performance.service';
 import { InvoiceHeaderService } from './services/invoice-header.entity';
 import { InvoiceRecordService } from './services/invoice-record.service';
 import { ReceiptRecordService } from './services/receipt-record.service';
-import { ContractController } from './contract.controller';
+import {
+  ContractController,
+  InvoiceHeaderController,
+  InvoiceRecordController,
+  PaymentController,
+  PerformanceController,
+  ReceiptRecordController,
+} from './contract.controller';
 import { CostFormModule } from '@/cost-form/cost-form.module';
 
 @Module({
@@ -26,6 +33,13 @@ import { CostFormModule } from '@/cost-form/cost-form.module';
     InvoiceRecordService,
     ReceiptRecordService,
   ],
-  controllers: [ContractController],
+  controllers: [
+    ContractController,
+    PaymentController,
+    PerformanceController,
+    InvoiceHeaderController,
+    InvoiceRecordController,
+    ReceiptRecordController,
+  ],
 })
 export class ContractModule {}

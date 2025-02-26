@@ -1,13 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, EntityManager } from 'typeorm';
+import { DataSource, DeepPartial, EntityManager } from 'typeorm';
 import { ContractInvoiceRecord } from '../entities/invoice-record.entity';
 
 @Injectable()
 export class InvoiceRecordService {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  async addInvoiceRecordWithPerformanceId(
+  create(invoiceRecord: DeepPartial<ContractInvoiceRecord>) {
+    return this.dataSource.manager.create(ContractInvoiceRecord, invoiceRecord);
+  }
+
+  async addWithPerformanceId(
     id: number,
     invoiceRecord?: ContractInvoiceRecord,
     manager?: EntityManager,
@@ -21,7 +25,7 @@ export class InvoiceRecordService {
       .insert(invoiceRecord);
   }
 
-  async getInvoiceRecordByPerformanceId(id: number, manager?: EntityManager) {
+  async getByPerformanceId(id: number, manager?: EntityManager) {
     if (!manager) manager = this.dataSource.manager;
 
     return await manager.getRepository(ContractInvoiceRecord).find({
@@ -29,7 +33,7 @@ export class InvoiceRecordService {
     });
   }
 
-  async updateInvoiceRecord(
+  async update(
     id: number,
     invoiceRecord: ContractInvoiceRecord,
     manager?: EntityManager,
@@ -41,7 +45,7 @@ export class InvoiceRecordService {
       .update(id, invoiceRecord);
   }
 
-  async deleteInvoiceRecord(id: number, manager?: EntityManager) {
+  async delete(id: number, manager?: EntityManager) {
     if (!manager) manager = this.dataSource.manager;
 
     return await manager.getRepository(ContractInvoiceRecord).delete(id);
