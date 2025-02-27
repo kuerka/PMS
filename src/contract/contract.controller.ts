@@ -15,12 +15,11 @@ import {
   ContractUpdateDto,
 } from './dto/contract.dto';
 import { Public } from '@/auth/auth.decorators';
-import { CostFormService } from '@/cost-form/cost-form.service';
 import { UpdatePerformanceDto } from './dto/performance.dto';
 import { PerformanceService } from './services/performance.service';
 import { PaymentMethodService } from './services/payment-method.service';
 import { CreatePaymentDto } from './dto/payment-method.dto';
-import { InvoiceHeaderService } from './services/invoice-header.entity';
+import { InvoiceHeaderService } from './services/invoice-header.service';
 import { CreateInvoiceHeaderDto } from './dto/invoice-header.dto';
 import { InvoiceRecordService } from './services/invoice-record.service';
 import { ReceiptRecordService } from './services/receipt-record.service';
@@ -37,10 +36,7 @@ import {
 @Controller('contract')
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 export class ContractController {
-  constructor(
-    private contractService: ContractService,
-    private costFormService: CostFormService,
-  ) {}
+  constructor(private contractService: ContractService) {}
 
   @Post('add')
   async createContract(@Body() contractDto: ContractDto) {

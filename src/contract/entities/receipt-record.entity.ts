@@ -16,13 +16,6 @@ export class ContractReceiptRecord {
   id: number;
 
   @Column('int', {
-    name: 'contract_invoice_record_id',
-    nullable: true,
-    comment: '收款信息所对应的开票记录',
-  })
-  contractInvoiceRecordId: number | null;
-
-  @Column('int', {
     name: 'contract_performance_id',
     nullable: true,
     comment:
