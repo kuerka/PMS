@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ProspectProject } from './prospect.entity';
-import { DataSource, EntityManager } from 'typeorm';
+import { DataSource, DeepPartial, EntityManager } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { ProductionCostForm } from '@/cost-form/entities/cost-form.entity';
-import { ProspectQueryDto, ProspectUpdateDto } from './prospect.dto';
-import { plainToClass } from 'class-transformer';
-import { CostFormDto } from '@/cost-form/dto/cost-form.dto';
+import { ProspectQueryDto } from './prospect.dto';
 import { CostFormService } from '@/cost-form/cost-form.service';
 
 @Injectable()
@@ -15,18 +13,23 @@ export class ProspectService {
     private costFormService: CostFormService,
   ) {}
 
-  async createTransaction(prospect: ProspectProject) {
+  create(prospect: DeepPartial<ProspectProject>) {
+    return this.dataSource.manager.create(ProspectProject, prospect);
+  }
+
+  async addTransaction(prospect: ProspectProject) {
     return await this.dataSource.manager.transaction(async (manager) => {
-      await this.create(manager, prospect);
+      await this.add(prospect, manager);
       if (prospect.isPriorWorkStarted) {
-        const form = new CostFormDto();
+        const form = this.costFormService.create(prospect.productionCostForm);
         form.prospectProject = prospect;
         await this.costFormService.add(form, manager);
       }
     });
   }
 
-  async create(manager: EntityManager, prospect: ProspectProject) {
+  async add(prospect: ProspectProject, manager?: EntityManager) {
+    if (!manager) manager = this.dataSource.manager;
     const prospectRepository = manager.getRepository(ProspectProject);
     return await prospectRepository.save(prospect);
   }
@@ -51,13 +54,78 @@ export class ProspectService {
   async getProspectPage(prospectQueryDto: ProspectQueryDto) {
     const page = prospectQueryDto.page || 1;
     const limit = prospectQueryDto.limit || 10;
-    const [prospects, total] = await this.dataSource.manager.findAndCount(
-      ProspectProject,
-      {
-        skip: (page - 1) * limit,
-        take: limit,
-      },
-    );
+    const query = prospectQueryDto.query || {};
+    const queryBuilder = this.dataSource.manager
+      .getRepository(ProspectProject)
+      .createQueryBuilder('prospect');
+
+    if (query.id) {
+      queryBuilder.andWhere('prospect.id = :id', { id: query.id });
+    }
+    if (query.projectName) {
+      queryBuilder.andWhere('prospect.projectName LIKE :projectName', {
+        projectName: `%${query.projectName}%`,
+      });
+    }
+    if (query.businessPersonnel) {
+      queryBuilder.andWhere(
+        'prospect.businessPersonnel LIKE :businessPersonnel',
+        { businessPersonnel: `%${query.businessPersonnel}%` },
+      );
+    }
+    if (query.leadingBusinessDepartment) {
+      queryBuilder.andWhere(
+        'prospect.leadingBusinessDepartment LIKE :leadingBusinessDepartment',
+        { leadingBusinessDepartment: `%${query.leadingBusinessDepartment}%` },
+      );
+    }
+    if (query.assistingBusinessDepartment) {
+      queryBuilder.andWhere(
+        'JSON_CONTAINS(prospect.assistingBusinessDepartment, :assistingBusinessDepartment)',
+        {
+          assistingBusinessDepartment: JSON.stringify(
+            query.assistingBusinessDepartment,
+          ),
+        },
+      );
+    }
+    if (query.isPriorWorkStarted !== undefined) {
+      queryBuilder.andWhere(
+        'prospect.isPriorWorkStarted = :isPriorWorkStarted',
+        { isPriorWorkStarted: query.isPriorWorkStarted },
+      );
+    }
+    if (query.projectDockingStage) {
+      queryBuilder.andWhere(
+        'prospect.projectDockingStage = :projectDockingStage',
+        { projectDockingStage: query.projectDockingStage },
+      );
+    }
+    if (query.estimatedContractAmount) {
+      queryBuilder.andWhere(
+        'prospect.estimatedContractAmount LIKE :estimatedContractAmount',
+        { estimatedContractAmount: `%${query.estimatedContractAmount}%` },
+      );
+    }
+    if (query.remark) {
+      queryBuilder.andWhere('prospect.remark LIKE :remark', {
+        remark: `%${query.remark}%`,
+      });
+    }
+    if (query.createdAt) {
+      queryBuilder.andWhere('prospect.createdAt = :createdAt', {
+        createdAt: query.createdAt,
+      });
+    }
+    if (query.updatedAt) {
+      queryBuilder.andWhere('prospect.updatedAt = :updatedAt', {
+        updatedAt: query.updatedAt,
+      });
+    }
+
+    queryBuilder.skip((page - 1) * limit).take(limit);
+    const prospects: ProspectProject[] = await queryBuilder.getRawMany();
+    const total = await queryBuilder.getCount();
     return {
       data: prospects,
       total,
@@ -67,33 +135,33 @@ export class ProspectService {
     };
   }
 
-  async update(id: number, prospect: ProspectProject) {
+  async updateTransaction(id: number, prospect: ProspectProject) {
     return await this.dataSource.manager.transaction(async (manager) => {
-      const prospectRepository = manager.getRepository(ProspectProject);
-      const costFormRepository = manager.getRepository(ProductionCostForm);
-
-      const updateProspect = plainToClass(ProspectUpdateDto, prospect);
-      await prospectRepository.update(id, updateProspect);
+      await this.update(prospect, manager);
 
       if (!prospect.isPriorWorkStarted) {
-        await manager.delete(ProductionCostForm, { prospectProject: { id } });
+        await this.costFormService.deleteByProspectId(id, manager);
         return;
       }
 
-      const form = await costFormRepository.findOneBy({
-        prospectProject: { id },
-      });
       const updateForm = prospect.productionCostForm;
+      if (!updateForm) return;
+
+      const form = await this.costFormService.findByProspectId(id);
       if (form) {
-        if (!updateForm) return;
         updateForm.id = form.id;
-        await this.costFormService.updateWithProspect(updateForm, prospect.id);
+        await this.costFormService.update(updateForm, manager);
       } else {
-        const costForm = plainToClass(CostFormDto, updateForm ?? {});
-        costForm.prospectProject = prospect;
-        await costFormRepository.save(costForm);
+        updateForm.createdAt = updateForm.updatedAt;
+        updateForm.prospectProjectId = id;
+        await this.costFormService.add(updateForm, manager);
       }
     });
+  }
+
+  async update(prospect: ProspectProject, manager?: EntityManager) {
+    if (!manager) manager = this.dataSource.manager;
+    return await manager.getRepository(ProspectProject).save(prospect);
   }
 
   async delete(id: number) {

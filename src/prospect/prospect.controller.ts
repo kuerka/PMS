@@ -1,20 +1,31 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ProspectService } from './prospect.service';
 import { Public } from '@/auth/auth.decorators';
-import { prospectDto, ProspectQueryDto } from './prospect.dto';
-import { plainToClass } from 'class-transformer';
-import { ProspectProject } from './prospect.entity';
+import {
+  createProspectDto,
+  ProspectQueryDto,
+  UpdateProspectDto,
+} from './prospect.dto';
 
 // TODO 后续添加权限
 @Public()
 @Controller('prospect')
+@UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 export class ProspectController {
   constructor(private prospectService: ProspectService) {}
 
   @Post('add')
-  async createProspect(@Body() prospect: prospectDto) {
-    prospect = plainToClass(prospectDto, prospect);
-    return await this.prospectService.createTransaction(prospect);
+  async createProspect(@Body() prospectDto: createProspectDto) {
+    const prospect = this.prospectService.create(prospectDto);
+    return await this.prospectService.addTransaction(prospect);
   }
   @Get('detail')
   async getProspectDetail(@Query('id') id: number) {
@@ -31,9 +42,9 @@ export class ProspectController {
   }
 
   @Post('update')
-  async updateProspect(@Body() prospect: ProspectProject) {
-    if (!prospect.id) return null;
-    return await this.prospectService.update(prospect.id, prospect);
+  async updateProspect(@Body() prospectDto: UpdateProspectDto) {
+    const prospect = this.prospectService.create(prospectDto);
+    return await this.prospectService.updateTransaction(prospect.id, prospect);
   }
 
   @Post('delete')

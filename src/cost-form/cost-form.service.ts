@@ -20,6 +20,12 @@ export class CostFormService {
     return await manager.getRepository(ProductionCostForm).save(costForm);
   }
 
+  async findByProspectId(prospectProjectId: number) {
+    return await this.datasource
+      .getRepository(ProductionCostForm)
+      .findOneBy({ prospectProjectId });
+  }
+
   async update(costForm: ProductionCostForm, manager?: EntityManager) {
     if (!manager) manager = this.datasource.manager;
     return await this.datasource
@@ -39,7 +45,6 @@ export class CostFormService {
   }
 
   async updateWithProspect(costForm: ProductionCostForm, prospectId: number) {
-    console.log('update with prospect');
     costForm = plainToClass(CostFormUpdateDto, costForm);
     costForm.prospectProjectId = prospectId;
     return await this.update(costForm);
@@ -47,5 +52,10 @@ export class CostFormService {
 
   async delete(id: number) {
     return await this.datasource.manager.delete(ProductionCostForm, id);
+  }
+
+  async deleteByProspectId(prospectProjectId: number, manager?: EntityManager) {
+    if (!manager) manager = this.datasource.manager;
+    return await manager.delete(ProductionCostForm, { prospectProjectId });
   }
 }

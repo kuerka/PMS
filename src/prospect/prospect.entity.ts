@@ -38,12 +38,8 @@ export class ProspectProject {
   })
   leadingBusinessDepartment: string | null;
 
-  @Column('varchar', {
-    name: 'assisting_business_department',
-    nullable: true,
-    length: 100,
-  })
-  assistingBusinessDepartment: string | null;
+  @Column('json', { name: 'assisting_business_department', nullable: true })
+  assistingBusinessDepartment: object | null;
 
   @Column('tinyint', {
     name: 'is_prior_work_started',
