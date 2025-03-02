@@ -18,7 +18,7 @@ export class CollaborationCompanyInvoice {
   id: number;
 
   @Column('int', {
-    name: 'collaboration_company_relation_id',
+    name: 'company_id',
     nullable: true,
     comment: '外键，关联 t_collaboration_company_relation 表的 id 字段',
   })
@@ -47,8 +47,6 @@ export class CollaborationCompanyInvoice {
     (collaborationCompany) => collaborationCompany.collaborationCompanyInvoices,
     { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' },
   )
-  @JoinColumn([
-    { name: 'collaboration_company_relation_id', referencedColumnName: 'id' },
-  ])
+  @JoinColumn([{ name: 'company_id', referencedColumnName: 'id' }])
   collaborationCompanyRelation: CollaborationCompany;
 }

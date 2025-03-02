@@ -1,14 +1,23 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import {
-  CompanyDto,
-  CompanyInvoiceDto,
-  CompanyPaymentDto,
-  CompanyUpdateDto,
+  CreateCollaborationCompanyDto,
+  UpdateCollaborationCompanyDto,
 } from './dto/collaboration-company.dto';
 import { Public } from '@/auth/auth.decorators';
 import { CollaborationCompanyService } from './services/collaboration-company.service';
 import { CollaborationDepartmentService } from './services/collaboration-department.service';
-import { CollaborationDepartment } from './entities/collaboration-department.entity';
+import {
+  CreateCollaborationDepartmentDto,
+  UpdateCollaborationDepartmentDto,
+} from './dto/collaboration-department.dto';
+import {
+  CreateInvoiceDto,
+  UpdateInvoiceDto,
+} from './dto/collaboration-company-invoice.dto';
+import {
+  CreatePaymentDto,
+  UpdatePaymentDto,
+} from './dto/collaboration-company-payment.dto';
 
 @Controller('costForm')
 export class CostFormController {
@@ -29,15 +38,17 @@ export class CompanyController {
     return await this.companyService.getCompanyDetail(id);
   }
   @Post('add')
-  async addCompany(@Body() companyDto: CompanyDto) {
+  async addCompany(@Body() companyDto: CreateCollaborationCompanyDto) {
+    const company = this.companyService.createCompany(companyDto);
     return await this.companyService.addCompanyByCostFormId(
-      companyDto.productionCostFormId!,
-      companyDto,
+      companyDto.productionCostFormId,
+      company,
     );
   }
   @Post('update')
-  async updateCompany(@Body() companyDto: CompanyUpdateDto) {
-    return await this.companyService.updateCompany(companyDto);
+  async updateCompany(@Body() companyDto: UpdateCollaborationCompanyDto) {
+    const company = this.companyService.createCompany(companyDto);
+    return await this.companyService.updateCompany(company);
   }
   @Post('delete')
   async deleteCompany(@Body('id') id: number) {
@@ -50,14 +61,16 @@ export class CompanyController {
 export class CompanyInvoiceController {
   constructor(private companyService: CollaborationCompanyService) {}
   @Post('add')
-  async addCompanyInvoice(@Body() invoice: CompanyInvoiceDto) {
+  async addCompanyInvoice(@Body() invoiceDto: CreateInvoiceDto) {
+    const invoice = this.companyService.createInvoice(invoiceDto);
     return await this.companyService.addCompanyInvoiceByCompanyId(
-      invoice.companyId!,
+      invoiceDto.companyId,
       invoice,
     );
   }
   @Post('update')
-  async updateCompanyInvoice(@Body() invoice: CompanyInvoiceDto) {
+  async updateCompanyInvoice(@Body() invoiceDto: UpdateInvoiceDto) {
+    const invoice = this.companyService.createInvoice(invoiceDto);
     return await this.companyService.updateCompanyInvoice(invoice);
   }
   @Post('delete')
@@ -71,14 +84,16 @@ export class CompanyInvoiceController {
 export class CompanyPaymentController {
   constructor(private companyService: CollaborationCompanyService) {}
   @Post('add')
-  async addCompanyPayment(@Body() payment: CompanyPaymentDto) {
+  async addCompanyPayment(@Body() paymentDto: CreatePaymentDto) {
+    const payment = this.companyService.createPayment(paymentDto);
     return await this.companyService.addCompanyPaymentByCompanyId(
-      payment.companyId!,
+      paymentDto.companyId,
       payment,
     );
   }
   @Post('update')
-  async updateCompanyPayment(@Body() payment: CompanyPaymentDto) {
+  async updateCompanyPayment(@Body() paymentDto: UpdatePaymentDto) {
+    const payment = this.companyService.createPayment(paymentDto);
     return await this.companyService.updateCompanyPayment(payment);
   }
   @Post('delete')
@@ -91,19 +106,24 @@ export class CompanyPaymentController {
 @Controller('costForm/department')
 export class DepartmentController {
   constructor(private departmentService: CollaborationDepartmentService) {}
-  @Post('list')
-  async getDepartmentByCostFormId(@Body('id') id: number) {
+  @Get('list')
+  async getDepartmentByCostFormId(@Query('id') id: number) {
     return await this.departmentService.getDepartmentByCostFormId(id);
   }
   @Post('add')
-  async addDepartment(@Body() department: CollaborationDepartment) {
+  async addDepartment(@Body() departmentDto: CreateCollaborationDepartmentDto) {
+    const department = this.departmentService.create(departmentDto);
+
     return await this.departmentService.addDepartmentByCostFormId(
-      department.productionCostFormId!,
+      departmentDto.productionCostFormId,
       department,
     );
   }
   @Post('update')
-  async updateDepartment(@Body() department: CollaborationDepartment) {
+  async updateDepartment(
+    @Body() departmentDto: UpdateCollaborationDepartmentDto,
+  ) {
+    const department = this.departmentService.create(departmentDto);
     return await this.departmentService.updateDepartment(department);
   }
   @Post('delete')

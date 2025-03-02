@@ -1,10 +1,5 @@
 import { CollaborationCompany } from '../entities/collaboration-company.entity';
-import {
-  CompanyDto,
-  CompanyInvoiceDto,
-  CompanyPaymentDto,
-} from '../dto/collaboration-company.dto';
-import { DataSource, EntityManager } from 'typeorm';
+import { DataSource, DeepPartial, EntityManager } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { CollaborationCompanyInvoice } from '../entities/collaboration-company-invoice.entity';
@@ -13,6 +8,12 @@ import { CollaborationCompanyPayment } from '../entities/collaboration-company-p
 @Injectable()
 export class CollaborationCompanyService {
   constructor(@InjectDataSource() private datasource: DataSource) {}
+
+  createCompany(company: DeepPartial<CollaborationCompany>) {
+    return this.datasource.manager
+      .getRepository(CollaborationCompany)
+      .create(company);
+  }
   async getCompanyByCostFormId(id: number) {
     return await this.datasource.manager
       .getRepository(CollaborationCompany)
@@ -39,23 +40,18 @@ export class CollaborationCompanyService {
 
   async addCompanyByCostFormId(
     id: number,
-    company?: CollaborationCompany,
+    company: CollaborationCompany,
     manager?: EntityManager,
   ) {
     if (!manager) manager = this.datasource.manager;
 
-    if (!company) company = new CompanyDto();
-    company.productionCostFormId = id;
-
-    return await manager.getRepository(CollaborationCompany).insert(company);
+    return await manager.getRepository(CollaborationCompany).save(company);
   }
 
   async updateCompany(company: CollaborationCompany, manager?: EntityManager) {
     if (!manager) manager = this.datasource.manager;
 
-    return await manager
-      .getRepository(CollaborationCompany)
-      .update(company.id, company);
+    return await manager.getRepository(CollaborationCompany).save(company);
   }
 
   async deleteCompany(id: number, manager?: EntityManager) {
@@ -63,7 +59,25 @@ export class CollaborationCompanyService {
     return await manager.getRepository(CollaborationCompany).delete(id);
   }
 
+  async deleteByCostFormId(id: number, manager?: EntityManager) {
+    if (!manager) manager = this.datasource.manager;
+    return await manager.transaction(async (manager) => {
+      const companies = await this.getCompanyByCostFormId(id);
+      for (const company of companies) {
+        await this.deleteInvoiceByCompanyId(company.id, manager);
+        await this.deletePaymentByCompanyId(company.id, manager);
+      }
+      await manager.delete(CollaborationCompany, { productionCostFormId: id });
+    });
+  }
+
   // Company Invoice
+  createInvoice(invoice: DeepPartial<CollaborationCompanyInvoice>) {
+    return this.datasource.manager
+      .getRepository(CollaborationCompanyInvoice)
+      .create(invoice);
+  }
+
   async getCompanyInvoiceByCompanyId(id: number) {
     return await this.datasource.manager
       .getRepository(CollaborationCompanyInvoice)
@@ -71,17 +85,14 @@ export class CollaborationCompanyService {
   }
   async addCompanyInvoiceByCompanyId(
     id: number,
-    companyInvoice?: CollaborationCompanyInvoice,
+    companyInvoice: CollaborationCompanyInvoice,
     manager?: EntityManager,
   ) {
     if (!manager) manager = this.datasource.manager;
 
-    if (!companyInvoice) companyInvoice = new CompanyInvoiceDto();
-    companyInvoice.companyId = id;
-
     return await manager
       .getRepository(CollaborationCompanyInvoice)
-      .insert(companyInvoice);
+      .save(companyInvoice);
   }
   async updateCompanyInvoice(
     companyInvoice: CollaborationCompanyInvoice,
@@ -91,14 +102,26 @@ export class CollaborationCompanyService {
 
     return await manager
       .getRepository(CollaborationCompanyInvoice)
-      .update(companyInvoice.id, companyInvoice);
+      .save(companyInvoice);
   }
 
   async deleteCompanyInvoice(id: number, manager?: EntityManager) {
     if (!manager) manager = this.datasource.manager;
     return await manager.getRepository(CollaborationCompanyInvoice).delete(id);
   }
+
+  async deleteInvoiceByCompanyId(id: number, manager?: EntityManager) {
+    if (!manager) manager = this.datasource.manager;
+    return await manager
+      .getRepository(CollaborationCompanyInvoice)
+      .delete({ companyId: id });
+  }
   // Company Payment
+  createPayment(payment: DeepPartial<CollaborationCompanyPayment>) {
+    return this.datasource.manager
+      .getRepository(CollaborationCompanyPayment)
+      .create(payment);
+  }
   async getCompanyPaymentByCompanyId(id: number) {
     return await this.datasource.manager
       .getRepository(CollaborationCompanyInvoice)
@@ -106,17 +129,14 @@ export class CollaborationCompanyService {
   }
   async addCompanyPaymentByCompanyId(
     id: number,
-    companyPayment?: CollaborationCompanyPayment,
+    companyPayment: CollaborationCompanyPayment,
     manager?: EntityManager,
   ) {
     if (!manager) manager = this.datasource.manager;
 
-    if (!companyPayment) companyPayment = new CompanyPaymentDto();
-    companyPayment.companyId = id;
-
     return await manager
       .getRepository(CollaborationCompanyPayment)
-      .insert(companyPayment);
+      .save(companyPayment);
   }
   async updateCompanyPayment(
     companyPayment: CollaborationCompanyPayment,
@@ -126,10 +146,17 @@ export class CollaborationCompanyService {
 
     return await manager
       .getRepository(CollaborationCompanyPayment)
-      .update(companyPayment.id, companyPayment);
+      .save(companyPayment);
   }
   async deleteCompanyPayment(id: number, manager?: EntityManager) {
     if (!manager) manager = this.datasource.manager;
     return await manager.getRepository(CollaborationCompanyPayment).delete(id);
+  }
+
+  async deletePaymentByCompanyId(id: number, manager?: EntityManager) {
+    if (!manager) manager = this.datasource.manager;
+    return await manager
+      .getRepository(CollaborationCompanyPayment)
+      .delete({ companyId: id });
   }
 }

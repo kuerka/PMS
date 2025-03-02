@@ -1,27 +1,58 @@
-import { Exclude } from 'class-transformer';
+import {
+  IsOptional,
+  IsInt,
+  IsString,
+  IsDecimal,
+  IsEnum,
+} from 'class-validator';
 import { CollaborationCompany } from '../entities/collaboration-company.entity';
-import { ProductionCostForm } from '../entities/cost-form.entity';
-import { CollaborationCompanyInvoice } from '../entities/collaboration-company-invoice.entity';
-import { CollaborationCompanyPayment } from '../entities/collaboration-company-payment.entity';
 
-export class CompanyDto extends CollaborationCompany {
-  @Exclude()
-  id: number;
+type DTO = Partial<CollaborationCompany>;
+
+export class CreateCollaborationCompanyDto implements DTO {
+  @IsInt()
+  productionCostFormId: number;
+
+  @IsString()
+  companyName: string;
+
+  @IsOptional()
+  @IsDecimal()
+  collaborationAmount?: string;
+
+  @IsOptional()
+  @IsEnum(['固定单价', '包干总价'])
+  collaborationAmountType?: '固定单价' | '包干总价';
+
+  @IsOptional()
+  @IsDecimal()
+  settlementAmount?: string;
+
+  @IsOptional()
+  @IsDecimal()
+  collaborationPayableFunds?: string;
 }
 
-export class CompanyUpdateDto extends CollaborationCompany {
-  @Exclude()
-  productionCostFormId: number | null;
-  @Exclude()
-  productionCostForm: ProductionCostForm;
-}
-
-export class CompanyInvoiceDto extends CollaborationCompanyInvoice {
-  @Exclude()
+export class UpdateCollaborationCompanyDto implements DTO {
+  @IsInt()
   id: number;
-}
 
-export class CompanyPaymentDto extends CollaborationCompanyPayment {
-  @Exclude()
-  id: number;
+  @IsString()
+  companyName: string;
+
+  @IsOptional()
+  @IsDecimal()
+  collaborationAmount?: string;
+
+  @IsOptional()
+  @IsEnum(['固定单价', '包干总价'])
+  collaborationAmountType?: '固定单价' | '包干总价';
+
+  @IsOptional()
+  @IsDecimal()
+  settlementAmount?: string;
+
+  @IsOptional()
+  @IsDecimal()
+  collaborationPayableFunds?: string;
 }

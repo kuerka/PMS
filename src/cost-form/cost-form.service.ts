@@ -2,10 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, DeepPartial, EntityManager } from 'typeorm';
 import { ProductionCostForm } from './entities/cost-form.entity';
+import { CollaborationDepartmentService } from './services/collaboration-department.service';
+import { CollaborationCompanyService } from './services/collaboration-company.service';
 
 @Injectable()
 export class CostFormService {
-  constructor(@InjectDataSource() private datasource: DataSource) {}
+  constructor(
+    @InjectDataSource() private datasource: DataSource,
+    private departmentService: CollaborationDepartmentService,
+    private companyService: CollaborationCompanyService,
+  ) {}
 
   create(costForm: DeepPartial<ProductionCostForm>) {
     return this.datasource.manager.create(ProductionCostForm, costForm);
@@ -51,6 +57,13 @@ export class CostFormService {
 
   async deleteByProspectId(prospectProjectId: number, manager?: EntityManager) {
     if (!manager) manager = this.datasource.manager;
-    return await manager.delete(ProductionCostForm, { prospectProjectId });
+    await manager.transaction(async (manager) => {
+      await this.departmentService.deleteByCostFormId(
+        prospectProjectId,
+        manager,
+      );
+      await this.companyService.deleteByCostFormId(prospectProjectId, manager);
+      await manager.delete(ProductionCostForm, { prospectProjectId });
+    });
   }
 }

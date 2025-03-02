@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { ProspectProject } from './prospect.entity';
 import { DataSource, DeepPartial, EntityManager } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { ProductionCostForm } from '@/cost-form/entities/cost-form.entity';
 import { ProspectQueryDto } from './prospect.dto';
 import { CostFormService } from '@/cost-form/cost-form.service';
 
@@ -164,7 +163,7 @@ export class ProspectService {
 
   async delete(id: number) {
     return await this.dataSource.manager.transaction(async (manager) => {
-      await manager.delete(ProductionCostForm, { prospectProject: { id } });
+      await this.costFormService.deleteByProspectId(id, manager);
       await manager.delete(ProspectProject, id);
     });
   }
