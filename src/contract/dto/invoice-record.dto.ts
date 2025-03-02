@@ -7,7 +7,6 @@ import {
   IsString,
 } from 'class-validator';
 import { ContractInvoiceRecord } from '../entities/invoice-record.entity';
-import { Exclude } from 'class-transformer';
 
 type DTO = Partial<ContractInvoiceRecord>;
 
@@ -27,14 +26,6 @@ export class CreateInvoiceRecordDto implements DTO {
   @IsString()
   @IsOptional()
   remark: string;
-
-  @IsOptional()
-  @Exclude()
-  createdAt: Date = new Date();
-
-  @IsOptional()
-  @Exclude()
-  updatedAt: Date = new Date();
 }
 
 export class UpdateInvoiceRecordDto implements DTO {
@@ -56,8 +47,4 @@ export class UpdateInvoiceRecordDto implements DTO {
   @IsString()
   @IsOptional()
   remark: string;
-
-  @IsOptional()
-  @Exclude()
-  updatedAt: Date = new Date();
 }

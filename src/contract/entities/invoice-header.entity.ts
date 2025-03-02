@@ -1,10 +1,12 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   Index,
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ContractPerformance } from './performance.entity';
 
@@ -38,10 +40,10 @@ export class InvoiceHeader {
   @Column('mediumtext', { name: 'address', nullable: true })
   address: string | null;
 
-  @Column('datetime', { name: 'created_at', nullable: true })
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date | null;
 
-  @Column('datetime', { name: 'updated_at', nullable: true })
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date | null;
 
   @Column('int', { name: 'contract_performance_id', nullable: true })

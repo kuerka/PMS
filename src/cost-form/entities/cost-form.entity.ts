@@ -1,16 +1,18 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   Index,
   JoinColumn,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { CollaborationCompany } from './collaboration-company.entity';
 import { CollaborationDepartment } from './collaboration-department.entity';
 import { ProspectProject } from '@/prospect/prospect.entity';
-import { Contract } from '@/contract/entities/contract.entity.entity';
+import { Contract } from '@/contract/entities/contract.entity';
 
 @Index('contract_id', ['contractId'], {})
 @Index('id', ['id'], { unique: true })
@@ -64,10 +66,10 @@ export class ProductionCostForm {
   })
   totalSettlementAmount: string | null;
 
-  @Column('datetime', { name: 'created_at' })
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date | null;
 
-  @Column('datetime', { name: 'updated_at', nullable: true })
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date | null;
 
   @Column('mediumtext', {

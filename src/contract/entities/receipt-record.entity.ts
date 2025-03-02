@@ -1,10 +1,12 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ContractPerformance } from './performance.entity';
 
@@ -34,10 +36,10 @@ export class ContractReceiptRecord {
   })
   receiptAmount: string | null;
 
-  @Column('datetime', { name: 'created_at', nullable: true })
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date | null;
 
-  @Column('datetime', { name: 'updated_at', nullable: true })
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date | null;
 
   @ManyToOne(

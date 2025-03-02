@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, DeepPartial, EntityManager } from 'typeorm';
-import { Contract } from '../entities/contract.entity.entity';
+import { Contract } from '../entities/contract.entity';
 import { PaginationDto } from '@/pagination/pagination.dto';
 import { CostFormService } from '@/cost-form/cost-form.service';
 import { PerformanceService } from './performance.service';

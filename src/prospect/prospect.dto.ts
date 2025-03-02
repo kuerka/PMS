@@ -38,12 +38,12 @@ export class createProspectDto implements DTO {
   @IsBoolean()
   isPriorWorkStarted: boolean;
 
-  @IsOptional()
-  @Exclude()
-  createdAt: Date = new Date();
-  @IsOptional()
-  @Exclude()
-  updatedAt: Date = new Date();
+  // @IsOptional()
+  // @Exclude()
+  // createdAt: Date = new Date();
+  // @IsOptional()
+  // @Exclude()
+  // updatedAt: Date = new Date();
 
   @IsOptional()
   @ValidateNested()
@@ -69,9 +69,9 @@ export class UpdateProspectDto implements DTO {
   projectDockingStage: ProjectDockingStage;
   @IsString()
   remark: string | null;
-  @IsOptional()
-  @Exclude()
-  updatedAt: Date = new Date();
+  // @IsOptional()
+  // @Exclude()
+  // updatedAt: Date = new Date();
   @IsOptional()
   @ValidateNested()
   @Type(() => updateCostFormDto)

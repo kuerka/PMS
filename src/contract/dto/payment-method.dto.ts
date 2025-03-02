@@ -1,6 +1,5 @@
-import { IsInt, IsOptional, IsString } from 'class-validator';
+import { IsInt, IsString } from 'class-validator';
 import { ContractPaymentMethod } from '../entities/payment-method.entity';
-import { Exclude } from 'class-transformer';
 
 type DTO = Partial<ContractPaymentMethod>;
 
@@ -13,12 +12,6 @@ export class CreatePaymentDto implements DTO {
   conditionDescription: string;
   @IsString()
   conditionProcessStatus: ConditionProcessStatus;
-  @IsOptional()
-  @Exclude()
-  createdAt: Date = new Date();
-  @IsOptional()
-  @Exclude()
-  updatedAt: Date = new Date();
 }
 
 export class UpdatePaymentDto implements DTO {
@@ -28,7 +21,4 @@ export class UpdatePaymentDto implements DTO {
   conditionDescription: string;
   @IsString()
   conditionProcessStatus: ConditionProcessStatus;
-  @IsOptional()
-  @Exclude()
-  updatedAt: Date = new Date();
 }

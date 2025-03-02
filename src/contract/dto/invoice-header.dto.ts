@@ -1,6 +1,5 @@
-import { IsInt, IsOptional, IsString } from 'class-validator';
+import { IsInt, IsString } from 'class-validator';
 import { InvoiceHeader } from '../entities/invoice-header.entity';
-import { Exclude } from 'class-transformer';
 
 type DTO = Partial<InvoiceHeader>;
 
@@ -19,12 +18,6 @@ export class CreateInvoiceHeaderDto implements DTO {
   bankName: string;
   @IsString()
   address: string;
-  @IsOptional()
-  @Exclude()
-  createdAt: Date = new Date();
-  @IsOptional()
-  @Exclude()
-  updatedAt: Date = new Date();
 }
 
 export class UpdateInvoiceHeaderDto implements DTO {
@@ -42,7 +35,4 @@ export class UpdateInvoiceHeaderDto implements DTO {
   bankName: string;
   @IsString()
   address: string;
-  @IsOptional()
-  @Exclude()
-  updatedAt: Date = new Date();
 }

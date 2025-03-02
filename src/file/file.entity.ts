@@ -1,13 +1,15 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ProspectProject } from '@/prospect/prospect.entity';
-import { Contract } from '@/contract/entities/contract.entity.entity';
+import { Contract } from '@/contract/entities/contract.entity';
 
 @Index('id', ['id'], { unique: true })
 @Index('prospect_project_id', ['prospectProjectId'], {})
@@ -75,10 +77,10 @@ export class File {
   @Column('int', { name: 'size', nullable: true })
   size: number | null;
 
-  @Column('datetime', { name: 'created_at', nullable: true })
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date | null;
 
-  @Column('datetime', { name: 'updated_at', nullable: true })
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date | null;
 
   @ManyToOne(

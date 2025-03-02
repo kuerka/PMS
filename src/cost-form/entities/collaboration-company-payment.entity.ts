@@ -1,10 +1,12 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { CollaborationCompany } from './collaboration-company.entity';
 
@@ -34,10 +36,10 @@ export class CollaborationCompanyPayment {
   @Column('date', { name: 'payment_time', nullable: true, comment: '支付时间' })
   paymentTime: string | null;
 
-  @Column('datetime', { name: 'created_at', nullable: true })
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date | null;
 
-  @Column('datetime', { name: 'updated_at', nullable: true })
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date | null;
 
   @ManyToOne(

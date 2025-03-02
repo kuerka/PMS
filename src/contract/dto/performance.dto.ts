@@ -1,6 +1,5 @@
-import { IsDateString, IsInt, IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsInt, IsString } from 'class-validator';
 import { ContractPerformance } from '../entities/performance.entity';
-import { Exclude } from 'class-transformer';
 
 type DTO = Partial<ContractPerformance>;
 
@@ -26,12 +25,6 @@ export class CreatePerformanceDto implements DTO {
   accumulatedReceiptAmount: string;
   @IsString()
   uncollectedAmount: string;
-  @IsOptional()
-  @Exclude()
-  createdAt: Date = new Date();
-  @IsOptional()
-  @Exclude()
-  updatedAt: Date = new Date();
 }
 
 export class UpdatePerformanceDto implements DTO {
@@ -55,7 +48,4 @@ export class UpdatePerformanceDto implements DTO {
   accumulatedReceiptAmount: string;
   @IsString()
   uncollectedAmount: string;
-  @IsOptional()
-  @Exclude()
-  updatedAt: Date = new Date();
 }

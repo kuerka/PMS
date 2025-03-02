@@ -28,8 +28,6 @@ export class FileService {
       files.type = '中标通知书';
       files.name = filename;
       files.size = file.size;
-      files.updatedAt = new Date();
-      files.createdAt = new Date();
       await manager.save(files);
 
       fs.writeFileSync(filepath, file.buffer);

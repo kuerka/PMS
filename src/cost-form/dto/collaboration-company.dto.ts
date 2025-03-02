@@ -7,19 +7,11 @@ import { CollaborationCompanyPayment } from '../entities/collaboration-company-p
 export class CompanyDto extends CollaborationCompany {
   @Exclude()
   id: number;
-  @Exclude()
-  createdAt: Date = new Date();
-  @Exclude()
-  updatedAt: Date = new Date();
 }
 
 export class CompanyUpdateDto extends CollaborationCompany {
   @Exclude()
   productionCostFormId: number | null;
-  @Exclude()
-  createdAt: Date;
-  @Exclude()
-  updatedAt: Date = new Date();
   @Exclude()
   productionCostForm: ProductionCostForm;
 }
@@ -27,17 +19,9 @@ export class CompanyUpdateDto extends CollaborationCompany {
 export class CompanyInvoiceDto extends CollaborationCompanyInvoice {
   @Exclude()
   id: number;
-  @Exclude()
-  createdAt: Date = new Date();
-  @Exclude()
-  updatedAt: Date = new Date();
 }
 
 export class CompanyPaymentDto extends CollaborationCompanyPayment {
   @Exclude()
   id: number;
-  @Exclude()
-  createdAt: Date = new Date();
-  @Exclude()
-  updatedAt: Date = new Date();
 }

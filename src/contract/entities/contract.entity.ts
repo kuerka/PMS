@@ -1,5 +1,6 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   Index,
   JoinColumn,
@@ -7,6 +8,7 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ProspectProject } from '@/prospect/prospect.entity';
 import { ContractPaymentMethod } from './payment-method.entity';
@@ -65,10 +67,10 @@ export class Contract {
   @Column('date', { name: 'project_end_date', nullable: true })
   projectEndDate: string | null;
 
-  @Column('datetime', { name: 'created_at', nullable: true })
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date | null;
 
-  @Column('datetime', { name: 'updated_at', nullable: true })
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date | null;
 
   @Column('mediumtext', { name: 'remark', nullable: true })

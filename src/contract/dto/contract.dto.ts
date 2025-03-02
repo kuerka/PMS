@@ -6,9 +6,9 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { Contract } from '../entities/contract.entity.entity';
+import { Contract } from '../entities/contract.entity';
 import { PaginationDto } from '@/pagination/pagination.dto';
-import { Exclude, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import {
   createCostFormDto,
   updateCostFormDto,
@@ -44,12 +44,7 @@ export class ContractDto implements DTO {
   projectStartDate: string;
   @IsDateString()
   projectEndDate: string;
-  @IsOptional()
-  @Exclude()
-  createdAt: Date = new Date();
-  @IsOptional()
-  @Exclude()
-  updatedAt: Date = new Date();
+
   @ValidateNested()
   @Type(() => createCostFormDto)
   productionCostForm: ProductionCostForm;
@@ -86,9 +81,7 @@ export class ContractUpdateDto implements DTO {
   projectStartDate: string;
   @IsDateString()
   projectEndDate: string;
-  @IsOptional()
-  @Exclude()
-  updatedAt: Date = new Date();
+
   @IsOptional()
   @ValidateNested()
   @Type(() => updateCostFormDto)

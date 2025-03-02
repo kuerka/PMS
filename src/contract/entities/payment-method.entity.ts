@@ -1,12 +1,14 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import { Contract } from './contract.entity.entity';
+import { Contract } from './contract.entity';
 
 @Index('contract_id', ['contractId'], {})
 @Index('id', ['id'], { unique: true })
@@ -37,10 +39,10 @@ export class ContractPaymentMethod {
   })
   conditionProcessStatus: '未触发' | '触发已完成' | '触发未完成' | null;
 
-  @Column('datetime', { name: 'created_at', nullable: true })
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date | null;
 
-  @Column('datetime', { name: 'updated_at', nullable: true })
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date | null;
 
   @ManyToOne(() => Contract, (contract) => contract.contractPaymentMethods, {

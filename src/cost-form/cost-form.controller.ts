@@ -30,8 +30,6 @@ export class CompanyController {
   }
   @Post('add')
   async addCompany(@Body() companyDto: CompanyDto) {
-    companyDto.createdAt = new Date();
-    companyDto.updatedAt = new Date();
     return await this.companyService.addCompanyByCostFormId(
       companyDto.productionCostFormId!,
       companyDto,
@@ -39,7 +37,6 @@ export class CompanyController {
   }
   @Post('update')
   async updateCompany(@Body() companyDto: CompanyUpdateDto) {
-    companyDto.updatedAt = new Date();
     return await this.companyService.updateCompany(companyDto);
   }
   @Post('delete')

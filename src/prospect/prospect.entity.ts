@@ -1,12 +1,14 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   Index,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import { Contract } from '@/contract/entities/contract.entity.entity';
+import { Contract } from '@/contract/entities/contract.entity';
 import { File } from '@/file/file.entity';
 import { ProductionCostForm } from '@/cost-form/entities/cost-form.entity';
 
@@ -64,10 +66,10 @@ export class ProspectProject {
     | '已签合同'
     | null;
 
-  @Column('datetime', { name: 'created_at', nullable: true })
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date | null;
 
-  @Column('datetime', { name: 'updated_at', nullable: true })
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date | null;
 
   @Column('mediumtext', {

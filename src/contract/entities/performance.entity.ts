@@ -1,14 +1,16 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   Index,
   JoinColumn,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ContractInvoiceRecord } from './invoice-record.entity';
-import { Contract } from './contract.entity.entity';
+import { Contract } from './contract.entity';
 import { ContractReceiptRecord } from './receipt-record.entity';
 import { InvoiceHeader } from './invoice-header.entity';
 
@@ -94,10 +96,10 @@ export class ContractPerformance {
   })
   accumulatedReceiptAmount: string | null;
 
-  @Column('datetime', { name: 'created_at', nullable: true })
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date | null;
 
-  @Column('datetime', { name: 'updated_at', nullable: true })
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date | null;
 
   @Column('decimal', {

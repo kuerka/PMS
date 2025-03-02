@@ -30,8 +30,7 @@ export class ProspectService {
 
   async add(prospect: ProspectProject, manager?: EntityManager) {
     if (!manager) manager = this.dataSource.manager;
-    const prospectRepository = manager.getRepository(ProspectProject);
-    return await prospectRepository.save(prospect);
+    return await manager.getRepository(ProspectProject).save(prospect);
   }
 
   async findAll() {
@@ -152,7 +151,6 @@ export class ProspectService {
         updateForm.id = form.id;
         await this.costFormService.update(updateForm, manager);
       } else {
-        updateForm.createdAt = updateForm.updatedAt;
         updateForm.prospectProjectId = id;
         await this.costFormService.add(updateForm, manager);
       }
