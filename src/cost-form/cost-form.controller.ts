@@ -28,13 +28,13 @@ export class CostFormController {
 @Controller('costForm/company')
 export class CompanyController {
   constructor(private companyService: CollaborationCompanyService) {}
-  @Post('list')
-  async getCompanyByCostFormId(@Body('id') id: number) {
+  @Get('list')
+  async getCompanyByCostFormId(@Query('id') id: number) {
     return await this.companyService.getCompanyByCostFormId(id);
   }
 
-  @Post('detail')
-  async getCompanyDetail(@Body('id') id: number) {
+  @Get('detail')
+  async getCompanyDetail(@Query('id') id: number) {
     return await this.companyService.getCompanyDetail(id);
   }
   @Post('add')

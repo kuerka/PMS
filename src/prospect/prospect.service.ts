@@ -55,7 +55,8 @@ export class ProspectService {
     const query = prospectQueryDto.query || {};
     const queryBuilder = this.dataSource.manager
       .getRepository(ProspectProject)
-      .createQueryBuilder('prospect');
+      .createQueryBuilder('prospect')
+      .leftJoinAndSelect('prospect.productionCostForm', 'costForm');
 
     if (query.id) {
       queryBuilder.andWhere('prospect.id = :id', { id: query.id });
@@ -122,7 +123,7 @@ export class ProspectService {
     }
 
     queryBuilder.skip((page - 1) * limit).take(limit);
-    const prospects: ProspectProject[] = await queryBuilder.getRawMany();
+    const prospects: ProspectProject[] = await queryBuilder.getMany();
     const total = await queryBuilder.getCount();
     return {
       data: prospects,
