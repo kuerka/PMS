@@ -5,12 +5,14 @@ import { Contract } from '../entities/contract.entity';
 import { PaginationDto } from '@/pagination/pagination.dto';
 import { CostFormService } from '@/cost-form/cost-form.service';
 import { PerformanceService } from './performance.service';
+import { PaymentMethodService } from './payment-method.service';
 
 @Injectable()
 export class ContractService {
   constructor(
     @InjectDataSource() private dataSource: DataSource,
     private costFormService: CostFormService,
+    private paymentService: PaymentMethodService,
     private performanceService: PerformanceService,
   ) {}
 
@@ -20,12 +22,13 @@ export class ContractService {
 
   async addContractTransition(contract: Contract) {
     return await this.dataSource.manager.transaction(async (manager) => {
-      console.log(contract);
+      const { productionCostForm, contractPerformance } = contract;
       const res = await this.addContract(contract, manager);
-      const costForm = this.costFormService.create(contract.productionCostForm);
+      const costForm = this.costFormService.create(productionCostForm);
       costForm.contract = res;
       await this.costFormService.add(costForm, manager);
-      const performance = this.performanceService.create();
+      const performance = this.performanceService.create(contractPerformance);
+      performance.contract = res;
       await this.performanceService.addWithContractId(
         res.id,
         performance,
@@ -64,7 +67,11 @@ export class ContractService {
       relations: {
         prospectProject: true,
         productionCostForm: true,
-        contractPerformance: true,
+        contractPerformance: {
+          invoiceHeader: true,
+          contractInvoiceRecords: true,
+          contractReceiptRecords: true,
+        },
       },
     });
   }
@@ -83,6 +90,16 @@ export class ContractService {
   async updateContract(contract: Contract, manager?: EntityManager) {
     if (!manager) manager = this.dataSource.manager;
     return await manager.getRepository(Contract).save(contract);
+  }
+
+  async deleteContractTransition(id: number) {
+    return await this.dataSource.manager.transaction(async (manager) => {
+      const form = this.costFormService.deleteByContractId(id, manager);
+      const payment = this.paymentService.deleteByContractId(id, manager);
+      const perform = this.performanceService.deleteByContractId(id, manager);
+      await Promise.all([form, payment, perform]);
+      await this.deleteContract(id, manager);
+    });
   }
   async deleteContract(id: number, manager?: EntityManager) {
     if (!manager) manager = this.dataSource.manager;

@@ -1,4 +1,4 @@
-import { IsInt, IsString } from 'class-validator';
+import { IsInt, IsString, IsOptional } from 'class-validator';
 import { InvoiceHeader } from '../entities/invoice-header.entity';
 
 type DTO = Partial<InvoiceHeader>;
@@ -23,16 +23,28 @@ export class CreateInvoiceHeaderDto implements DTO {
 export class UpdateInvoiceHeaderDto implements DTO {
   @IsInt()
   id: number;
+
   @IsString()
-  companyName: string;
+  @IsOptional()
+  companyName?: string;
+
   @IsString()
-  contactPhone: string;
+  @IsOptional()
+  contactPhone?: string;
+
   @IsString()
-  taxpayerIdentificationNumber: string;
+  @IsOptional()
+  taxpayerIdentificationNumber?: string;
+
   @IsString()
-  bankAccount: string;
+  @IsOptional()
+  bankAccount?: string;
+
   @IsString()
-  bankName: string;
+  @IsOptional()
+  bankName?: string;
+
   @IsString()
-  address: string;
+  @IsOptional()
+  address?: string;
 }

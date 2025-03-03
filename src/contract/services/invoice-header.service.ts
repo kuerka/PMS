@@ -13,11 +13,10 @@ export class InvoiceHeaderService {
 
   async addWithPerformanceId(
     id: number,
-    invoiceHeader?: InvoiceHeader,
+    invoiceHeader: InvoiceHeader,
     manager?: EntityManager,
   ) {
     if (!manager) manager = this.dataSource.manager;
-    if (!invoiceHeader) invoiceHeader = new InvoiceHeader();
 
     invoiceHeader.contractPerformanceId = id;
     return await manager.getRepository(InvoiceHeader).insert(invoiceHeader);
@@ -45,5 +44,12 @@ export class InvoiceHeaderService {
     if (!manager) manager = this.dataSource.manager;
 
     return await manager.getRepository(InvoiceHeader).delete(id);
+  }
+
+  async deleteByPerformanceId(performanceId: number, manager?: EntityManager) {
+    if (!manager) manager = this.dataSource.manager;
+    await manager
+      .getRepository(InvoiceHeader)
+      .delete({ contractPerformanceId: performanceId });
   }
 }

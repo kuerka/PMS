@@ -28,6 +28,12 @@ export class CostFormService {
       .findOneBy({ prospectProjectId });
   }
 
+  async findByContractId(contractId: number) {
+    return await this.datasource
+      .getRepository(ProductionCostForm)
+      .findOneBy({ contractId });
+  }
+
   async update(costForm: ProductionCostForm, manager?: EntityManager) {
     if (!manager) manager = this.datasource.manager;
     return await this.datasource
@@ -58,12 +64,21 @@ export class CostFormService {
   async deleteByProspectId(prospectProjectId: number, manager?: EntityManager) {
     if (!manager) manager = this.datasource.manager;
     await manager.transaction(async (manager) => {
-      await this.departmentService.deleteByCostFormId(
-        prospectProjectId,
-        manager,
-      );
-      await this.companyService.deleteByCostFormId(prospectProjectId, manager);
+      const form = await this.findByProspectId(prospectProjectId);
+      if (!form) return;
+      await this.departmentService.deleteByCostFormId(form.id, manager);
+      await this.companyService.deleteByCostFormId(form.id, manager);
       await manager.delete(ProductionCostForm, { prospectProjectId });
+    });
+  }
+  async deleteByContractId(contractId: number, manager?: EntityManager) {
+    if (!manager) manager = this.datasource.manager;
+    await manager.transaction(async (manager) => {
+      const form = await this.findByContractId(contractId);
+      if (!form) return;
+      await this.departmentService.deleteByCostFormId(form.id, manager);
+      await this.companyService.deleteByCostFormId(form.id, manager);
+      await manager.delete(ProductionCostForm, { contractId });
     });
   }
 }

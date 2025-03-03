@@ -1,24 +1,24 @@
-import { IsInt, IsString } from 'class-validator';
+import { IsDecimal, IsInt, IsOptional, IsString } from 'class-validator';
 import { ContractPaymentMethod } from '../entities/payment-method.entity';
 
 type DTO = Partial<ContractPaymentMethod>;
-
-type ConditionProcessStatus = ContractPaymentMethod['conditionProcessStatus'];
 
 export class CreatePaymentDto implements DTO {
   @IsInt()
   contractId: number;
   @IsString()
   conditionDescription: string;
-  @IsString()
-  conditionProcessStatus: ConditionProcessStatus;
+  @IsDecimal()
+  accounts: string;
 }
 
 export class UpdatePaymentDto implements DTO {
   @IsInt()
   id: number;
+  @IsOptional()
   @IsString()
   conditionDescription: string;
-  @IsString()
-  conditionProcessStatus: ConditionProcessStatus;
+  @IsOptional()
+  @IsDecimal()
+  accounts: string;
 }

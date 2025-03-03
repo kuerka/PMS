@@ -1,4 +1,10 @@
-import { IsDateString, IsInt, IsString } from 'class-validator';
+import {
+  IsDateString,
+  IsDecimal,
+  IsInt,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { ContractPerformance } from '../entities/performance.entity';
 
 type DTO = Partial<ContractPerformance>;
@@ -9,43 +15,52 @@ type ContractExecutionStatus = ContractPerformance['contractExecutionStatus'];
 export class CreatePerformanceDto implements DTO {
   @IsString()
   bondType: BondType;
-  @IsString()
+  @IsDecimal()
   cashBondAmount: string;
   @IsDateString()
   bondExpiryDate: string;
-  @IsString()
+  @IsDecimal()
   contractSettlementAmount: string;
-  @IsString()
+  @IsDecimal()
   accountsReceivable: string;
   @IsString()
   contractExecutionStatus: ContractExecutionStatus;
-  @IsString()
+  @IsDecimal()
   accumulatedInvoiceAmount: string;
-  @IsString()
+  @IsDecimal()
   accumulatedReceiptAmount: string;
-  @IsString()
+  @IsDecimal()
   uncollectedAmount: string;
 }
 
 export class UpdatePerformanceDto implements DTO {
   @IsInt()
   id: number;
+  @IsOptional()
   @IsString()
   bondType: BondType;
-  @IsString()
+  @IsOptional()
+  @IsDecimal()
   cashBondAmount: string;
+  @IsOptional()
   @IsDateString()
   bondExpiryDate: string;
-  @IsString()
+  @IsOptional()
+  @IsDecimal()
   contractSettlementAmount: string;
-  @IsString()
+  @IsOptional()
+  @IsDecimal()
   accountsReceivable: string;
+  @IsOptional()
   @IsString()
   contractExecutionStatus: ContractExecutionStatus;
-  @IsString()
+  @IsOptional()
+  @IsDecimal()
   accumulatedInvoiceAmount: string;
-  @IsString()
+  @IsOptional()
+  @IsDecimal()
   accumulatedReceiptAmount: string;
-  @IsString()
+  @IsOptional()
+  @IsDecimal()
   uncollectedAmount: string;
 }

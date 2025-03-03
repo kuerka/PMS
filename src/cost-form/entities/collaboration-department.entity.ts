@@ -68,7 +68,10 @@ export class CollaborationDepartment {
   @ManyToOne(
     () => ProductionCostForm,
     (productionCostForm) => productionCostForm.collaborationDepartments,
-    { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' },
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'NO ACTION',
+    },
   )
   @JoinColumn([{ name: 'production_cost_form_id', referencedColumnName: 'id' }])
   productionCostForm: ProductionCostForm;

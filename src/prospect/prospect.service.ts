@@ -69,13 +69,17 @@ export class ProspectService {
     if (query.businessPersonnel) {
       queryBuilder.andWhere(
         'prospect.businessPersonnel LIKE :businessPersonnel',
-        { businessPersonnel: `%${query.businessPersonnel}%` },
+        {
+          businessPersonnel: `%${query.businessPersonnel}%`,
+        },
       );
     }
     if (query.leadingBusinessDepartment) {
       queryBuilder.andWhere(
         'prospect.leadingBusinessDepartment LIKE :leadingBusinessDepartment',
-        { leadingBusinessDepartment: `%${query.leadingBusinessDepartment}%` },
+        {
+          leadingBusinessDepartment: `%${query.leadingBusinessDepartment}%`,
+        },
       );
     }
     if (query.assistingBusinessDepartment) {
@@ -91,19 +95,25 @@ export class ProspectService {
     if (query.isPriorWorkStarted !== undefined) {
       queryBuilder.andWhere(
         'prospect.isPriorWorkStarted = :isPriorWorkStarted',
-        { isPriorWorkStarted: query.isPriorWorkStarted },
+        {
+          isPriorWorkStarted: query.isPriorWorkStarted,
+        },
       );
     }
     if (query.projectDockingStage) {
       queryBuilder.andWhere(
         'prospect.projectDockingStage = :projectDockingStage',
-        { projectDockingStage: query.projectDockingStage },
+        {
+          projectDockingStage: query.projectDockingStage,
+        },
       );
     }
     if (query.estimatedContractAmount) {
       queryBuilder.andWhere(
         'prospect.estimatedContractAmount LIKE :estimatedContractAmount',
-        { estimatedContractAmount: `%${query.estimatedContractAmount}%` },
+        {
+          estimatedContractAmount: `%${query.estimatedContractAmount}%`,
+        },
       );
     }
     if (query.remark) {

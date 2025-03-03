@@ -50,4 +50,12 @@ export class PaymentMethodService {
 
     return await manager.getRepository(ContractPaymentMethod).delete(id);
   }
+
+  async deleteByContractId(id: number, manager?: EntityManager) {
+    if (!manager) manager = this.dataSource.manager;
+
+    return await manager
+      .getRepository(ContractPaymentMethod)
+      .delete({ contractId: id });
+  }
 }

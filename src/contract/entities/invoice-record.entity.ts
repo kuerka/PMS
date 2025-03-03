@@ -56,7 +56,10 @@ export class ContractInvoiceRecord {
   @ManyToOne(
     () => ContractPerformance,
     (contractPerformance) => contractPerformance.contractInvoiceRecords,
-    { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' },
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'NO ACTION',
+    },
   )
   @JoinColumn([{ name: 'contract_performance_id', referencedColumnName: 'id' }])
   contractPerformance: ContractPerformance;

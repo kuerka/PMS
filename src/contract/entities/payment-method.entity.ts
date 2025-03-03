@@ -31,13 +31,23 @@ export class ContractPaymentMethod {
   })
   conditionDescription: string | null;
 
-  @Column('enum', {
-    name: 'condition_process_status',
+  @Column('decimal', {
+    name: 'accounts',
     nullable: true,
-    comment: '付款条件是否触发以及是否完成对应收款',
-    enum: ['未触发', '触发已完成', '触发未完成'],
+    comment: '对应此收款条件的具体的应该收款的数额',
+    precision: 10,
+    scale: 0,
   })
-  conditionProcessStatus: '未触发' | '触发已完成' | '触发未完成' | null;
+  accounts: string | null;
+
+  @Column('tinyint', {
+    name: 'accounts_status',
+    nullable: true,
+    comment: '与项目累计收款金额对比，大于累计收款金额为true，小于为false',
+    width: 1,
+    default: () => "'0'",
+  })
+  accountsStatus: boolean | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date | null;

@@ -45,7 +45,10 @@ export class CollaborationCompanyPayment {
   @ManyToOne(
     () => CollaborationCompany,
     (collaborationCompany) => collaborationCompany.collaborationCompanyPayments,
-    { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' },
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'NO ACTION',
+    },
   )
   @JoinColumn([{ name: 'company_id', referencedColumnName: 'id' }])
   collaborationCompanyRelation: CollaborationCompany;

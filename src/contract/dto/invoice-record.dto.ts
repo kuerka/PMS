@@ -24,27 +24,22 @@ export class CreateInvoiceRecordDto implements DTO {
   invoiceType: '增值税专用发票' | '增值税普通发票';
 
   @IsString()
-  @IsOptional()
   remark: string;
 }
 
 export class UpdateInvoiceRecordDto implements DTO {
   @IsInt()
   id: number;
-
-  @IsInt()
-  contractPerformanceId: number;
-
+  @IsOptional()
   @IsDateString()
   invoiceTime: string;
-
+  @IsOptional()
   @IsDecimal()
   invoiceAmount: string;
-
+  @IsOptional()
   @IsEnum(['增值税专用发票', '增值税普通发票'])
   invoiceType: '增值税专用发票' | '增值税普通发票';
-
-  @IsString()
   @IsOptional()
+  @IsString()
   remark: string;
 }

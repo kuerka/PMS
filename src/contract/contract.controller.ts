@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Param,
   Post,
   Query,
   UsePipes,
@@ -10,9 +9,9 @@ import {
 } from '@nestjs/common';
 import { ContractService } from './services/contract.service';
 import {
-  ContractDto,
+  CreateContractDto,
   ContractQueryDto,
-  ContractUpdateDto,
+  UpdateContractDto,
 } from './dto/contract.dto';
 import { Public } from '@/auth/auth.decorators';
 import { UpdatePerformanceDto } from './dto/performance.dto';
@@ -39,8 +38,7 @@ export class ContractController {
   constructor(private contractService: ContractService) {}
 
   @Post('add')
-  async createContract(@Body() contractDto: ContractDto) {
-    console.log(contractDto);
+  async createContract(@Body() contractDto: CreateContractDto) {
     const contract = this.contractService.createContract(contractDto);
     return await this.contractService.addContractTransition(contract);
   }
@@ -53,14 +51,13 @@ export class ContractController {
     return await this.contractService.getContractDetailsById(id);
   }
   @Post('update')
-  async updateContract(@Body() contractDto: ContractUpdateDto) {
+  async updateContract(@Body() contractDto: UpdateContractDto) {
     const contract = this.contractService.createContract(contractDto);
-    console.log(contract);
     return await this.contractService.updateContractTransition(contract);
   }
   @Post('delete')
-  async deleteContract(@Param('id') id: number) {
-    return await this.contractService.deleteContract(id);
+  async deleteContract(@Body('id') id: number) {
+    return await this.contractService.deleteContractTransition(id);
   }
 }
 

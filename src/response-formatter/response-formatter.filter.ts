@@ -12,6 +12,8 @@ export class ResponseFormatterFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response: Response = ctx.getResponse();
 
+    console.log(exception);
+
     const status = exception.getStatus?.() || 500;
     const message = exception.message || 'Internal server error';
     const errorResponse = {

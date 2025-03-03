@@ -86,7 +86,10 @@ export class File {
   @ManyToOne(
     () => ProspectProject,
     (prospectProject) => prospectProject.files,
-    { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' },
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'NO ACTION',
+    },
   )
   @JoinColumn([{ name: 'prospect_project_id', referencedColumnName: 'id' }])
   prospectProject: ProspectProject;

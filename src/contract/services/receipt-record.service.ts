@@ -50,4 +50,12 @@ export class ReceiptRecordService {
 
     return await manager.getRepository(ContractReceiptRecord).delete(id);
   }
+
+  async deleteByPerformanceId(id: number, manager?: EntityManager) {
+    if (!manager) manager = this.dataSource.manager;
+
+    return await manager
+      .getRepository(ContractReceiptRecord)
+      .delete({ contractPerformanceId: id });
+  }
 }

@@ -1,4 +1,4 @@
-import { IsDateString, IsDecimal, IsInt } from 'class-validator';
+import { IsDateString, IsDecimal, IsInt, IsOptional } from 'class-validator';
 import { ContractReceiptRecord } from '../entities/receipt-record.entity';
 
 type DTO = Partial<ContractReceiptRecord>;
@@ -17,10 +17,10 @@ export class CreateReceiptRecordDto implements DTO {
 export class UpdateReceiptRecordDto implements DTO {
   @IsInt()
   id: number;
-
+  @IsOptional()
   @IsDateString()
   receiptTime: string;
-
+  @IsOptional()
   @IsDecimal()
   receiptAmount: string;
 }

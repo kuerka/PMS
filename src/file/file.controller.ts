@@ -24,7 +24,6 @@ export class FileController {
   @Post('delete')
   async deleteFile(@Body() body: { id: number }) {
     const { id } = body;
-    console.log(id, typeof id);
     return await this.fileService.delete(id);
   }
 }

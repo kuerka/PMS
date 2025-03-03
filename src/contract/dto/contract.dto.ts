@@ -20,7 +20,7 @@ import { ContractPerformance } from '../entities/performance.entity';
 type DTO = Partial<Contract>;
 type AmountType = Contract['amountType'];
 
-export class ContractDto implements DTO {
+export class CreateContractDto implements DTO {
   @IsOptional()
   @IsInt()
   prospectProjectId?: number | null | undefined;
@@ -58,32 +58,46 @@ export class ContractQueryDto implements PaginationDto {
   limit: number;
 }
 
-export class ContractUpdateDto implements DTO {
+export class UpdateContractDto implements DTO {
   @IsInt()
   id: number;
+  @IsOptional()
   @IsString()
-  contractNumber: string;
+  contractNumber?: string;
+  @IsOptional()
   @IsString()
-  projectName: string;
+  projectName?: string;
+  @IsOptional()
   @IsString()
-  projectType: string;
+  projectType?: string;
+  @IsOptional()
   @IsString()
-  projectLocation: string;
+  projectLocation?: string;
+  @IsOptional()
   @IsString()
-  owner: string;
+  owner?: string;
+  @IsOptional()
   @IsString()
-  amountType: AmountType;
+  amountType?: AmountType;
+  @IsOptional()
   @IsString()
-  remark: string;
+  remark?: string;
+  @IsOptional()
   @IsBoolean()
-  isPreliminaryNumber: boolean;
+  isPreliminaryNumber?: boolean;
+  @IsOptional()
   @IsDateString()
-  projectStartDate: string;
+  projectStartDate?: string;
+  @IsOptional()
   @IsDateString()
-  projectEndDate: string;
+  projectEndDate?: string;
 
   @IsOptional()
   @ValidateNested()
   @Type(() => updateCostFormDto)
-  productionCostForm: ProductionCostForm;
+  productionCostForm?: ProductionCostForm;
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => UpdateContractDto)
+  contractPerformance?: ContractPerformance;
 }

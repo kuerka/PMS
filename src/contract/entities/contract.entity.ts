@@ -88,7 +88,10 @@ export class Contract {
   @ManyToOne(
     () => ProspectProject,
     (prospectProject) => prospectProject.contract,
-    { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' },
+    {
+      onDelete: 'NO ACTION',
+      onUpdate: 'NO ACTION',
+    },
   )
   @JoinColumn([{ name: 'prospect_project_id', referencedColumnName: 'id' }])
   prospectProject: ProspectProject;
