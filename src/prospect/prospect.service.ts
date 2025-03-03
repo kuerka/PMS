@@ -32,6 +32,10 @@ export class ProspectService {
     return await manager.getRepository(ProspectProject).save(prospect);
   }
 
+  async findById(id: number) {
+    return await this.dataSource.manager.findOneBy(ProspectProject, { id });
+  }
+
   async findAll() {
     return await this.dataSource.manager.find(ProspectProject);
   }

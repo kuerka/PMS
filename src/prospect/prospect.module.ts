@@ -7,5 +7,6 @@ import { CostFormModule } from '@/cost-form/cost-form.module';
   imports: [CostFormModule],
   providers: [ProspectService],
   controllers: [ProspectController],
+  exports: [ProspectService],
 })
 export class ProspectModule {}
