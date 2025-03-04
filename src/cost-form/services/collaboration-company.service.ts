@@ -45,18 +45,24 @@ export class CollaborationCompanyService {
   ) {
     if (!manager) manager = this.datasource.manager;
 
-    return await manager.getRepository(CollaborationCompany).save(company);
+    return await manager.getRepository(CollaborationCompany).insert(company);
   }
 
   async updateCompany(company: CollaborationCompany, manager?: EntityManager) {
     if (!manager) manager = this.datasource.manager;
 
-    return await manager.getRepository(CollaborationCompany).save(company);
+    return await manager
+      .getRepository(CollaborationCompany)
+      .update(company.id, company);
   }
 
   async deleteCompany(id: number, manager?: EntityManager) {
     if (!manager) manager = this.datasource.manager;
-    return await manager.getRepository(CollaborationCompany).delete(id);
+    return await manager.transaction(async (manager) => {
+      await this.deleteInvoiceByCompanyId(id, manager);
+      await this.deletePaymentByCompanyId(id, manager);
+      await manager.delete(CollaborationCompany, id);
+    });
   }
 
   async deleteByCostFormId(id: number, manager?: EntityManager) {
@@ -81,7 +87,7 @@ export class CollaborationCompanyService {
   async getCompanyInvoiceByCompanyId(id: number) {
     return await this.datasource.manager
       .getRepository(CollaborationCompanyInvoice)
-      .find({ where: { companyId: id } });
+      .findBy({ companyId: id });
   }
   async addCompanyInvoiceByCompanyId(
     id: number,
@@ -92,7 +98,7 @@ export class CollaborationCompanyService {
 
     return await manager
       .getRepository(CollaborationCompanyInvoice)
-      .save(companyInvoice);
+      .insert(companyInvoice);
   }
   async updateCompanyInvoice(
     companyInvoice: CollaborationCompanyInvoice,
@@ -102,7 +108,7 @@ export class CollaborationCompanyService {
 
     return await manager
       .getRepository(CollaborationCompanyInvoice)
-      .save(companyInvoice);
+      .update(companyInvoice.id, companyInvoice);
   }
 
   async deleteCompanyInvoice(id: number, manager?: EntityManager) {
@@ -136,7 +142,7 @@ export class CollaborationCompanyService {
 
     return await manager
       .getRepository(CollaborationCompanyPayment)
-      .save(companyPayment);
+      .insert(companyPayment);
   }
   async updateCompanyPayment(
     companyPayment: CollaborationCompanyPayment,
@@ -146,7 +152,7 @@ export class CollaborationCompanyService {
 
     return await manager
       .getRepository(CollaborationCompanyPayment)
-      .save(companyPayment);
+      .update(companyPayment.id, companyPayment);
   }
   async deleteCompanyPayment(id: number, manager?: EntityManager) {
     if (!manager) manager = this.datasource.manager;

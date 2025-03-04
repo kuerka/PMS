@@ -29,7 +29,7 @@ export class CostFormController {
 export class CompanyController {
   constructor(private companyService: CollaborationCompanyService) {}
   @Get('list')
-  async getCompanyByCostFormId(@Query('id') id: number) {
+  async getCompanyByCostFormId(@Query('costId') id: number) {
     return await this.companyService.getCompanyByCostFormId(id);
   }
 
@@ -68,6 +68,11 @@ export class CompanyInvoiceController {
       invoice,
     );
   }
+  @Get('list')
+  async getCompanyInvoiceByCompanyId(@Query('companyId') id: number) {
+    if (!id) return [];
+    return await this.companyService.getCompanyInvoiceByCompanyId(id);
+  }
   @Post('update')
   async updateCompanyInvoice(@Body() invoiceDto: UpdateInvoiceDto) {
     const invoice = this.companyService.createInvoice(invoiceDto);
@@ -83,6 +88,12 @@ export class CompanyInvoiceController {
 @Controller('costForm/company/payment')
 export class CompanyPaymentController {
   constructor(private companyService: CollaborationCompanyService) {}
+
+  @Get('list')
+  async getCompanyPaymentByCompanyId(@Query('companyId') id: number) {
+    if (!id) return [];
+    return await this.companyService.getCompanyPaymentByCompanyId(id);
+  }
   @Post('add')
   async addCompanyPayment(@Body() paymentDto: CreatePaymentDto) {
     const payment = this.companyService.createPayment(paymentDto);
