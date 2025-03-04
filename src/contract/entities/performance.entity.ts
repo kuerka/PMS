@@ -136,3 +136,8 @@ export class ContractPerformance {
   )
   invoiceHeader: InvoiceHeader;
 }
+
+export const TableName: Partial<ContractPerformance> = {
+  accumulatedInvoiceAmount: 'accumulatedInvoiceAmount',
+  accumulatedReceiptAmount: 'accumulatedReceiptAmount',
+};

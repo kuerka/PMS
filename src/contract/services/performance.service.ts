@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, DeepPartial, EntityManager } from 'typeorm';
-import { ContractPerformance } from '../entities/performance.entity';
+import { ContractPerformance, TableName } from '../entities/performance.entity';
 import { InvoiceHeaderService } from './invoice-header.service';
 import { InvoiceRecordService } from './invoice-record.service';
 import { ReceiptRecordService } from './receipt-record.service';
@@ -60,6 +60,35 @@ export class PerformanceService {
       .getRepository(ContractPerformance)
       .update({ id }, performance);
   }
+
+  async incrementInvoice(id: number, count: string, manager?: EntityManager) {
+    if (!manager) manager = this.dataSource.manager;
+    await manager
+      .getRepository(ContractPerformance)
+      .increment({ id }, TableName.accumulatedInvoiceAmount!, count);
+  }
+
+  async decrementInvoice(id: number, count: string, manager?: EntityManager) {
+    if (!manager) manager = this.dataSource.manager;
+    await manager
+      .getRepository(ContractPerformance)
+      .decrement({ id }, TableName.accumulatedInvoiceAmount!, count);
+  }
+
+  async incrementReceipt(id: number, count: string, manager?: EntityManager) {
+    if (!manager) manager = this.dataSource.manager;
+    await manager
+      .getRepository(ContractPerformance)
+      .increment({ id }, TableName.accumulatedReceiptAmount!, count);
+  }
+
+  async decrementReceipt(id: number, count: string, manager?: EntityManager) {
+    if (!manager) manager = this.dataSource.manager;
+    await manager
+      .getRepository(ContractPerformance)
+      .decrement({ id }, TableName.accumulatedReceiptAmount!, count);
+  }
+
   async deleteByContractId(contractId: number, manager?: EntityManager) {
     if (!manager) manager = this.dataSource.manager;
     await manager.transaction(async (manager) => {
