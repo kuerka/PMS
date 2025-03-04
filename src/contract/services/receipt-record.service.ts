@@ -3,7 +3,6 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, DeepPartial, EntityManager } from 'typeorm';
 import { ContractReceiptRecord } from '../entities/receipt-record.entity';
 import { PerformanceService } from './performance.service';
-import Decimal from 'decimal.js';
 
 @Injectable()
 export class ReceiptRecordService {
@@ -28,8 +27,7 @@ export class ReceiptRecordService {
     receiptRecord.contractPerformanceId = id;
     await manager.transaction(async (manager) => {
       await manager.getRepository(ContractReceiptRecord).insert(receiptRecord);
-      const amount = receiptRecord.receiptAmount;
-      await this.performanceService.incrementReceipt(id, amount!, manager);
+      await this.performanceService.updateAccumulateReceipt(id, manager);
     });
   }
 
@@ -51,14 +49,10 @@ export class ReceiptRecordService {
       const repository = manager.getRepository(ContractReceiptRecord);
       const oldReceipt = await repository.findOneBy({ id });
       if (!oldReceipt) return;
-
       const pId = oldReceipt.contractPerformanceId;
-      const newAmount = Decimal(receiptRecord.receiptAmount!);
-      const oldAmount = Decimal(oldReceipt.receiptAmount!);
-      const delta = newAmount.sub(oldAmount).toString();
 
       await repository.update(id, receiptRecord);
-      await this.performanceService.incrementReceipt(pId!, delta, manager);
+      await this.performanceService.updateAccumulateReceipt(pId!, manager);
     });
   }
 
@@ -69,11 +63,10 @@ export class ReceiptRecordService {
       const repository = manager.getRepository(ContractReceiptRecord);
       const receipt = await repository.findOneBy({ id });
       if (!receipt) return;
-
       const pId = receipt.contractPerformanceId;
-      const amount = receipt.receiptAmount;
+
       await repository.delete(id);
-      await this.performanceService.decrementReceipt(pId!, amount!, manager);
+      await this.performanceService.updateAccumulateReceipt(pId!, manager);
     });
   }
 

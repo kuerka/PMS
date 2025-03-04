@@ -10,6 +10,7 @@ const OrmConfig: TypeOrmModuleOptions = {
   database: 'pms',
   entities: [path.join(__dirname, '../**/*.entity{.ts,.js}')],
   synchronize: false,
+  logging: ['query'],
 };
 
 export { OrmConfig };

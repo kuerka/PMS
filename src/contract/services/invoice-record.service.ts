@@ -3,7 +3,6 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, DeepPartial, EntityManager } from 'typeorm';
 import { ContractInvoiceRecord } from '../entities/invoice-record.entity';
 import { PerformanceService } from './performance.service';
-import Decimal from 'decimal.js';
 
 @Injectable()
 export class InvoiceRecordService {
@@ -28,8 +27,7 @@ export class InvoiceRecordService {
     invoiceRecord.contractPerformanceId = id;
     await manager.transaction(async (manager) => {
       await manager.getRepository(ContractInvoiceRecord).insert(invoiceRecord);
-      const amount = invoiceRecord.invoiceAmount!;
-      await this.performanceService.incrementInvoice(id, amount, manager);
+      await this.performanceService.updateAccumulateInvoice(id, manager);
     });
   }
 
@@ -49,16 +47,13 @@ export class InvoiceRecordService {
     if (!manager) manager = this.dataSource.manager;
     await manager.transaction(async (manager) => {
       const repository = manager.getRepository(ContractInvoiceRecord);
-      const oldInvoiceRecord = await repository.findOne({ where: { id } });
+      const oldInvoiceRecord = await repository.findOneBy({ id });
       if (!oldInvoiceRecord) return;
 
       const pId = oldInvoiceRecord.contractPerformanceId;
-      const newAmount = Decimal(invoiceRecord.invoiceAmount!);
-      const oldAmount = Decimal(oldInvoiceRecord.invoiceAmount!);
-      const delta = newAmount.sub(oldAmount).toString();
 
       await repository.update(id, invoiceRecord);
-      await this.performanceService.incrementInvoice(pId!, delta, manager);
+      await this.performanceService.updateAccumulateInvoice(pId!, manager);
     });
   }
 
@@ -69,10 +64,9 @@ export class InvoiceRecordService {
       const oldInvoiceRecord = await repository.findOne({ where: { id } });
       if (!oldInvoiceRecord) return;
       const pid = oldInvoiceRecord.contractPerformanceId;
-      const amount = oldInvoiceRecord.invoiceAmount;
 
       await repository.delete(id);
-      await this.performanceService.decrementInvoice(pid!, amount!, manager);
+      await this.performanceService.updateAccumulateInvoice(pid!, manager);
     });
   }
 

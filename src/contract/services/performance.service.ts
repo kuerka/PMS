@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, DeepPartial, EntityManager } from 'typeorm';
-import { ContractPerformance, TableName } from '../entities/performance.entity';
+import { ContractPerformance } from '../entities/performance.entity';
 import { InvoiceHeaderService } from './invoice-header.service';
 import { InvoiceRecordService } from './invoice-record.service';
 import { ReceiptRecordService } from './receipt-record.service';
+import { ContractInvoiceRecord } from '../entities/invoice-record.entity';
+import { ContractReceiptRecord } from '../entities/receipt-record.entity';
 
 @Injectable()
 export class PerformanceService {
@@ -61,32 +63,38 @@ export class PerformanceService {
       .update({ id }, performance);
   }
 
-  async incrementInvoice(id: number, count: string, manager?: EntityManager) {
+  async updateAccumulateInvoice(id: number, manager?: EntityManager) {
     if (!manager) manager = this.dataSource.manager;
+
+    const subQuery = manager
+      .createQueryBuilder()
+      .select('SUM(invoice_amount)', 'sum')
+      .from(ContractInvoiceRecord, 'c')
+      .where({ contractPerformanceId: id });
+
     await manager
-      .getRepository(ContractPerformance)
-      .increment({ id }, TableName.accumulatedInvoiceAmount!, count);
+      .createQueryBuilder()
+      .update(ContractPerformance)
+      .set({ accumulatedInvoiceAmount: () => `(${subQuery.getQuery()})` })
+      .where({ id })
+      .execute();
   }
 
-  async decrementInvoice(id: number, count: string, manager?: EntityManager) {
+  async updateAccumulateReceipt(id: number, manager?: EntityManager) {
     if (!manager) manager = this.dataSource.manager;
-    await manager
-      .getRepository(ContractPerformance)
-      .decrement({ id }, TableName.accumulatedInvoiceAmount!, count);
-  }
 
-  async incrementReceipt(id: number, count: string, manager?: EntityManager) {
-    if (!manager) manager = this.dataSource.manager;
-    await manager
-      .getRepository(ContractPerformance)
-      .increment({ id }, TableName.accumulatedReceiptAmount!, count);
-  }
+    const subQuery = manager
+      .createQueryBuilder()
+      .select('SUM(receipt_amount)', 'sum')
+      .from(ContractReceiptRecord, 'c')
+      .where({ contractPerformanceId: id });
 
-  async decrementReceipt(id: number, count: string, manager?: EntityManager) {
-    if (!manager) manager = this.dataSource.manager;
     await manager
-      .getRepository(ContractPerformance)
-      .decrement({ id }, TableName.accumulatedReceiptAmount!, count);
+      .createQueryBuilder()
+      .update(ContractPerformance)
+      .set({ accumulatedReceiptAmount: () => `(${subQuery.getQuery()})` })
+      .where({ id })
+      .execute();
   }
 
   async deleteByContractId(contractId: number, manager?: EntityManager) {
