@@ -36,9 +36,9 @@ export class InvoiceRecordService {
   async getByPerformanceId(id: number, manager?: EntityManager) {
     if (!manager) manager = this.dataSource.manager;
 
-    return await manager.getRepository(ContractInvoiceRecord).find({
-      where: { contractPerformanceId: id },
-    });
+    return await manager
+      .getRepository(ContractInvoiceRecord)
+      .findBy({ contractPerformanceId: id });
   }
 
   async update(

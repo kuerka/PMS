@@ -59,6 +59,19 @@ export class ContractService {
     };
   }
 
+  async getContractSimpleById(id: number) {
+    return await this.dataSource.manager.findOne(Contract, {
+      where: {
+        id,
+      },
+      relations: {
+        prospectProject: true,
+        productionCostForm: true,
+        contractPerformance: true,
+      },
+    });
+  }
+
   async getContractDetailsById(id: number) {
     return await this.dataSource.manager.findOne(Contract, {
       where: {

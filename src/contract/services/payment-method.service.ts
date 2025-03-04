@@ -28,9 +28,9 @@ export class PaymentMethodService {
   ) {
     if (!manager) manager = this.dataSource.manager;
 
-    return await manager.getRepository(ContractPaymentMethod).findOne({
-      where: { contractId },
-    });
+    return await manager
+      .getRepository(ContractPaymentMethod)
+      .findBy({ contractId });
   }
 
   async updatePaymentMethod(

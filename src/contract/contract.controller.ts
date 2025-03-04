@@ -17,9 +17,12 @@ import { Public } from '@/auth/auth.decorators';
 import { UpdatePerformanceDto } from './dto/performance.dto';
 import { PerformanceService } from './services/performance.service';
 import { PaymentMethodService } from './services/payment-method.service';
-import { CreatePaymentDto } from './dto/payment-method.dto';
+import { CreatePaymentDto, UpdatePaymentDto } from './dto/payment-method.dto';
 import { InvoiceHeaderService } from './services/invoice-header.service';
-import { CreateInvoiceHeaderDto } from './dto/invoice-header.dto';
+import {
+  CreateInvoiceHeaderDto,
+  UpdateInvoiceHeaderDto,
+} from './dto/invoice-header.dto';
 import { InvoiceRecordService } from './services/invoice-record.service';
 import { ReceiptRecordService } from './services/receipt-record.service';
 import {
@@ -45,6 +48,10 @@ export class ContractController {
   @Post('page')
   async getContractPage(@Body() contractQueryDto: ContractQueryDto) {
     return await this.contractService.getContractPage(contractQueryDto);
+  }
+  @Get('simple')
+  async getContractSimple(@Query('id') id: number) {
+    return await this.contractService.getContractSimpleById(id);
   }
   @Get('detail')
   async getContractDetail(@Query('id') id: number) {
@@ -92,12 +99,13 @@ export class PaymentController {
     const payment = this.paymentService.create(paymentDto);
     return await this.paymentService.addPaymentMethod(payment);
   }
-  @Get('detail')
+  @Get('list')
   async getPaymentByContractId(@Query('contractId') contractId: number) {
+    if (!contractId) return [];
     return await this.paymentService.getPaymentMethodByContractId(contractId);
   }
   @Post('update')
-  async updatePaymentByContractId(@Body() paymentDto: UpdatePerformanceDto) {
+  async updatePaymentByContractId(@Body() paymentDto: UpdatePaymentDto) {
     const payment = this.paymentService.create(paymentDto);
     const { id } = payment;
     return await this.paymentService.updatePaymentMethod(id, payment);
@@ -124,12 +132,13 @@ export class InvoiceHeaderController {
       invoiceHeader,
     );
   }
-  @Get('detail')
+  @Get('list')
   async getCostFormByPerformanceId(@Query('performanceId') id: number) {
+    if (!id) return;
     return await this.invoiceHeaderService.getByPerformanceId(id);
   }
   @Post('update')
-  async updateInvoiceHeader(@Body() invoiceHeaderDto: UpdatePerformanceDto) {
+  async updateInvoiceHeader(@Body() invoiceHeaderDto: UpdateInvoiceHeaderDto) {
     const invoiceHeader = this.invoiceHeaderService.create(invoiceHeaderDto);
     const { id } = invoiceHeader;
     return await this.invoiceHeaderService.update(id, invoiceHeader);
@@ -158,8 +167,9 @@ export class InvoiceRecordController {
     );
   }
 
-  @Get('detail')
+  @Get('list')
   async getInvoiceRecordByPerformanceId(@Query('performanceId') id: number) {
+    if (!id) return [];
     return await this.invoiceRecordService.getByPerformanceId(id);
   }
 
@@ -194,8 +204,9 @@ export class ReceiptRecordController {
     );
   }
 
-  @Get('detail')
+  @Get('list')
   async getReceiptRecordByPerformanceId(@Query('performanceId') id: number) {
+    if (!id) return [];
     return await this.receiptRecordService.getByPerformanceId(id);
   }
 
