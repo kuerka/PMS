@@ -21,6 +21,18 @@ type FileType = FileEntity['type'];
 export class FileController {
   constructor(private fileService: FileService) {}
 
+  @Get('list/prospect')
+  async getProspectFiles(@Query('id') id: number) {
+    if (!id) return [];
+    return await this.fileService.getProspectFiles(id);
+  }
+
+  @Get('list/contract')
+  async getContractFiles(@Query('id') id: number) {
+    if (!id) return [];
+    return await this.fileService.getContractFiles(id);
+  }
+
   @Post('upload/prospect')
   @UseInterceptors(FileInterceptor('file'))
   async uploadProspectFile(
@@ -52,6 +64,14 @@ export class FileController {
     @Query('id') id: number,
   ) {
     await this.fileService.batchDownloadProspectFile(id, res);
+  }
+
+  @Get('batch/contract')
+  async batchDownloadContractFiles(
+    @Res() res: Response,
+    @Query('id') id: number,
+  ) {
+    await this.fileService.batchDownloadContractFile(id, res);
   }
 
   @Post('delete')

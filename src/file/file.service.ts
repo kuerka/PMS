@@ -20,6 +20,18 @@ export class FileService {
     private prospectService: ProspectService,
   ) {}
 
+  async getProspectFiles(id: number) {
+    return await this.fileRepository.findBy({
+      prospectProjectId: id,
+    });
+  }
+
+  async getContractFiles(id: number) {
+    return await this.fileRepository.findBy({
+      contractId: id,
+    });
+  }
+
   async addProspectFile(file: Express.Multer.File, id: number, type: FileType) {
     const fileEntity = this.fileRepository.create();
     fileEntity.prospectProjectId = id;
@@ -80,6 +92,17 @@ export class FileService {
     });
 
     await this.batchDownload(fileEntities, res, prospect.projectName);
+  }
+
+  async batchDownloadContractFile(id: number, res: Response) {
+    const contract = await this.prospectService.findById(id);
+    if (!contract) return;
+
+    const fileEntities = await this.fileRepository.findBy({
+      contractId: id,
+    });
+
+    await this.batchDownload(fileEntities, res, contract.projectName);
   }
 
   async batchDownload(
