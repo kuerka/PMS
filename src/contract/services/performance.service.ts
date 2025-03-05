@@ -5,8 +5,6 @@ import { ContractPerformance } from '../entities/performance.entity';
 import { InvoiceHeaderService } from './invoice-header.service';
 import { InvoiceRecordService } from './invoice-record.service';
 import { ReceiptRecordService } from './receipt-record.service';
-import { ContractInvoiceRecord } from '../entities/invoice-record.entity';
-import { ContractReceiptRecord } from '../entities/receipt-record.entity';
 
 @Injectable()
 export class PerformanceService {
@@ -61,40 +59,6 @@ export class PerformanceService {
     return await manager
       .getRepository(ContractPerformance)
       .update({ id }, performance);
-  }
-
-  async updateAccumulateInvoice(id: number, manager?: EntityManager) {
-    if (!manager) manager = this.dataSource.manager;
-
-    const subQuery = manager
-      .createQueryBuilder()
-      .select('SUM(invoice_amount)', 'sum')
-      .from(ContractInvoiceRecord, 'c')
-      .where({ contractPerformanceId: id });
-
-    await manager
-      .createQueryBuilder()
-      .update(ContractPerformance)
-      .set({ accumulatedInvoiceAmount: () => `(${subQuery.getQuery()})` })
-      .where({ id })
-      .execute();
-  }
-
-  async updateAccumulateReceipt(id: number, manager?: EntityManager) {
-    if (!manager) manager = this.dataSource.manager;
-
-    const subQuery = manager
-      .createQueryBuilder()
-      .select('SUM(receipt_amount)', 'sum')
-      .from(ContractReceiptRecord, 'c')
-      .where({ contractPerformanceId: id });
-
-    await manager
-      .createQueryBuilder()
-      .update(ContractPerformance)
-      .set({ accumulatedReceiptAmount: () => `(${subQuery.getQuery()})` })
-      .where({ id })
-      .execute();
   }
 
   async deleteByContractId(contractId: number, manager?: EntityManager) {
