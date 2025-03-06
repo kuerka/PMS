@@ -25,12 +25,6 @@ export class CreatePerformanceDto implements DTO {
   accountsReceivable: string;
   @IsString()
   contractExecutionStatus: ContractExecutionStatus;
-  @IsDecimal()
-  accumulatedInvoiceAmount: string;
-  @IsDecimal()
-  accumulatedReceiptAmount: string;
-  @IsDecimal()
-  uncollectedAmount: string;
 }
 
 export class UpdatePerformanceDto implements DTO {
@@ -54,13 +48,4 @@ export class UpdatePerformanceDto implements DTO {
   @IsOptional()
   @IsString()
   contractExecutionStatus: ContractExecutionStatus;
-  @IsOptional()
-  @IsDecimal()
-  accumulatedInvoiceAmount: string;
-  @IsOptional()
-  @IsDecimal()
-  accumulatedReceiptAmount: string;
-  @IsOptional()
-  @IsDecimal()
-  uncollectedAmount: string;
 }
