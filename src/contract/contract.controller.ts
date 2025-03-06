@@ -66,6 +66,13 @@ export class ContractController {
   async deleteContract(@Body('id') id: number) {
     return await this.contractService.deleteContractTransition(id);
   }
+  @Get('accumulate')
+  async getContractAccumulate(
+    @Query('limit') limit: number,
+    @Query('offset') offset: number,
+  ) {
+    return await this.contractService.getAccumulatedAmount(limit, offset);
+  }
 }
 
 @Public()

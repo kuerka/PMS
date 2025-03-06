@@ -72,6 +72,81 @@ export class ContractService {
     });
   }
 
+  async getAccumulatedAmount(limit: number = 20, offset: number = 2000) {
+    const LimitAndSkipQuery = this.dataSource.manager
+      .createQueryBuilder()
+      .subQuery()
+      .select('id')
+      .from(
+        (qb) =>
+          qb
+            .subQuery()
+            .select()
+            .from(Contract, 'ccl')
+            .limit(limit)
+            .offset(offset),
+        'ccl',
+      );
+
+    const cctSubQuery = this.dataSource.manager
+      .createQueryBuilder()
+      .subQuery()
+      .select('c.id', 'cId')
+      .addSelect('cc.id', 'ccId')
+      .from(Contract, 'c')
+      .leftJoin('production_cost_form', 'pcf', 'c.id = pcf.contract_id')
+      .leftJoin(
+        'collaboration_company',
+        'cc',
+        'pcf.id = cc.production_cost_form_id',
+      )
+      .where((qb) => {
+        const subQUery = qb
+          .subQuery()
+          .select('id')
+          .from(LimitAndSkipQuery.getQuery(), 't2');
+        return `c.id IN ${subQUery.getQuery()}`;
+      });
+
+    const invoiceSubQuery = this.dataSource.manager
+      .createQueryBuilder()
+      .subQuery()
+      .select('t.cId', 'cId')
+      .addSelect('SUM(cci.invoice_amount)', 'ia')
+      .from(cctSubQuery.getQuery(), 't')
+      .leftJoin(
+        'collaboration_company_invoice',
+        'cci',
+        'cci.company_id = t.ccId',
+      )
+      .groupBy('t.cId');
+    const paymentSubQuery = this.dataSource.manager
+      .createQueryBuilder()
+      .subQuery()
+      .select('t.cId', 'cId')
+      .addSelect('SUM(ccp.payment_amount)', 'pa')
+      .from(cctSubQuery.getQuery(), 't')
+      .leftJoin(
+        'collaboration_company_payment',
+        'ccp',
+        'ccp.company_id = t.ccId',
+      )
+      .groupBy('t.cId');
+
+    const result = this.dataSource.manager
+      .createQueryBuilder()
+      .select('A.cId', 'cId')
+      .addSelect('A.ia', 'ia')
+      .addSelect('B.pa', 'pa')
+      .from(invoiceSubQuery.getQuery(), 'A')
+      .leftJoin(paymentSubQuery.getQuery(), 'B', 'A.cId = B.cId');
+    console.log(result.getQuery());
+
+    const list: object[] = await result.getRawMany();
+
+    return list;
+  }
+
   async getContractDetailsById(id: number) {
     return await this.dataSource.manager.findOne(Contract, {
       where: {
