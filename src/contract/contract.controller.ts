@@ -10,7 +10,7 @@ import {
 import { ContractService } from './services/contract.service';
 import {
   CreateContractDto,
-  ContractQueryDto,
+  QueryContractDto,
   UpdateContractDto,
 } from './dto/contract.dto';
 import { Public } from '@/auth/auth.decorators';
@@ -46,8 +46,8 @@ export class ContractController {
     return await this.contractService.addContractTransition(contract);
   }
   @Post('page')
-  async getContractPage(@Body() contractQueryDto: ContractQueryDto) {
-    return await this.contractService.getContractPage(contractQueryDto);
+  async getContractPage(@Body() queryContractDto: QueryContractDto) {
+    return await this.contractService.getContractPage(queryContractDto);
   }
   @Get('simple')
   async getContractSimple(@Query('id') id: number) {

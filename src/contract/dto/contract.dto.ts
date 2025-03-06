@@ -53,9 +53,62 @@ export class CreateContractDto implements DTO {
   contractPerformance: ContractPerformance;
 }
 
-export class ContractQueryDto implements PaginationDto {
-  page: number;
+export class ContractQuery implements DTO {
+  @IsOptional()
+  @IsInt()
+  id: number;
+  @IsOptional()
+  @IsString()
+  contractNumber?: string;
+  @IsOptional()
+  @IsString()
+  projectName?: string;
+  @IsOptional()
+  @IsString()
+  projectType?: string;
+  @IsOptional()
+  @IsString()
+  projectLocation?: string;
+  @IsOptional()
+  @IsString()
+  owner?: string;
+  @IsOptional()
+  @IsString()
+  amountType?: AmountType;
+  @IsOptional()
+  @IsString()
+  remark?: string;
+  @IsOptional()
+  @IsBoolean()
+  isPreliminaryNumber?: boolean;
+  @IsOptional()
+  @IsDateString()
+  projectStartDate?: string;
+  @IsOptional()
+  @IsDateString()
+  projectEndDate?: string;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => updateCostFormDto)
+  productionCostForm?: ProductionCostForm;
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => UpdateContractDto)
+  contractPerformance?: ContractPerformance;
+}
+
+export class QueryContractDto implements PaginationDto {
+  @IsOptional()
+  @IsInt()
+  page: number = 1;
+  @IsOptional()
+  @IsInt()
   limit: number;
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ContractQuery)
+  query: ContractQuery;
 }
 
 export class UpdateContractDto implements DTO {

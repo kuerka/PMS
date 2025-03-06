@@ -1,11 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, DeepPartial, EntityManager } from 'typeorm';
+import {
+  DataSource,
+  DeepPartial,
+  EntityManager,
+  SelectQueryBuilder,
+} from 'typeorm';
 import { Contract } from '../entities/contract.entity';
-import { PaginationDto } from '@/pagination/pagination.dto';
 import { CostFormService } from '@/cost-form/cost-form.service';
 import { PerformanceService } from './performance.service';
 import { PaymentMethodService } from './payment-method.service';
+import { ProductionCostForm } from '@/cost-form/entities/cost-form.entity';
+import { CollaborationCompany } from '@/cost-form/entities/collaboration-company.entity';
+import { CollaborationCompanyInvoice } from '@/cost-form/entities/collaboration-company-invoice.entity';
+import { CollaborationCompanyPayment } from '@/cost-form/entities/collaboration-company-payment.entity';
+import { QueryContractDto } from '../dto/contract.dto';
+import { keysToCamel } from '@/utils/convert';
 
 @Injectable()
 export class ContractService {
@@ -41,20 +51,79 @@ export class ContractService {
     return await manager.getRepository(Contract).save(contract);
   }
 
-  async getContractPage(queryDto: PaginationDto) {
-    const { page, limit } = queryDto;
-    const [prospects, total] = await this.dataSource.manager.findAndCount(
-      Contract,
-      {
-        skip: (page - 1) * limit,
-        take: limit,
-      },
-    );
+  async getContractPage(queryDto: QueryContractDto) {
+    return await this.getContractPageQuery(queryDto);
+  }
+
+  async getContractPageQuery(queryDto: QueryContractDto) {
+    const page = queryDto.page || 1;
+    const limit = queryDto.limit || 10;
+    const query = queryDto.query || {};
+
+    const queryBuilder = this.dataSource
+      .createQueryBuilder()
+      .select()
+      .from(Contract, 'contract');
+
+    if (query.id) {
+      queryBuilder.andWhere('contract.id = :id', { id: query.id });
+    }
+    if (query.projectName) {
+      queryBuilder.andWhere('contract.projectName LIKE :projectName', {
+        projectName: `%${query.projectName}%`,
+      });
+    }
+    if (query.contractNumber) {
+      queryBuilder.andWhere('contract.contractNumber = :contractNumber', {
+        contractNumber: query.contractNumber,
+      });
+    }
+    if (query.projectType) {
+      queryBuilder.andWhere('contract.projectType = :projectType', {
+        projectType: query.projectType,
+      });
+    }
+    if (query.projectLocation) {
+      queryBuilder.andWhere('contract.contractStatus = :contractStatus', {
+        projectLocation: query.projectLocation,
+      });
+    }
+    if (query.owner) {
+      queryBuilder.andWhere('contract.owner LIKE :owner', {
+        owner: `%${query.owner}%`,
+      });
+    }
+    if (query.amountType) {
+      queryBuilder.andWhere('contract.amountType = :amountType', {
+        amountType: query.amountType,
+      });
+    }
+    if (query.remark) {
+      queryBuilder.andWhere('contract.remark LIKE :remark', {
+        remark: `%${query.remark}%`,
+      });
+    }
+    if (query.projectStartDate) {
+      queryBuilder.andWhere('contract.projectStartDate >= :projectStartDate', {
+        projectStartDate: query.projectStartDate,
+      });
+    }
+    if (query.projectEndDate) {
+      queryBuilder.andWhere('contract.projectEndDate <= :projectEndDate', {
+        projectEndDate: query.projectEndDate,
+      });
+    }
+
+    queryBuilder.skip((page - 1) * limit).take(limit);
+    const total = await queryBuilder.getCount();
+
+    const raws = await this.getAccumulatedAmount(queryBuilder);
+    const data = raws.map(keysToCamel);
     return {
-      data: prospects,
+      data,
       total,
-      page,
       limit,
+      page,
       pageCount: Math.ceil(total / limit),
     };
   }
@@ -70,6 +139,54 @@ export class ContractService {
         contractPerformance: true,
       },
     });
+  }
+
+  async getAccumulatedAmount(contractQuery: SelectQueryBuilder<Contract>) {
+    const companyQuery = this.dataSource
+      .createQueryBuilder()
+      .select('cct_c.id', 'cId')
+      .from('cct_c', 'cct_c')
+      .leftJoin(ProductionCostForm, 'pcf', 'pcf.contract_id = cct_c.id')
+      .leftJoin(
+        CollaborationCompany,
+        'cc',
+        'cc.production_cost_form_id = pcf.id',
+      );
+
+    const InvoiceQuery = this.dataSource
+      .createQueryBuilder()
+      .subQuery()
+      .select('cte_cc.cId', 'cId')
+      .addSelect('SUM(cci.invoice_amount)', 'ia')
+      .from('cte_cc', 'cte_cc')
+      .leftJoin(CollaborationCompanyInvoice, 'cci', 'cci.company_id=cte_cc.cId')
+      .groupBy('cte_cc.cId');
+
+    const PaymentQuery = this.dataSource
+      .createQueryBuilder()
+      .subQuery()
+      .select('cte_cc.cId', 'cId')
+      .addSelect('SUM(ccp.payment_amount)', 'pa')
+      .from('cte_cc', 'cte_cc')
+      .leftJoin(CollaborationCompanyPayment, 'ccp', 'ccp.company_id=cte_cc.cId')
+      .groupBy('cte_cc.cId');
+
+    const resultQuery = this.dataSource
+      .createQueryBuilder()
+      .addCommonTableExpression(contractQuery, 'cct_c')
+      .addCommonTableExpression(companyQuery, 'cte_cc')
+      .select('cc.*')
+      .addSelect('A.ia', 'accumulated_invoice_amount')
+      .addSelect('B.pa', 'accumulated_receipt_amount')
+      .from('cct_c', 'cc')
+      .leftJoin(InvoiceQuery.getQuery(), 'A', 'A.cId=cc.id')
+      .leftJoin(PaymentQuery.getQuery(), 'B', 'B.cId=cc.id')
+      .setParameters(contractQuery.getParameters());
+
+    console.log(resultQuery.getQuery());
+
+    const list: object[] = await resultQuery.getRawMany();
+    return list;
   }
 
   async getContractDetailsById(id: number) {
