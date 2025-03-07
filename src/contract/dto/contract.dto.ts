@@ -55,9 +55,6 @@ export class CreateContractDto implements DTO {
 
 export class ContractQuery implements DTO {
   @IsOptional()
-  @IsInt()
-  id: number;
-  @IsOptional()
   @IsString()
   contractNumber?: string;
   @IsOptional()

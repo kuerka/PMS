@@ -3,7 +3,11 @@ import { UserService } from './user.service';
 import { Roles } from 'src/auth/auth.decorators';
 import { LimitsMap } from 'src/auth/constants';
 import { plainToClass } from 'class-transformer';
-import { UpdatePasswordDto, UserNoPasswordDto } from './user.dto';
+import {
+  UpdatePasswordDto,
+  UpdateUserDto,
+  UserNoPasswordDto,
+} from './user.dto';
 import { FailedCause } from '@/response-formatter/response-formatter.interceptor';
 
 @Controller('user')
@@ -19,9 +23,9 @@ export class UserController {
   }
 
   @Post('update/info')
-  async updateInfo(@Body() userDto: UserNoPasswordDto) {
-    userDto = plainToClass(UserNoPasswordDto, userDto);
-    await this.userService.updateInfo(userDto.id, userDto);
+  async updateInfo(@Body() userDto: UpdateUserDto) {
+    const user = this.userService.create(userDto);
+    await this.userService.updateInfo(userDto.id, user);
   }
 
   @Post('update/password')

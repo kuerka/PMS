@@ -31,6 +31,14 @@ export class ContractPaymentMethod {
   })
   conditionDescription: string | null;
 
+  @Column('tinyint', {
+    name: 'condition_process_status',
+    nullable: true,
+    comment: '付款条件是否触发',
+    width: 1,
+  })
+  conditionProcessStatus: boolean | null;
+
   @Column('decimal', {
     name: 'accounts',
     nullable: true,

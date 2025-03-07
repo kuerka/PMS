@@ -65,9 +65,6 @@ export class ContractService {
       .select()
       .from(Contract, 'contract');
 
-    if (query.id) {
-      queryBuilder.andWhere('contract.id = :id', { id: query.id });
-    }
     if (query.projectName) {
       queryBuilder.andWhere('contract.projectName LIKE :projectName', {
         projectName: `%${query.projectName}%`,

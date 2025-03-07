@@ -27,10 +27,6 @@ export class CreateCollaborationCompanyDto implements DTO {
   @IsOptional()
   @IsDecimal()
   settlementAmount?: string;
-
-  @IsOptional()
-  @IsDecimal()
-  collaborationPayableFunds?: string;
 }
 
 export class UpdateCollaborationCompanyDto implements DTO {
@@ -51,8 +47,4 @@ export class UpdateCollaborationCompanyDto implements DTO {
   @IsOptional()
   @IsDecimal()
   settlementAmount?: string;
-
-  @IsOptional()
-  @IsDecimal()
-  collaborationPayableFunds?: string;
 }
