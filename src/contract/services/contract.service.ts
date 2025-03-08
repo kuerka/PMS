@@ -188,8 +188,6 @@ export class ContractService {
       .leftJoin(PaymentQuery.getQuery(), 'B', 'B.cId=cc.id')
       .setParameters(contractQuery.getParameters());
 
-    console.log(resultQuery.getQuery());
-
     const list: object[] = await resultQuery.getRawMany();
     return list;
   }

@@ -1,13 +1,18 @@
 import { CollaborationCompany } from '../entities/collaboration-company.entity';
 import { DataSource, DeepPartial, EntityManager } from 'typeorm';
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { CollaborationCompanyInvoice } from '../entities/collaboration-company-invoice.entity';
 import { CollaborationCompanyPayment } from '../entities/collaboration-company-payment.entity';
+import { CostFormService } from '../cost-form.service';
 
 @Injectable()
 export class CollaborationCompanyService {
-  constructor(@InjectDataSource() private datasource: DataSource) {}
+  constructor(
+    @InjectDataSource() private datasource: DataSource,
+    @Inject(forwardRef(() => CostFormService))
+    private costFormService: CostFormService,
+  ) {}
 
   createCompany(company: DeepPartial<CollaborationCompany>) {
     return this.datasource.manager
@@ -77,6 +82,12 @@ export class CollaborationCompanyService {
     });
   }
 
+  async getById(id: number) {
+    return await this.datasource.manager
+      .getRepository(CollaborationCompany)
+      .findOneBy({ id });
+  }
+
   // Company Invoice
   createInvoice(invoice: DeepPartial<CollaborationCompanyInvoice>) {
     return this.datasource.manager
@@ -89,31 +100,59 @@ export class CollaborationCompanyService {
       .getRepository(CollaborationCompanyInvoice)
       .findBy({ companyId: id });
   }
+
+  async getCompanyByInvoiceId(id: number) {
+    return await this.datasource
+      .createQueryBuilder(CollaborationCompany, 'cc')
+      .select()
+      .leftJoin(CollaborationCompanyInvoice, 'cci', 'cci.companyId = cc.id')
+      .where('cci.id = :id', { id })
+      .getOne();
+  }
   async addCompanyInvoiceByCompanyId(
-    id: number,
+    companyId: number,
     companyInvoice: CollaborationCompanyInvoice,
     manager?: EntityManager,
   ) {
     if (!manager) manager = this.datasource.manager;
 
-    return await manager
-      .getRepository(CollaborationCompanyInvoice)
-      .insert(companyInvoice);
+    const company = await this.getById(companyId);
+    if (!company) return;
+    const cId = company.productionCostFormId;
+
+    return await manager.transaction(async (manager) => {
+      await manager.insert(CollaborationCompanyInvoice, companyInvoice);
+      await this.costFormService.updateAccumulatedInvoice(cId!, manager);
+    });
   }
   async updateCompanyInvoice(
     companyInvoice: CollaborationCompanyInvoice,
     manager?: EntityManager,
   ) {
     if (!manager) manager = this.datasource.manager;
+    const { id } = companyInvoice;
 
-    return await manager
-      .getRepository(CollaborationCompanyInvoice)
-      .update(companyInvoice.id, companyInvoice);
+    const company = await this.getCompanyByInvoiceId(id);
+    if (!company) return;
+    const cId = company.productionCostFormId;
+
+    return await manager.transaction(async (manager) => {
+      await manager.update(CollaborationCompanyInvoice, id, companyInvoice);
+      await this.costFormService.updateAccumulatedInvoice(cId!, manager);
+    });
   }
 
   async deleteCompanyInvoice(id: number, manager?: EntityManager) {
     if (!manager) manager = this.datasource.manager;
-    return await manager.getRepository(CollaborationCompanyInvoice).delete(id);
+
+    const company = await this.getCompanyByInvoiceId(id);
+    if (!company) return;
+    const cId = company.productionCostFormId;
+
+    return await manager.transaction(async (manager) => {
+      await manager.getRepository(CollaborationCompanyInvoice).delete(id);
+      await this.costFormService.updateAccumulatedInvoice(cId!, manager);
+    });
   }
 
   async deleteInvoiceByCompanyId(id: number, manager?: EntityManager) {
@@ -133,30 +172,55 @@ export class CollaborationCompanyService {
       .getRepository(CollaborationCompanyInvoice)
       .find({ where: { companyId: id } });
   }
+  async getCompanyByPaymentId(id: number) {
+    return await this.datasource
+      .createQueryBuilder(CollaborationCompany, 'cc')
+      .select()
+      .leftJoin(CollaborationCompanyPayment, 'cp', 'cp.companyId = cc.id')
+      .where('cp.id = :id', { id })
+      .getOne();
+  }
   async addCompanyPaymentByCompanyId(
-    id: number,
+    companyId: number,
     companyPayment: CollaborationCompanyPayment,
     manager?: EntityManager,
   ) {
     if (!manager) manager = this.datasource.manager;
 
-    return await manager
-      .getRepository(CollaborationCompanyPayment)
-      .insert(companyPayment);
+    const company = await this.getById(companyId);
+    if (!company) return;
+    const cId = company.productionCostFormId;
+
+    return await manager.transaction(async (manager) => {
+      await manager.insert(CollaborationCompanyPayment, companyPayment);
+      await this.costFormService.updateAccumulatedReceipt(cId!, manager);
+    });
   }
   async updateCompanyPayment(
     companyPayment: CollaborationCompanyPayment,
     manager?: EntityManager,
   ) {
     if (!manager) manager = this.datasource.manager;
-
-    return await manager
-      .getRepository(CollaborationCompanyPayment)
-      .update(companyPayment.id, companyPayment);
+    const { id } = companyPayment;
+    const company = await this.getCompanyByPaymentId(id);
+    if (!company) return;
+    const cId = company.productionCostFormId;
+    return await manager.transaction(async (manager) => {
+      await manager.update(CollaborationCompanyPayment, id, companyPayment);
+      await this.costFormService.updateAccumulatedReceipt(cId!, manager);
+    });
   }
   async deleteCompanyPayment(id: number, manager?: EntityManager) {
     if (!manager) manager = this.datasource.manager;
-    return await manager.getRepository(CollaborationCompanyPayment).delete(id);
+
+    const company = await this.getCompanyByPaymentId(id);
+    if (!company) return;
+    const cId = company.productionCostFormId;
+
+    return await manager.transaction(async (manager) => {
+      await manager.getRepository(CollaborationCompanyPayment).delete(id);
+      await this.costFormService.updateAccumulatedReceipt(cId!, manager);
+    });
   }
 
   async deletePaymentByCompanyId(id: number, manager?: EntityManager) {

@@ -61,6 +61,18 @@ export class PerformanceService {
       .update({ id }, performance);
   }
 
+  async updateAccumulateInvoice(id: number, manager?: EntityManager) {
+    if (!manager) manager = this.dataSource.manager;
+
+    await manager.query('CALL sum_contract_invoice(?)', [id]);
+  }
+
+  async updateAccumulateReceipt(id: number, manager?: EntityManager) {
+    if (!manager) manager = this.dataSource.manager;
+
+    await manager.query('CALL sum_contract_receipt(?)', [id]);
+  }
+
   async deleteByContractId(contractId: number, manager?: EntityManager) {
     if (!manager) manager = this.dataSource.manager;
     await manager.transaction(async (manager) => {

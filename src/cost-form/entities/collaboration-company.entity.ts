@@ -91,14 +91,14 @@ export class CollaborationCompany {
   @OneToMany(
     () => CollaborationCompanyInvoice,
     (collaborationCompanyInvoice) =>
-      collaborationCompanyInvoice.collaborationCompanyRelation,
+      collaborationCompanyInvoice.CollaborationCompany,
   )
   collaborationCompanyInvoices: CollaborationCompanyInvoice[];
 
   @OneToMany(
     () => CollaborationCompanyPayment,
     (collaborationCompanyPayment) =>
-      collaborationCompanyPayment.collaborationCompanyRelation,
+      collaborationCompanyPayment.CollaborationCompany,
   )
   collaborationCompanyPayments: CollaborationCompanyPayment[];
 }

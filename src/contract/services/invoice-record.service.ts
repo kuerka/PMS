@@ -24,7 +24,11 @@ export class InvoiceRecordService {
     if (!manager) manager = this.dataSource.manager;
     if (!invoiceRecord) invoiceRecord = new ContractInvoiceRecord();
 
-    await manager.getRepository(ContractInvoiceRecord).insert(invoiceRecord);
+    invoiceRecord.contractPerformanceId = id;
+    await manager.transaction(async (manager) => {
+      await manager.getRepository(ContractInvoiceRecord).insert(invoiceRecord);
+      await this.performanceService.updateAccumulateInvoice(id, manager);
+    });
   }
 
   async getByPerformanceId(id: number, manager?: EntityManager) {
@@ -41,14 +45,29 @@ export class InvoiceRecordService {
     manager?: EntityManager,
   ) {
     if (!manager) manager = this.dataSource.manager;
-    await manager
-      .getRepository(ContractInvoiceRecord)
-      .update(id, invoiceRecord);
+    await manager.transaction(async (manager) => {
+      const repository = manager.getRepository(ContractInvoiceRecord);
+      const oldInvoiceRecord = await repository.findOneBy({ id });
+      if (!oldInvoiceRecord) return;
+
+      const pId = oldInvoiceRecord.contractPerformanceId;
+
+      await repository.update(id, invoiceRecord);
+      await this.performanceService.updateAccumulateInvoice(pId!, manager);
+    });
   }
 
   async delete(id: number, manager?: EntityManager) {
     if (!manager) manager = this.dataSource.manager;
-    await manager.getRepository(ContractInvoiceRecord).delete(id);
+    await manager.transaction(async (manager) => {
+      const repository = manager.getRepository(ContractInvoiceRecord);
+      const oldInvoiceRecord = await repository.findOne({ where: { id } });
+      if (!oldInvoiceRecord) return;
+      const pid = oldInvoiceRecord.contractPerformanceId;
+
+      await repository.delete(id);
+      await this.performanceService.updateAccumulateInvoice(pid!, manager);
+    });
   }
 
   async deleteByPerformanceId(id: number, manager?: EntityManager) {

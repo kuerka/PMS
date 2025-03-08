@@ -51,5 +51,5 @@ export class CollaborationCompanyPayment {
     },
   )
   @JoinColumn([{ name: 'company_id', referencedColumnName: 'id' }])
-  collaborationCompanyRelation: CollaborationCompany;
+  CollaborationCompany: CollaborationCompany;
 }

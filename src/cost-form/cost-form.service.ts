@@ -57,6 +57,16 @@ export class CostFormService {
     return await this.update(costForm);
   }
 
+  async updateAccumulatedInvoice(id: number, manager?: EntityManager) {
+    if (!manager) manager = this.datasource.manager;
+    await manager.query('CALL sum_collaboration_invoice(?)', [id]);
+  }
+
+  async updateAccumulatedReceipt(id: number, manager: EntityManager) {
+    if (!manager) manager = this.datasource.manager;
+    await manager.query('CALL sum_collaboration_payment(?)', [id]);
+  }
+
   async delete(id: number) {
     return await this.datasource.manager.delete(ProductionCostForm, id);
   }
