@@ -65,14 +65,14 @@ export class ContractService {
       .select()
       .from(Contract, 'contract');
 
-    if (query.projectName) {
-      queryBuilder.andWhere('contract.projectName LIKE :projectName', {
-        projectName: `%${query.projectName}%`,
-      });
-    }
     if (query.contractNumber) {
       queryBuilder.andWhere('contract.contractNumber = :contractNumber', {
         contractNumber: query.contractNumber,
+      });
+    }
+    if (query.projectName) {
+      queryBuilder.andWhere('contract.projectName LIKE :projectName', {
+        projectName: `%${query.projectName}%`,
       });
     }
     if (query.projectType) {
@@ -81,7 +81,7 @@ export class ContractService {
       });
     }
     if (query.projectLocation) {
-      queryBuilder.andWhere('contract.contractStatus = :contractStatus', {
+      queryBuilder.andWhere('contract.projectLocation = :projectLocation', {
         projectLocation: query.projectLocation,
       });
     }
@@ -89,6 +89,14 @@ export class ContractService {
       queryBuilder.andWhere('contract.owner LIKE :owner', {
         owner: `%${query.owner}%`,
       });
+    }
+    if (query.isPreliminaryNumber) {
+      queryBuilder.andWhere(
+        'contract.isPreliminaryNumber = :isPreliminaryNumber',
+        {
+          isPreliminaryNumber: query.isPreliminaryNumber,
+        },
+      );
     }
     if (query.amountType) {
       queryBuilder.andWhere('contract.amountType = :amountType', {
