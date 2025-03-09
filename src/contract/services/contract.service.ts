@@ -14,7 +14,6 @@ import { CollaborationCompany } from '@/cost-form/entities/collaboration-company
 import { CollaborationCompanyInvoice } from '@/cost-form/entities/collaboration-company-invoice.entity';
 import { CollaborationCompanyPayment } from '@/cost-form/entities/collaboration-company-payment.entity';
 import { QueryContractDto } from '../dto/contract.dto';
-import { keysToCamel } from '@/utils/convert';
 import { InvoiceHeaderService } from './invoice-header.service';
 import { InvoiceRecordService } from './invoice-record.service';
 import { ReceiptRecordService } from './receipt-record.service';
@@ -52,69 +51,68 @@ export class ContractService {
     return await this.getContractPageQuery(queryDto);
   }
 
+  // TODO 后续添加筛选条件
   async getContractPageQuery(queryDto: QueryContractDto) {
-    const page = queryDto.page || 1;
-    const limit = queryDto.limit || 10;
-    const query = queryDto.query || {};
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const query = queryDto || {};
+    const page = queryDto.pageParams?.currentPage || 1;
+    const limit = queryDto.pageParams?.pageSize || 10;
 
     const queryBuilder = this.dataSource
-      .createQueryBuilder()
+      .createQueryBuilder(Contract, 'c')
       .select()
-      .from(Contract, 'contract');
+      .leftJoinAndSelect('c.productionCostForm', 'costForm');
 
-    if (query.contractNumber) {
-      queryBuilder.andWhere('contract.contractNumber = :contractNumber', {
-        contractNumber: query.contractNumber,
-      });
-    }
-    if (query.projectName) {
-      queryBuilder.andWhere('contract.projectName LIKE :projectName', {
-        projectName: `%${query.projectName}%`,
-      });
-    }
-    if (query.projectType) {
-      queryBuilder.andWhere('contract.projectType = :projectType', {
-        projectType: query.projectType,
-      });
-    }
-    if (query.projectLocation) {
-      queryBuilder.andWhere('contract.projectLocation = :projectLocation', {
-        projectLocation: query.projectLocation,
-      });
-    }
-    if (query.owner) {
-      queryBuilder.andWhere('contract.owner LIKE :owner', {
-        owner: `%${query.owner}%`,
-      });
-    }
-    if (query.isPreliminaryNumber) {
-      queryBuilder.andWhere(
-        'contract.isPreliminaryNumber = :isPreliminaryNumber',
-        {
-          isPreliminaryNumber: query.isPreliminaryNumber,
-        },
-      );
-    }
-    if (query.amountType) {
-      queryBuilder.andWhere('contract.amountType = :amountType', {
-        amountType: query.amountType,
-      });
-    }
-    if (query.remark) {
-      queryBuilder.andWhere('contract.remark LIKE :remark', {
-        remark: `%${query.remark}%`,
-      });
-    }
-    if (query.projectStartDate) {
-      queryBuilder.andWhere('contract.projectStartDate >= :projectStartDate', {
-        projectStartDate: query.projectStartDate,
-      });
-    }
-    if (query.projectEndDate) {
-      queryBuilder.andWhere('contract.projectEndDate <= :projectEndDate', {
-        projectEndDate: query.projectEndDate,
-      });
-    }
+    // if (query.contractNumber) {
+    //   queryBuilder.andWhere('c.contractNumber = :contractNumber', {
+    //     contractNumber: query.contractNumber,
+    //   });
+    // }
+    // if (query.projectName) {
+    //   queryBuilder.andWhere('c.projectName LIKE :projectName', {
+    //     projectName: `%${query.projectName}%`,
+    //   });
+    // }
+    // if (query.projectType) {
+    //   queryBuilder.andWhere('c.projectType = :projectType', {
+    //     projectType: query.projectType,
+    //   });
+    // }
+    // if (query.projectLocation) {
+    //   queryBuilder.andWhere('c.projectLocation = :projectLocation', {
+    //     projectLocation: query.projectLocation,
+    //   });
+    // }
+    // if (query.owner) {
+    //   queryBuilder.andWhere('c.owner LIKE :owner', {
+    //     owner: `%${query.owner}%`,
+    //   });
+    // }
+    // if (query.isPreliminaryNumber) {
+    //   queryBuilder.andWhere('c.isPreliminaryNumber = :isPreliminaryNumber', {
+    //     isPreliminaryNumber: query.isPreliminaryNumber,
+    //   });
+    // }
+    // if (query.amountType) {
+    //   queryBuilder.andWhere('c.amountType = :amountType', {
+    //     amountType: query.amountType,
+    //   });
+    // }
+    // if (query.remark) {
+    //   queryBuilder.andWhere('c.remark LIKE :remark', {
+    //     remark: `%${query.remark}%`,
+    //   });
+    // }
+    // if (query.projectStartDate) {
+    //   queryBuilder.andWhere('c.projectStartDate >= :projectStartDate', {
+    //     projectStartDate: query.projectStartDate,
+    //   });
+    // }
+    // if (query.projectEndDate) {
+    //   queryBuilder.andWhere('c.projectEndDate <= :projectEndDate', {
+    //     projectEndDate: query.projectEndDate,
+    //   });
+    // }
 
     queryBuilder.skip((page - 1) * limit).take(limit);
     const total = await queryBuilder.getCount();
@@ -122,8 +120,7 @@ export class ContractService {
     // const raws = await this.getAccumulatedAmount(queryBuilder);
     // const data = raws.map(keysToCamel);
     // const data = await queryBuilder.getRawMany();
-    const raws = await queryBuilder.getMany();
-    const data = raws.map(keysToCamel);
+    const data = await queryBuilder.getMany();
     return {
       data,
       total,

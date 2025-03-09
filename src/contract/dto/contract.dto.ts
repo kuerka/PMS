@@ -8,7 +8,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Contract } from '../entities/contract.entity';
-import { PaginationDto } from '@/pagination/pagination.dto';
+import { PaginationDto, SortDTO } from '@/pagination/pagination.dto';
 import { Type } from 'class-transformer';
 import {
   createCostFormDto,
@@ -123,17 +123,15 @@ export class ContractQuery implements DTO {
   productionCostForm?: ProductionCostForm;
 }
 
-export class QueryContractDto implements PaginationDto {
-  @IsOptional()
-  @IsInt()
-  page: number = 1;
-  @IsOptional()
-  @IsInt()
-  limit: number;
+export class QueryContractDto {
   @IsOptional()
   @ValidateNested()
-  @Type(() => ContractQuery)
-  query: ContractQuery;
+  @Type(() => PaginationDto)
+  pageParams: PaginationDto;
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => SortDTO)
+  sort: SortDTO;
 }
 
 export class UpdateContractDto implements DTO {
