@@ -5,7 +5,7 @@ type DTO = Partial<InvoiceHeader>;
 
 export class CreateInvoiceHeaderDto implements DTO {
   @IsInt()
-  contractPerformanceId: number;
+  contractId: number;
   @IsString()
   companyName: string;
   @IsString()

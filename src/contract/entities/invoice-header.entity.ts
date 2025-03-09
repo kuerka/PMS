@@ -8,9 +8,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ContractPerformance } from './performance.entity';
+import { Contract } from './contract.entity';
 
-@Index('contract_performance_id', ['contractPerformanceId'], {})
+@Index('contract_id', ['contractId'], {})
 @Index('id', ['id'], { unique: true })
 @Entity('invoice_header', { schema: 'pms' })
 export class InvoiceHeader {
@@ -46,17 +46,13 @@ export class InvoiceHeader {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date | null;
 
-  @Column('int', { name: 'contract_performance_id', nullable: true })
-  contractPerformanceId: number | null;
+  @Column('int', { name: 'contract_id', nullable: true })
+  contractId: number | null;
 
-  @OneToOne(
-    () => ContractPerformance,
-    (contractPerformance) => contractPerformance.invoiceHeader,
-    {
-      onDelete: 'NO ACTION',
-      onUpdate: 'NO ACTION',
-    },
-  )
-  @JoinColumn([{ name: 'contract_performance_id', referencedColumnName: 'id' }])
-  contractPerformance: ContractPerformance;
+  @OneToOne(() => Contract, (contract) => contract.invoiceHeader, {
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  })
+  @JoinColumn([{ name: 'contract_id', referencedColumnName: 'id' }])
+  contract: Contract;
 }

@@ -39,8 +39,8 @@ export class CollaborationCompany {
     name: 'collaboration_amount',
     nullable: true,
     comment: '协作公司协作金额',
-    precision: 10,
-    scale: 0,
+    precision: 15,
+    scale: 2,
   })
   collaborationAmount: string | null;
 
@@ -56,8 +56,8 @@ export class CollaborationCompany {
     name: 'settlement_amount',
     nullable: true,
     comment: '协作公司结算金额',
-    precision: 10,
-    scale: 0,
+    precision: 15,
+    scale: 2,
   })
   settlementAmount: string | null;
 
@@ -72,8 +72,8 @@ export class CollaborationCompany {
     nullable: true,
     comment:
       '协作应支付资金，根据公式 “结算金额 *（累计收款金额 / 合同结算金额） - 累计支付金额” 计算得出；只在合同管理平台中显示，在意向登记平台中不显示',
-    precision: 10,
-    scale: 0,
+    precision: 15,
+    scale: 2,
   })
   collaborationPayableFunds: string | null;
 

@@ -4,7 +4,6 @@ import {
   Entity,
   Index,
   JoinColumn,
-  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -12,9 +11,11 @@ import {
 } from 'typeorm';
 import { ProspectProject } from '@/prospect/prospect.entity';
 import { ContractPaymentMethod } from './payment-method.entity';
-import { ContractPerformance } from './performance.entity';
 import { File } from '@/file/file.entity';
 import { ProductionCostForm } from '@/cost-form/entities/cost-form.entity';
+import { ContractInvoiceRecord } from './invoice-record.entity';
+import { ContractReceiptRecord } from './receipt-record.entity';
+import { InvoiceHeader } from './invoice-header.entity';
 
 @Index('id', ['id'], { unique: true })
 @Index('prospect_project_id', ['prospectProjectId'], {})
@@ -56,8 +57,8 @@ export class Contract {
   @Column('decimal', {
     name: 'contract_amount',
     nullable: true,
-    precision: 10,
-    scale: 0,
+    precision: 15,
+    scale: 2,
   })
   contractAmount: string | null;
 
@@ -66,6 +67,75 @@ export class Contract {
 
   @Column('date', { name: 'project_end_date', nullable: true })
   projectEndDate: string | null;
+
+  @Column('enum', {
+    name: 'bond_type',
+    nullable: true,
+    comment: '合约类型',
+    enum: ['现金', '保险/保函'],
+  })
+  bondType: '现金' | '保险/保函' | null;
+
+  @Column('decimal', {
+    name: 'cash_bond_amount',
+    nullable: true,
+    comment: '合约类型数额',
+    precision: 15,
+    scale: 2,
+  })
+  cashBondAmount: string | null;
+
+  @Column('date', {
+    name: 'bond_expiry_date',
+    nullable: true,
+    comment:
+      '保险及保函形式的履约保证金到期时间，当 bond_type 为 保险/保函 时有效',
+  })
+  bondExpiryDate: string | null;
+
+  @Column('decimal', {
+    name: 'contract_settlement_amount',
+    nullable: true,
+    comment: '合同结算金额',
+    precision: 15,
+    scale: 2,
+  })
+  contractSettlementAmount: string | null;
+
+  @Column('decimal', {
+    name: 'accounts_receivable',
+    nullable: true,
+    comment: '应收账款',
+    precision: 15,
+    scale: 2,
+  })
+  accountsReceivable: string | null;
+
+  @Column('enum', {
+    name: 'contract_execution_status',
+    nullable: true,
+    comment: '合同执行情况',
+    enum: ['履约中', '暂停', '终止', '履约完成'],
+  })
+  contractExecutionStatus: '履约中' | '暂停' | '终止' | '履约完成' | null;
+
+  @Column('decimal', {
+    name: 'accumulated_invoice_amount',
+    nullable: true,
+    comment: '累计开票金额',
+    precision: 15,
+    scale: 2,
+  })
+  accumulatedInvoiceAmount: string | null;
+
+  @Column('decimal', {
+    name: 'accumulated_receipt_amount',
+    nullable: true,
+    comment: '累计收款金额',
+    precision: 15,
+    scale: 2,
+  })
+  accumulatedReceiptAmount: string | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date | null;
@@ -85,31 +155,46 @@ export class Contract {
   })
   isPreliminaryNumber: boolean | null;
 
-  @ManyToOne(
+  @Column('decimal', {
+    name: 'uncollected_amount',
+    nullable: true,
+    comment: '未收账款',
+    precision: 15,
+    scale: 2,
+  })
+  uncollectedAmount: string | null;
+
+  @OneToOne(
     () => ProspectProject,
     (prospectProject) => prospectProject.contract,
-    {
-      onDelete: 'NO ACTION',
-      onUpdate: 'NO ACTION',
-    },
+    { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' },
   )
   @JoinColumn([{ name: 'prospect_project_id', referencedColumnName: 'id' }])
   prospectProject: ProspectProject;
 
-  @OneToOne(
+  @OneToMany(
+    () => ContractInvoiceRecord,
+    (contractInvoiceRecord) => contractInvoiceRecord.contract,
+  )
+  contractInvoiceRecords: ContractInvoiceRecord[];
+
+  @OneToMany(
     () => ContractPaymentMethod,
     (contractPaymentMethod) => contractPaymentMethod.contract,
   )
   contractPaymentMethods: ContractPaymentMethod[];
 
-  @OneToOne(
-    () => ContractPerformance,
-    (contractPerformance) => contractPerformance.contract,
+  @OneToMany(
+    () => ContractReceiptRecord,
+    (contractReceiptRecord) => contractReceiptRecord.contract,
   )
-  contractPerformance: ContractPerformance;
+  contractReceiptRecords: ContractReceiptRecord[];
 
   @OneToMany(() => File, (file) => file.contract)
   files: File[];
+
+  @OneToOne(() => InvoiceHeader, (invoiceHeader) => invoiceHeader.contract)
+  invoiceHeader: InvoiceHeader;
 
   @OneToOne(
     () => ProductionCostForm,

@@ -25,8 +25,8 @@ export class ProspectProject {
   @Column('decimal', {
     name: 'estimated_contract_amount',
     nullable: true,
-    precision: 10,
-    scale: 0,
+    precision: 15,
+    scale: 2,
   })
   estimatedContractAmount: string | null;
 

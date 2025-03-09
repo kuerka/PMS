@@ -1,6 +1,7 @@
 import {
   IsBoolean,
   IsDateString,
+  IsDecimal,
   IsInt,
   IsOptional,
   IsString,
@@ -14,11 +15,11 @@ import {
   updateCostFormDto,
 } from '@/cost-form/dto/cost-form.dto';
 import { ProductionCostForm } from '@/cost-form/entities/cost-form.entity';
-import { CreatePerformanceDto } from './performance.dto';
-import { ContractPerformance } from '../entities/performance.entity';
 
 type DTO = Partial<Contract>;
 type AmountType = Contract['amountType'];
+type BondType = Contract['bondType'];
+type ContractExecutionStatus = Contract['contractExecutionStatus'];
 
 export class CreateContractDto implements DTO {
   @IsOptional()
@@ -45,12 +46,22 @@ export class CreateContractDto implements DTO {
   @IsDateString()
   projectEndDate: string;
 
+  @IsString()
+  bondType: BondType;
+  @IsDecimal()
+  cashBondAmount: string;
+  @IsDateString()
+  bondExpiryDate: string;
+  @IsDecimal()
+  contractSettlementAmount: string;
+  @IsDecimal()
+  accountsReceivable: string;
+  @IsString()
+  contractExecutionStatus: ContractExecutionStatus;
+
   @ValidateNested()
   @Type(() => createCostFormDto)
   productionCostForm: ProductionCostForm;
-  @ValidateNested()
-  @Type(() => CreatePerformanceDto)
-  contractPerformance: ContractPerformance;
 }
 
 export class ContractQuery implements DTO {
@@ -85,14 +96,31 @@ export class ContractQuery implements DTO {
   @IsDateString()
   projectEndDate?: string;
 
+  @IsInt()
+  id: number;
+  @IsOptional()
+  @IsString()
+  bondType: BondType;
+  @IsOptional()
+  @IsDecimal()
+  cashBondAmount: string;
+  @IsOptional()
+  @IsDateString()
+  bondExpiryDate: string;
+  @IsOptional()
+  @IsDecimal()
+  contractSettlementAmount: string;
+  @IsOptional()
+  @IsDecimal()
+  accountsReceivable: string;
+  @IsOptional()
+  @IsString()
+  contractExecutionStatus: ContractExecutionStatus;
+
   @IsOptional()
   @ValidateNested()
   @Type(() => updateCostFormDto)
   productionCostForm?: ProductionCostForm;
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => UpdateContractDto)
-  contractPerformance?: ContractPerformance;
 }
 
 export class QueryContractDto implements PaginationDto {
@@ -143,11 +171,26 @@ export class UpdateContractDto implements DTO {
   projectEndDate?: string;
 
   @IsOptional()
+  @IsString()
+  bondType: BondType;
+  @IsOptional()
+  @IsDecimal()
+  cashBondAmount: string;
+  @IsOptional()
+  @IsDateString()
+  bondExpiryDate: string;
+  @IsOptional()
+  @IsDecimal()
+  contractSettlementAmount: string;
+  @IsOptional()
+  @IsDecimal()
+  accountsReceivable: string;
+  @IsOptional()
+  @IsString()
+  contractExecutionStatus: ContractExecutionStatus;
+
+  @IsOptional()
   @ValidateNested()
   @Type(() => updateCostFormDto)
   productionCostForm?: ProductionCostForm;
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => UpdateContractDto)
-  contractPerformance?: ContractPerformance;
 }

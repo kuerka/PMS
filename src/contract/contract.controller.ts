@@ -14,8 +14,6 @@ import {
   UpdateContractDto,
 } from './dto/contract.dto';
 import { Public } from '@/auth/auth.decorators';
-import { UpdatePerformanceDto } from './dto/performance.dto';
-import { PerformanceService } from './services/performance.service';
 import { PaymentMethodService } from './services/payment-method.service';
 import { CreatePaymentDto, UpdatePaymentDto } from './dto/payment-method.dto';
 import { InvoiceHeaderService } from './services/invoice-header.service';
@@ -69,27 +67,6 @@ export class ContractController {
 }
 
 @Public()
-@Controller('contract/performance')
-@UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
-export class PerformanceController {
-  constructor(private performanceService: PerformanceService) {}
-  @Get('detail')
-  async getPerformance(@Query('contractId') contractId: number) {
-    return await this.performanceService.getByContractId(contractId);
-  }
-  @Post('update')
-  async updatePerformance(@Body() performanceDto: UpdatePerformanceDto) {
-    const { id } = performanceDto;
-    const performance = this.performanceService.create(performanceDto);
-    return await this.performanceService.updateById(id, performance);
-  }
-  @Post('delete')
-  async deletePerformance(@Body('contractId') contractId: number) {
-    return await this.performanceService.deleteByContractId(contractId);
-  }
-}
-
-@Public()
 @Controller('contract/payment')
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 export class PaymentController {
@@ -122,20 +99,20 @@ export class PaymentController {
 export class InvoiceHeaderController {
   constructor(private invoiceHeaderService: InvoiceHeaderService) {}
   @Post('add')
-  async addInvoiceHeaderWithPerformanceId(
+  async addInvoiceHeaderWithContractId(
     @Body() invoiceHeaderDto: CreateInvoiceHeaderDto,
   ) {
     const invoiceHeader = this.invoiceHeaderService.create(invoiceHeaderDto);
-    const { contractPerformanceId } = invoiceHeaderDto;
-    return await this.invoiceHeaderService.addWithPerformanceId(
-      contractPerformanceId,
+    const { contractId } = invoiceHeaderDto;
+    return await this.invoiceHeaderService.addWithContractId(
+      contractId,
       invoiceHeader,
     );
   }
   @Get('list')
-  async getCostFormByPerformanceId(@Query('performanceId') id: number) {
+  async getCostFormByContractId(@Query('contractId') id: number) {
     if (!id) return;
-    return await this.invoiceHeaderService.getByPerformanceId(id);
+    return await this.invoiceHeaderService.getByContractId(id);
   }
   @Post('update')
   async updateInvoiceHeader(@Body() invoiceHeaderDto: UpdateInvoiceHeaderDto) {
@@ -156,21 +133,21 @@ export class InvoiceRecordController {
   constructor(private invoiceRecordService: InvoiceRecordService) {}
 
   @Post('add')
-  async addInvoiceRecordWithPerformanceId(
+  async addInvoiceRecordWithContractId(
     @Body() invoiceRecordDto: CreateInvoiceRecordDto,
   ) {
     const invoiceRecord = this.invoiceRecordService.create(invoiceRecordDto);
-    const { contractPerformanceId } = invoiceRecordDto;
-    return await this.invoiceRecordService.addWithPerformanceId(
-      contractPerformanceId,
+    const { contractId } = invoiceRecordDto;
+    return await this.invoiceRecordService.addWithContractId(
+      contractId,
       invoiceRecord,
     );
   }
 
   @Get('list')
-  async getInvoiceRecordByPerformanceId(@Query('performanceId') id: number) {
+  async getInvoiceRecordByContractId(@Query('contractId') id: number) {
     if (!id) return [];
-    return await this.invoiceRecordService.getByPerformanceId(id);
+    return await this.invoiceRecordService.getByContractId(id);
   }
 
   @Post('update')
@@ -193,21 +170,21 @@ export class ReceiptRecordController {
   constructor(private receiptRecordService: ReceiptRecordService) {}
 
   @Post('add')
-  async addReceiptRecordWithPerformanceId(
+  async addReceiptRecordWithContractId(
     @Body() receiptRecordDto: CreateReceiptRecordDto,
   ) {
     const receiptRecord = this.receiptRecordService.create(receiptRecordDto);
-    const { contractPerformanceId } = receiptRecordDto;
-    return await this.receiptRecordService.addWithPerformanceId(
-      contractPerformanceId,
+    const { contractId } = receiptRecordDto;
+    return await this.receiptRecordService.addWithContractId(
+      contractId,
       receiptRecord,
     );
   }
 
   @Get('list')
-  async getReceiptRecordByPerformanceId(@Query('performanceId') id: number) {
+  async getReceiptRecordByContractId(@Query('contractId') id: number) {
     if (!id) return [];
-    return await this.receiptRecordService.getByPerformanceId(id);
+    return await this.receiptRecordService.getByContractId(id);
   }
 
   @Post('update')

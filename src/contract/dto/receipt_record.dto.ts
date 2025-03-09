@@ -5,7 +5,7 @@ type DTO = Partial<ContractReceiptRecord>;
 
 export class CreateReceiptRecordDto implements DTO {
   @IsInt()
-  contractPerformanceId: number;
+  contractId: number;
 
   @IsDateString()
   receiptTime: string;

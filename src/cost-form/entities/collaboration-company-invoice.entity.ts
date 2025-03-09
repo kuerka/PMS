@@ -28,8 +28,8 @@ export class CollaborationCompanyInvoice {
     name: 'invoice_amount',
     nullable: true,
     comment: '本次收票金额',
-    precision: 10,
-    scale: 0,
+    precision: 15,
+    scale: 2,
   })
   invoiceAmount: string | null;
 

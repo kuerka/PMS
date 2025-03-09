@@ -12,7 +12,7 @@ type DTO = Partial<ContractInvoiceRecord>;
 
 export class CreateInvoiceRecordDto implements DTO {
   @IsInt()
-  contractPerformanceId: number;
+  contractId: number;
 
   @IsDateString()
   invoiceTime: string;
