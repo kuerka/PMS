@@ -82,8 +82,8 @@ class ProspectQuery {
   @IsArray()
   searchValues: string[];
   @IsOptional()
-  @IsString()
-  projectDockingStage?: ProjectDockingStage | undefined;
+  @IsArray()
+  projectDockingStage?: ProjectDockingStage[] | undefined;
   @IsOptional()
   @IsString()
   businessPersonnel?: string | undefined;

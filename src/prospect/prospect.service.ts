@@ -61,21 +61,17 @@ export class ProspectService {
     });
   }
 
-  async getProspectPage(prospectQueryDto: ProspectQueryDto) {
+  getProspectQuery(
+    prospectQueryDto: ProspectQueryDto,
+    hasCostForm: boolean = false,
+  ) {
     const query = prospectQueryDto || {};
-    const page = prospectQueryDto.pageParams?.currentPage || 1;
-    const limit = prospectQueryDto.pageParams?.pageSize || 10;
-    const { prop, order } = prospectQueryDto.sort || {};
     const queryBuilder = this.dataSource.manager
       .getRepository(ProspectProject)
-      .createQueryBuilder('p')
-      .leftJoinAndSelect('p.productionCostForm', 'costForm');
+      .createQueryBuilder('p');
 
-    if (prop && order) {
-      console.log(prop, order);
-      const _order = order === 'ASC' ? 'ASC' : 'DESC';
-      queryBuilder.orderBy(`p.${prop}`, _order);
-    }
+    if (hasCostForm)
+      queryBuilder.leftJoinAndSelect('p.productionCostForm', 'costForm');
 
     if (query.searchValues) {
       const queryStr = query.searchValues
@@ -89,10 +85,15 @@ export class ProspectService {
       }
     }
 
-    if (query.projectDockingStage) {
-      queryBuilder.andWhere('p.projectDockingStage = :projectDockingStage', {
-        projectDockingStage: query.projectDockingStage,
-      });
+    console.log('projectDockingStage:', query.projectDockingStage, query);
+
+    if (query.projectDockingStage && query.projectDockingStage.length > 0) {
+      queryBuilder.andWhere(
+        'p.projectDockingStage IN (:...projectDockingStage)',
+        {
+          projectDockingStage: query.projectDockingStage,
+        },
+      );
     }
     if (query.businessPersonnel) {
       queryBuilder.andWhere('p.businessPersonnel = :businessPersonnel', {
@@ -147,7 +148,21 @@ export class ProspectService {
       }
     }
 
+    return queryBuilder;
+  }
+
+  async getProspectPage(prospectQueryDto: ProspectQueryDto) {
+    const page = prospectQueryDto.pageParams?.currentPage || 1;
+    const limit = prospectQueryDto.pageParams?.pageSize || 10;
+    const { prop, order } = prospectQueryDto.sort || {};
+    const queryBuilder = this.getProspectQuery(prospectQueryDto, true);
+
+    if (prop && order) {
+      const _order = order === 'ASC' ? 'ASC' : 'DESC';
+      queryBuilder.orderBy(`p.${prop}`, _order);
+    }
     queryBuilder.skip((page - 1) * limit).take(limit);
+
     const prospects: ProspectProject[] = await queryBuilder.getMany();
     const total = await queryBuilder.getCount();
     return {
@@ -157,6 +172,17 @@ export class ProspectService {
       limit,
       pageCount: Math.ceil(total / limit),
     };
+  }
+
+  async getTotalAccumulated(prospectQueryDto: ProspectQueryDto) {
+    const queryBuilder = this.getProspectQuery(prospectQueryDto);
+    const totalCost: object[] | undefined = await queryBuilder
+      .select(
+        'SUM(p.estimated_contract_amount)',
+        'totalEstimatedContractAmount',
+      )
+      .getRawOne();
+    return totalCost;
   }
 
   async updateTransaction(id: number, prospect: ProspectProject) {

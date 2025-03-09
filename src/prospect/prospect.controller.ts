@@ -40,6 +40,10 @@ export class ProspectController {
   async getProspectPage(@Body() prospectQueryDto: ProspectQueryDto) {
     return await this.prospectService.getProspectPage(prospectQueryDto);
   }
+  @Post('totalEstimated')
+  async getTotalEstimated(@Body() prospectQueryDto: ProspectQueryDto) {
+    return await this.prospectService.getTotalAccumulated(prospectQueryDto);
+  }
 
   @Post('update')
   async updateProspect(@Body() prospectDto: UpdateProspectDto) {
