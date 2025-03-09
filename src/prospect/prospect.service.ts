@@ -54,41 +54,54 @@ export class ProspectService {
   }
 
   async getProspectPage(prospectQueryDto: ProspectQueryDto) {
-    const page = prospectQueryDto.page || 1;
-    const limit = prospectQueryDto.limit || 10;
-    const query = prospectQueryDto.query || {};
+    const query = prospectQueryDto || {};
+    const page = prospectQueryDto.pageParams?.currentPage || 1;
+    const limit = prospectQueryDto.pageParams?.pageSize || 10;
+    const { prop, order } = prospectQueryDto.sort || {};
     const queryBuilder = this.dataSource.manager
       .getRepository(ProspectProject)
-      .createQueryBuilder('prospect')
-      .leftJoinAndSelect('prospect.productionCostForm', 'costForm');
+      .createQueryBuilder('p')
+      .leftJoinAndSelect('p.productionCostForm', 'costForm');
 
-    if (query.id) {
-      queryBuilder.andWhere('prospect.id = :id', { id: query.id });
+    if (prop && order) {
+      console.log(prop, order);
+      const _order = order === 'ASC' ? 'ASC' : 'DESC';
+      queryBuilder.orderBy(`p.${prop}`, _order);
     }
-    if (query.projectName) {
-      queryBuilder.andWhere('prospect.projectName LIKE :projectName', {
-        projectName: `%${query.projectName}%`,
+
+    if (query.searchValues) {
+      const queryStr = query.searchValues
+        .filter((val) => val.trim() !== '')
+        .map((val) => `(?=.*${val})`)
+        .join('');
+      if (queryStr) {
+        queryBuilder.andWhere('p.projectName REGEXP :projectName', {
+          projectName: queryStr,
+        });
+      }
+    }
+
+    if (query.projectDockingStage) {
+      queryBuilder.andWhere('p.projectDockingStage = :projectDockingStage', {
+        projectDockingStage: query.projectDockingStage,
       });
     }
     if (query.businessPersonnel) {
-      queryBuilder.andWhere(
-        'prospect.businessPersonnel LIKE :businessPersonnel',
-        {
-          businessPersonnel: `%${query.businessPersonnel}%`,
-        },
-      );
+      queryBuilder.andWhere('p.businessPersonnel = :businessPersonnel', {
+        businessPersonnel: `${query.businessPersonnel}`,
+      });
     }
     if (query.leadingBusinessDepartment) {
       queryBuilder.andWhere(
-        'prospect.leadingBusinessDepartment LIKE :leadingBusinessDepartment',
+        'p.leadingBusinessDepartment = :leadingBusinessDepartment',
         {
-          leadingBusinessDepartment: `%${query.leadingBusinessDepartment}%`,
+          leadingBusinessDepartment: `${query.leadingBusinessDepartment}`,
         },
       );
     }
     if (query.assistingBusinessDepartment) {
       queryBuilder.andWhere(
-        'JSON_CONTAINS(prospect.assistingBusinessDepartment, :assistingBusinessDepartment)',
+        'JSON_CONTAINS(p.assistingBusinessDepartment, :assistingBusinessDepartment)',
         {
           assistingBusinessDepartment: JSON.stringify(
             query.assistingBusinessDepartment,
@@ -96,44 +109,34 @@ export class ProspectService {
         },
       );
     }
-    if (query.isPriorWorkStarted !== undefined) {
-      queryBuilder.andWhere(
-        'prospect.isPriorWorkStarted = :isPriorWorkStarted',
-        {
-          isPriorWorkStarted: query.isPriorWorkStarted,
-        },
-      );
+
+    if (
+      query.estimatedContractAmount &&
+      Array.isArray(query.estimatedContractAmount)
+    ) {
+      if (query.estimatedContractAmount[0] != undefined) {
+        queryBuilder.andWhere('p.estimatedContractAmount >= :minAmount', {
+          minAmount: query.estimatedContractAmount[0],
+        });
+      }
+      if (query.estimatedContractAmount[1] != undefined) {
+        queryBuilder.andWhere('p.estimatedContractAmount <= :maxAmount', {
+          maxAmount: query.estimatedContractAmount[1],
+        });
+      }
     }
-    if (query.projectDockingStage) {
-      queryBuilder.andWhere(
-        'prospect.projectDockingStage = :projectDockingStage',
-        {
-          projectDockingStage: query.projectDockingStage,
-        },
-      );
-    }
-    if (query.estimatedContractAmount) {
-      queryBuilder.andWhere(
-        'prospect.estimatedContractAmount LIKE :estimatedContractAmount',
-        {
-          estimatedContractAmount: `%${query.estimatedContractAmount}%`,
-        },
-      );
-    }
-    if (query.remark) {
-      queryBuilder.andWhere('prospect.remark LIKE :remark', {
-        remark: `%${query.remark}%`,
-      });
-    }
-    if (query.createdAt) {
-      queryBuilder.andWhere('prospect.createdAt = :createdAt', {
-        createdAt: query.createdAt,
-      });
-    }
-    if (query.updatedAt) {
-      queryBuilder.andWhere('prospect.updatedAt = :updatedAt', {
-        updatedAt: query.updatedAt,
-      });
+
+    if (query.createdAt && Array.isArray(query.createdAt)) {
+      if (query.createdAt[0] != undefined) {
+        queryBuilder.andWhere('p.createdAt >= :startDate', {
+          startDate: query.createdAt[0],
+        });
+      }
+      if (query.createdAt[1] != undefined) {
+        queryBuilder.andWhere('p.createdAt <= :endDate', {
+          endDate: query.createdAt[1],
+        });
+      }
     }
 
     queryBuilder.skip((page - 1) * limit).take(limit);

@@ -1,11 +1,11 @@
-import { PaginationDto } from '@/pagination/pagination.dto';
+import { PaginationDto, SortDTO } from '@/pagination/pagination.dto';
 import { ProspectProject } from './prospect.entity';
 import { Exclude, Type } from 'class-transformer';
 import { ProductionCostForm } from '@/cost-form/entities/cost-form.entity';
 import {
   IsArray,
   IsBoolean,
-  IsDateString,
+  IsDecimal,
   IsInt,
   IsOptional,
   IsString,
@@ -38,13 +38,6 @@ export class createProspectDto implements DTO {
   @IsBoolean()
   isPriorWorkStarted: boolean;
 
-  // @IsOptional()
-  // @Exclude()
-  // createdAt: Date = new Date();
-  // @IsOptional()
-  // @Exclude()
-  // updatedAt: Date = new Date();
-
   @IsOptional()
   @ValidateNested()
   @Type(() => createCostFormDto)
@@ -56,7 +49,8 @@ export class UpdateProspectDto implements DTO {
   id: number;
   @IsString()
   projectName: string;
-  estimatedContractAmount: string | null;
+  @IsDecimal()
+  estimatedContractAmount: string;
   @IsString()
   businessPersonnel: string;
   @IsString()
@@ -69,9 +63,7 @@ export class UpdateProspectDto implements DTO {
   projectDockingStage: ProjectDockingStage;
   @IsString()
   remark: string | null;
-  // @IsOptional()
-  // @Exclude()
-  // updatedAt: Date = new Date();
+
   @IsOptional()
   @ValidateNested()
   @Type(() => updateCostFormDto)
@@ -85,13 +77,13 @@ export class prospectDto extends ProspectProject {
   updatedAt: Date = new Date();
 }
 
-class ProspectQuery implements DTO {
+class ProspectQuery {
   @IsOptional()
-  @IsInt()
-  id?: number | undefined;
+  @IsArray()
+  searchValues: string[];
   @IsOptional()
   @IsString()
-  projectName?: string | undefined;
+  projectDockingStage?: ProjectDockingStage | undefined;
   @IsOptional()
   @IsString()
   businessPersonnel?: string | undefined;
@@ -102,43 +94,20 @@ class ProspectQuery implements DTO {
   @IsArray()
   assistingBusinessDepartment?: object | undefined;
   @IsOptional()
-  @IsBoolean()
-  isPriorWorkStarted?: boolean | undefined;
+  @IsArray()
+  estimatedContractAmount: number[];
   @IsOptional()
-  @IsString()
-  projectDockingStage?: ProjectDockingStage | undefined;
-  @IsOptional()
-  @IsString()
-  estimatedContractAmount?: string | undefined;
-  @IsOptional()
-  @IsString()
-  remark?: string | undefined;
-  @IsOptional()
-  @IsDateString()
-  createdAt?: Date | undefined;
-  @IsOptional()
-  @IsDateString()
-  updatedAt?: Date | undefined;
-}
+  @IsArray()
+  createdAt?: Date[];
 
-export class ProspectQueryDto implements PaginationDto {
-  @IsOptional()
-  @IsInt()
-  page: number = 1;
-  @IsOptional()
-  @IsInt()
-  limit: number = 10;
   @IsOptional()
   @ValidateNested()
-  @Type(() => ProspectQuery)
-  query: ProspectQuery;
+  @Type(() => PaginationDto)
+  pageParams: PaginationDto;
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => SortDTO)
+  sort: SortDTO;
 }
 
-export class ProspectUpdateDto extends ProspectProject {
-  @Exclude()
-  createdAt: Date | null;
-  @Exclude()
-  updatedAt: Date | null = new Date();
-  @Exclude()
-  productionCostForm: ProductionCostForm;
-}
+export class ProspectQueryDto extends ProspectQuery {}
