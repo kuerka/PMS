@@ -49,7 +49,15 @@ export class ProspectService {
   async findOneWithCostForm(id: number) {
     return await this.dataSource.manager.findOne(ProspectProject, {
       where: { id },
-      relations: { productionCostForm: true },
+      relations: {
+        productionCostForm: {
+          collaborationDepartments: true,
+          collaborationCompanies: {
+            collaborationCompanyInvoices: true,
+            collaborationCompanyPayments: true,
+          },
+        },
+      },
     });
   }
 

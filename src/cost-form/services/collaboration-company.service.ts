@@ -50,13 +50,13 @@ export class CollaborationCompanyService {
   ) {
     if (!manager) manager = this.datasource.manager;
 
-    return await manager.getRepository(CollaborationCompany).insert(company);
+    await manager.getRepository(CollaborationCompany).insert(company);
   }
 
   async updateCompany(company: CollaborationCompany, manager?: EntityManager) {
     if (!manager) manager = this.datasource.manager;
 
-    return await manager
+    await manager
       .getRepository(CollaborationCompany)
       .update(company.id, company);
   }
