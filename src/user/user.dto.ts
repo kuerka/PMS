@@ -13,7 +13,7 @@ export class UpdateUserDto implements DTO {
   @IsInt()
   id: number;
   @IsString()
-  username: string;
+  name: string;
   @IsString()
   phone: string;
   @IsString()
