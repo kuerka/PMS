@@ -76,13 +76,13 @@ export class ProductionCostForm {
   accumulatedInvoiceAmount: string | null;
 
   @Column('decimal', {
-    name: 'accumulated_invoice_payment',
+    name: 'accumulated_payment_amount',
     nullable: true,
     precision: 15,
     scale: 2,
     default: () => "'0'",
   })
-  accumulatedInvoicePayment: string | null;
+  accumulatedPaymentAmount: string | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date | null;
