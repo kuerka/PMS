@@ -43,8 +43,8 @@ export class ContractPaymentMethod {
     name: 'accounts',
     nullable: true,
     comment: '对应此收款条件的具体的应该收款的数额',
-    precision: 10,
-    scale: 0,
+    precision: 15,
+    scale: 2,
   })
   accounts: string | null;
 

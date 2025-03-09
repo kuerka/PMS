@@ -36,8 +36,8 @@ export class CollaborationDepartment {
     name: 'budget_amount',
     nullable: true,
     comment: '协作部门预算金额',
-    precision: 10,
-    scale: 0,
+    precision: 15,
+    scale: 2,
   })
   budgetAmount: string | null;
 
@@ -45,8 +45,8 @@ export class CollaborationDepartment {
     name: 'budget_execution_amount',
     nullable: true,
     comment: '协作部门预算执行金额',
-    precision: 10,
-    scale: 0,
+    precision: 15,
+    scale: 2,
   })
   budgetExecutionAmount: string | null;
 
@@ -54,8 +54,8 @@ export class CollaborationDepartment {
     name: 'settlement_amount',
     nullable: true,
     comment: '协作部门结算金额',
-    precision: 10,
-    scale: 0,
+    precision: 15,
+    scale: 2,
   })
   settlementAmount: string | null;
 

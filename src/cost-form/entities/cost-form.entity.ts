@@ -33,8 +33,8 @@ export class ProductionCostForm {
     name: 'project_completion_progress',
     nullable: true,
     comment: '项目完成进度，范围 0.00 - 100.00，表示 0 - 100%',
-    precision: 10,
-    scale: 0,
+    precision: 5,
+    scale: 2,
     default: () => "'0'",
   })
   projectCompletionProgress: string | null;
@@ -43,8 +43,8 @@ export class ProductionCostForm {
     name: 'total_budget_amount',
     nullable: true,
     comment: '预算总金额',
-    precision: 10,
-    scale: 0,
+    precision: 15,
+    scale: 2,
   })
   totalBudgetAmount: string | null;
 
@@ -52,8 +52,8 @@ export class ProductionCostForm {
     name: 'total_budget_execution_amount',
     nullable: true,
     comment: '预算执行总金额',
-    precision: 10,
-    scale: 0,
+    precision: 15,
+    scale: 2,
   })
   totalBudgetExecutionAmount: string | null;
 
@@ -61,8 +61,8 @@ export class ProductionCostForm {
     name: 'total_settlement_amount',
     nullable: true,
     comment: '结算总金额',
-    precision: 10,
-    scale: 0,
+    precision: 15,
+    scale: 2,
   })
   totalSettlementAmount: string | null;
 

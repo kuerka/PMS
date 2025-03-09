@@ -1,22 +1,21 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, DeepPartial, EntityManager } from 'typeorm';
 import { ContractReceiptRecord } from '../entities/receipt-record.entity';
-import { PerformanceService } from './performance.service';
+import { AccumulateService } from './contract-accumulated.service';
 
 @Injectable()
 export class ReceiptRecordService {
   constructor(
     @InjectDataSource() private dataSource: DataSource,
-    @Inject(forwardRef(() => PerformanceService))
-    private performanceService: PerformanceService,
+    private accumulateService: AccumulateService,
   ) {}
 
   create(receiptRecord: DeepPartial<ContractReceiptRecord>) {
     return this.dataSource.manager.create(ContractReceiptRecord, receiptRecord);
   }
 
-  async addWithPerformanceId(
+  async addWithContractId(
     id: number,
     receiptRecord?: ContractReceiptRecord,
     manager?: EntityManager,
@@ -24,18 +23,18 @@ export class ReceiptRecordService {
     if (!manager) manager = this.dataSource.manager;
     if (!receiptRecord) receiptRecord = new ContractReceiptRecord();
 
-    receiptRecord.contractPerformanceId = id;
+    receiptRecord.contractId = id;
     await manager.transaction(async (manager) => {
       await manager.getRepository(ContractReceiptRecord).insert(receiptRecord);
-      await this.performanceService.updateAccumulateReceipt(id, manager);
+      await this.accumulateService.updateAccumulateReceipt(id, manager);
     });
   }
 
-  async getByPerformanceId(id: number, manager?: EntityManager) {
+  async getByContractId(contractId: number, manager?: EntityManager) {
     if (!manager) manager = this.dataSource.manager;
 
     return await manager.getRepository(ContractReceiptRecord).find({
-      where: { contractPerformanceId: id },
+      where: { contractId },
     });
   }
 
@@ -49,10 +48,10 @@ export class ReceiptRecordService {
       const repository = manager.getRepository(ContractReceiptRecord);
       const oldReceipt = await repository.findOneBy({ id });
       if (!oldReceipt) return;
-      const pId = oldReceipt.contractPerformanceId;
+      const cId = oldReceipt.contractId;
 
       await repository.update(id, receiptRecord);
-      await this.performanceService.updateAccumulateReceipt(pId!, manager);
+      await this.accumulateService.updateAccumulateReceipt(cId!, manager);
     });
   }
 
@@ -63,18 +62,18 @@ export class ReceiptRecordService {
       const repository = manager.getRepository(ContractReceiptRecord);
       const receipt = await repository.findOneBy({ id });
       if (!receipt) return;
-      const pId = receipt.contractPerformanceId;
+      const cId = receipt.contractId;
 
       await repository.delete(id);
-      await this.performanceService.updateAccumulateReceipt(pId!, manager);
+      await this.accumulateService.updateAccumulateReceipt(cId!, manager);
     });
   }
 
-  async deleteByPerformanceId(id: number, manager?: EntityManager) {
+  async deleteByContractId(contractId: number, manager?: EntityManager) {
     if (!manager) manager = this.dataSource.manager;
 
     return await manager
       .getRepository(ContractReceiptRecord)
-      .delete({ contractPerformanceId: id });
+      .delete({ contractId });
   }
 }

@@ -28,8 +28,8 @@ export class CollaborationCompanyPayment {
     name: 'payment_amount',
     nullable: true,
     comment: '本次支付金额',
-    precision: 10,
-    scale: 0,
+    precision: 15,
+    scale: 2,
   })
   paymentAmount: string | null;
 

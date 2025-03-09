@@ -25,8 +25,8 @@ export class ProspectProject {
   @Column('decimal', {
     name: 'estimated_contract_amount',
     nullable: true,
-    precision: 10,
-    scale: 0,
+    precision: 15,
+    scale: 2,
   })
   estimatedContractAmount: string | null;
 
@@ -71,6 +71,24 @@ export class ProspectProject {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date | null;
+
+  @Column('decimal', {
+    name: 'accumulated_invoice_amount',
+    nullable: true,
+    precision: 15,
+    scale: 2,
+    default: () => "'0'",
+  })
+  accumulatedInvoiceAmount: string | null;
+
+  @Column('decimal', {
+    name: 'accumulated_invoice_payment',
+    nullable: true,
+    precision: 15,
+    scale: 2,
+    default: () => "'0'",
+  })
+  accumulatedInvoicePayment: string | null;
 
   @Column('mediumtext', {
     name: 'remark',

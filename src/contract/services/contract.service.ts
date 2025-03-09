@@ -8,7 +8,6 @@ import {
 } from 'typeorm';
 import { Contract } from '../entities/contract.entity';
 import { CostFormService } from '@/cost-form/cost-form.service';
-import { PerformanceService } from './performance.service';
 import { PaymentMethodService } from './payment-method.service';
 import { ProductionCostForm } from '@/cost-form/entities/cost-form.entity';
 import { CollaborationCompany } from '@/cost-form/entities/collaboration-company.entity';
@@ -16,6 +15,9 @@ import { CollaborationCompanyInvoice } from '@/cost-form/entities/collaboration-
 import { CollaborationCompanyPayment } from '@/cost-form/entities/collaboration-company-payment.entity';
 import { QueryContractDto } from '../dto/contract.dto';
 import { keysToCamel } from '@/utils/convert';
+import { InvoiceHeaderService } from './invoice-header.service';
+import { InvoiceRecordService } from './invoice-record.service';
+import { ReceiptRecordService } from './receipt-record.service';
 
 @Injectable()
 export class ContractService {
@@ -23,7 +25,9 @@ export class ContractService {
     @InjectDataSource() private dataSource: DataSource,
     private costFormService: CostFormService,
     private paymentService: PaymentMethodService,
-    private performanceService: PerformanceService,
+    private invoiceHeaderService: InvoiceHeaderService,
+    private invoiceRecordService: InvoiceRecordService,
+    private receiptService: ReceiptRecordService,
   ) {}
 
   createContract(contract: DeepPartial<Contract>) {
@@ -32,18 +36,11 @@ export class ContractService {
 
   async addContractTransition(contract: Contract) {
     return await this.dataSource.manager.transaction(async (manager) => {
-      const { productionCostForm, contractPerformance } = contract;
+      const { productionCostForm } = contract;
       const res = await this.addContract(contract, manager);
       const costForm = this.costFormService.create(productionCostForm);
       costForm.contract = res;
       await this.costFormService.add(costForm, manager);
-      const performance = this.performanceService.create(contractPerformance);
-      performance.contract = res;
-      await this.performanceService.addWithContractId(
-        res.id,
-        performance,
-        manager,
-      );
     });
   }
   async addContract(contract: Contract, manager?: EntityManager) {
@@ -141,7 +138,6 @@ export class ContractService {
       relations: {
         prospectProject: true,
         productionCostForm: true,
-        contractPerformance: true,
       },
     });
   }
@@ -200,11 +196,9 @@ export class ContractService {
       relations: {
         prospectProject: true,
         productionCostForm: true,
-        contractPerformance: {
-          invoiceHeader: true,
-          contractInvoiceRecords: true,
-          contractReceiptRecords: true,
-        },
+        invoiceHeader: true,
+        contractInvoiceRecords: true,
+        contractReceiptRecords: true,
       },
     });
   }
@@ -229,8 +223,10 @@ export class ContractService {
     return await this.dataSource.manager.transaction(async (manager) => {
       const form = this.costFormService.deleteByContractId(id, manager);
       const payment = this.paymentService.deleteByContractId(id, manager);
-      const perform = this.performanceService.deleteByContractId(id, manager);
-      await Promise.all([form, payment, perform]);
+      const header = this.invoiceHeaderService.deleteByContractId(id, manager);
+      const record = this.invoiceRecordService.deleteByContractId(id, manager);
+      const receipt = this.receiptService.deleteByContractId(id, manager);
+      await Promise.all([form, payment, header, record, receipt]);
       await this.deleteContract(id, manager);
     });
   }
