@@ -4,9 +4,11 @@ import {
   Get,
   Post,
   Query,
+  Res,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { ProspectService } from './prospect.service';
 import { Public } from '@/auth/auth.decorators';
 import {
@@ -43,6 +45,21 @@ export class ProspectController {
   @Post('totalEstimated')
   async getTotalEstimated(@Body() prospectQueryDto: ProspectQueryDto) {
     return await this.prospectService.getTotalAccumulated(prospectQueryDto);
+  }
+
+  @Post('excel')
+  async exportProspectExcel(
+    @Body() prospectQueryDto: ProspectQueryDto,
+    @Res() res: Response,
+  ) {
+    const buffer = await this.prospectService.getFilterExcel(prospectQueryDto);
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': 'attachment; filename="prospects.xlsx"',
+      'Content-Length': buffer.byteLength,
+    });
+    res.end(buffer);
   }
 
   @Post('update')

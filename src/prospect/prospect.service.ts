@@ -4,6 +4,8 @@ import { DataSource, DeepPartial, EntityManager } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { ProspectQueryDto } from './prospect.dto';
 import { CostFormService } from '@/cost-form/cost-form.service';
+import { DepartmentCodeToName } from '@/config/const';
+import * as exceljs from 'exceljs';
 
 @Injectable()
 export class ProspectService {
@@ -183,6 +185,52 @@ export class ProspectService {
       )
       .getRawOne();
     return totalCost;
+  }
+
+  async getFilterExcel(prospectQueryDto: ProspectQueryDto) {
+    const queryBuilder = this.getProspectQuery(prospectQueryDto);
+    const rows = await queryBuilder.getMany();
+    const workbook = new exceljs.Workbook();
+    const worksheet = workbook.addWorksheet();
+    worksheet.columns = [
+      { header: '项目ID', key: 'id' },
+      { header: '项目名称', key: 'projectName' },
+      { header: '预估合同金额', key: 'estimatedContractAmount' },
+      { header: '业务人员', key: 'businessPersonnel' },
+      { header: '主导业务部门', key: 'leadingBusinessDepartment' },
+      { header: '辅助业务部门', key: 'assistingBusinessDepartment' },
+      { header: '是否已开始前期工作', key: 'isPriorWorkStarted' },
+      { header: '项目对接阶段', key: 'projectDockingStage' },
+      { header: '创建时间', key: 'createdAt' },
+      { header: '更新时间', key: 'updatedAt' },
+      { header: '备注', key: 'remark' },
+    ];
+
+    for (const row of rows) {
+      const assisting: string[] =
+        (row.assistingBusinessDepartment as string[]) ?? [];
+      console.log('assisting:', assisting);
+      const assistingBusinessDepartment = assisting
+        .map((id) => DepartmentCodeToName[id] ?? id)
+        .join(',');
+
+      worksheet.addRow({
+        id: row.id,
+        projectName: row.projectName,
+        estimatedContractAmount: row.estimatedContractAmount,
+        businessPersonnel: row.businessPersonnel,
+        leadingBusinessDepartment: row.leadingBusinessDepartment,
+        assistingBusinessDepartment: assistingBusinessDepartment,
+        isPriorWorkStarted: row.isPriorWorkStarted ? '是' : '否',
+        projectDockingStage: row.projectDockingStage,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        remark: row.remark,
+      });
+    }
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    return buffer;
   }
 
   async updateTransaction(id: number, prospect: ProspectProject) {
