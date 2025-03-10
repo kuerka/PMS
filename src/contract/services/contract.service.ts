@@ -51,17 +51,17 @@ export class ContractService {
     return await this.getContractPageQuery(queryDto);
   }
 
-  // TODO 后续添加筛选条件
-  async getContractPageQuery(queryDto: QueryContractDto) {
+  getContractQueryBuilder(
+    queryDto: QueryContractDto,
+    hasCost: boolean = false,
+  ) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const query = queryDto || {};
-    const page = queryDto.pageParams?.currentPage || 1;
-    const limit = queryDto.pageParams?.pageSize || 10;
-
-    const queryBuilder = this.dataSource
-      .createQueryBuilder(Contract, 'c')
-      .select()
-      .leftJoinAndSelect('c.productionCostForm', 'costForm');
+    const queryBuilder = this.dataSource.manager
+      .getRepository(Contract)
+      .createQueryBuilder('c');
+    if (hasCost)
+      queryBuilder.leftJoinAndSelect('c.productionCostForm', 'costForm');
 
     // if (query.contractNumber) {
     //   queryBuilder.andWhere('c.contractNumber = :contractNumber', {
@@ -114,13 +114,24 @@ export class ContractService {
     //   });
     // }
 
-    queryBuilder.skip((page - 1) * limit).take(limit);
-    const total = await queryBuilder.getCount();
+    return queryBuilder;
+  }
+  // TODO 后续添加筛选条件
+  async getContractPageQuery(queryDto: QueryContractDto) {
+    const page = queryDto.pageParams?.currentPage || 1;
+    const limit = queryDto.pageParams?.pageSize || 10;
+    const { prop, order } = queryDto.sort || {};
 
-    // const raws = await this.getAccumulatedAmount(queryBuilder);
-    // const data = raws.map(keysToCamel);
-    // const data = await queryBuilder.getRawMany();
-    const data = await queryBuilder.getMany();
+    const queryBuilder = this.getContractQueryBuilder(queryDto, true);
+
+    console.log('sort:', prop, order);
+
+    if (prop && order) {
+      const _order = order === 'ASC' ? 'ASC' : 'DESC';
+      queryBuilder.orderBy(`c.${prop}`, _order);
+    }
+    queryBuilder.skip((page - 1) * limit).take(limit);
+    const [data, total] = await queryBuilder.getManyAndCount();
     return {
       data,
       total,
