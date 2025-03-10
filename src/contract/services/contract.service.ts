@@ -51,68 +51,135 @@ export class ContractService {
     return await this.getContractPageQuery(queryDto);
   }
 
-  getContractQueryBuilder(
-    queryDto: QueryContractDto,
-    hasCost: boolean = false,
-  ) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getContractQueryBuilder(queryDto: QueryContractDto) {
     const query = queryDto || {};
     const queryBuilder = this.dataSource.manager
       .getRepository(Contract)
       .createQueryBuilder('c');
-    if (hasCost)
-      queryBuilder.leftJoinAndSelect('c.productionCostForm', 'costForm');
 
-    // if (query.contractNumber) {
-    //   queryBuilder.andWhere('c.contractNumber = :contractNumber', {
-    //     contractNumber: query.contractNumber,
-    //   });
-    // }
-    // if (query.projectName) {
-    //   queryBuilder.andWhere('c.projectName LIKE :projectName', {
-    //     projectName: `%${query.projectName}%`,
-    //   });
-    // }
-    // if (query.projectType) {
-    //   queryBuilder.andWhere('c.projectType = :projectType', {
-    //     projectType: query.projectType,
-    //   });
-    // }
-    // if (query.projectLocation) {
-    //   queryBuilder.andWhere('c.projectLocation = :projectLocation', {
-    //     projectLocation: query.projectLocation,
-    //   });
-    // }
-    // if (query.owner) {
-    //   queryBuilder.andWhere('c.owner LIKE :owner', {
-    //     owner: `%${query.owner}%`,
-    //   });
-    // }
-    // if (query.isPreliminaryNumber) {
-    //   queryBuilder.andWhere('c.isPreliminaryNumber = :isPreliminaryNumber', {
-    //     isPreliminaryNumber: query.isPreliminaryNumber,
-    //   });
-    // }
-    // if (query.amountType) {
-    //   queryBuilder.andWhere('c.amountType = :amountType', {
-    //     amountType: query.amountType,
-    //   });
-    // }
-    // if (query.remark) {
-    //   queryBuilder.andWhere('c.remark LIKE :remark', {
-    //     remark: `%${query.remark}%`,
-    //   });
-    // }
-    // if (query.projectStartDate) {
-    //   queryBuilder.andWhere('c.projectStartDate >= :projectStartDate', {
-    //     projectStartDate: query.projectStartDate,
-    //   });
-    // }
-    // if (query.projectEndDate) {
-    //   queryBuilder.andWhere('c.projectEndDate <= :projectEndDate', {
-    //     projectEndDate: query.projectEndDate,
-    //   });
-    // }
+    if (query.searchValues) {
+      const queryStr = query.searchValues
+        .filter((val) => val.trim() !== '')
+        .map((val) => `(?=.*${val})`)
+        .join('');
+      if (queryStr) {
+        queryBuilder.andWhere('c.projectName REGEXP :projectName', {
+          projectName: queryStr,
+        });
+      }
+    }
+
+    if (query.projectType && query.projectType.length > 0) {
+      queryBuilder.andWhere('c.projectType IN (:...projectType)', {
+        projectType: query.projectType,
+      });
+    }
+    if (query.projectLocation) {
+      queryBuilder.andWhere('c.projectLocation = :projectLocation', {
+        projectLocation: query.projectLocation,
+      });
+    }
+    if (query.owner) {
+      queryBuilder.andWhere('c.owner LIKE :owner', {
+        owner: `%${query.owner}%`,
+      });
+    }
+    if (query.amountType) {
+      queryBuilder.andWhere('c.amountType = :amountType', {
+        amountType: query.amountType,
+      });
+    }
+    if (query.projectDate && Array.isArray(query.projectDate)) {
+      if (query.projectDate[0] != undefined) {
+        queryBuilder.andWhere('c.projectStartDate >= :startDate', {
+          startDate: query.projectDate[0],
+        });
+      }
+      if (query.projectDate[1] != undefined) {
+        queryBuilder.andWhere('c.projectEndDate <= :endDate', {
+          endDate: query.projectDate[1],
+        });
+      }
+    }
+    if (query.bondType) {
+      queryBuilder.andWhere('c.bondType = :bondType', {
+        bondType: query.bondType,
+      });
+    }
+    if (query.cashBondAmount && Array.isArray(query.cashBondAmount)) {
+      if (query.cashBondAmount[0] != undefined) {
+        queryBuilder.andWhere('c.cashBondAmount >= :minCashBondAmount', {
+          minCashBondAmount: query.cashBondAmount[0],
+        });
+      }
+      if (query.cashBondAmount[1] != undefined) {
+        queryBuilder.andWhere('c.cashBondAmount <= :maxCashBondAmount', {
+          maxCashBondAmount: query.cashBondAmount[1],
+        });
+      }
+    }
+    if (query.bondExpiryDate && Array.isArray(query.bondExpiryDate)) {
+      if (query.bondExpiryDate[0] != undefined) {
+        queryBuilder.andWhere('c.bondExpiryDate >= :minBondExpiryDate', {
+          minBondExpiryDate: query.bondExpiryDate[0],
+        });
+      }
+      if (query.bondExpiryDate[1] != undefined) {
+        queryBuilder.andWhere('c.bondExpiryDate <= :maxBondExpiryDate', {
+          maxBondExpiryDate: query.bondExpiryDate[1],
+        });
+      }
+    }
+    if (
+      query.contractSettlementAmount &&
+      Array.isArray(query.contractSettlementAmount)
+    ) {
+      if (query.contractSettlementAmount[0] != undefined) {
+        queryBuilder.andWhere(
+          'c.contractSettlementAmount >= :minSettlementAmount',
+          {
+            minSettlementAmount: query.contractSettlementAmount[0],
+          },
+        );
+      }
+      if (query.contractSettlementAmount[1] != undefined) {
+        queryBuilder.andWhere(
+          'c.contractSettlementAmount <= :maxSettlementAmount',
+          {
+            maxSettlementAmount: query.contractSettlementAmount[1],
+          },
+        );
+      }
+    }
+    if (query.accountsReceivable && Array.isArray(query.accountsReceivable)) {
+      if (query.accountsReceivable[0] != undefined) {
+        queryBuilder.andWhere(
+          'c.accountsReceivable >= :minAccountsReceivable',
+          {
+            minAccountsReceivable: query.accountsReceivable[0],
+          },
+        );
+      }
+      if (query.accountsReceivable[1] != undefined) {
+        queryBuilder.andWhere(
+          'c.accountsReceivable <= :maxAccountsReceivable',
+          {
+            maxAccountsReceivable: query.accountsReceivable[1],
+          },
+        );
+      }
+    }
+    if (
+      query.contractExecutionStatus &&
+      query.contractExecutionStatus.length > 0
+    ) {
+      queryBuilder.andWhere(
+        'c.contractExecutionStatus IN (:...contractExecutionStatus)',
+        {
+          contractExecutionStatus: query.contractExecutionStatus,
+        },
+      );
+    }
 
     return queryBuilder;
   }
@@ -122,9 +189,9 @@ export class ContractService {
     const limit = queryDto.pageParams?.pageSize || 10;
     const { prop, order } = queryDto.sort || {};
 
-    const queryBuilder = this.getContractQueryBuilder(queryDto, true);
+    const queryBuilder = this.getContractQueryBuilder(queryDto);
 
-    console.log('sort:', prop, order);
+    queryBuilder.leftJoinAndSelect('c.productionCostForm', 'costForm');
 
     if (prop && order) {
       const _order = order === 'ASC' ? 'ASC' : 'DESC';

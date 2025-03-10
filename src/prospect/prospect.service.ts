@@ -86,9 +86,6 @@ export class ProspectService {
         });
       }
     }
-
-    console.log('projectDockingStage:', query.projectDockingStage, query);
-
     if (query.projectDockingStage && query.projectDockingStage.length > 0) {
       queryBuilder.andWhere(
         'p.projectDockingStage IN (:...projectDockingStage)',

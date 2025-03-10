@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsBoolean,
   IsDateString,
   IsDecimal,
@@ -124,6 +125,43 @@ export class ContractQuery implements DTO {
 }
 
 export class QueryContractDto {
+  @IsOptional()
+  @IsArray()
+  searchValues: string[];
+  @IsOptional()
+  @IsArray()
+  projectType: string[];
+  @IsOptional()
+  @IsString()
+  projectLocation: string;
+  @IsOptional()
+  @IsString()
+  owner: string;
+  @IsOptional()
+  @IsString()
+  amountType: AmountType;
+  @IsOptional()
+  @IsArray()
+  projectDate: string[];
+  @IsOptional()
+  @IsString()
+  bondType: string;
+  @IsOptional()
+  @IsArray()
+  cashBondAmount: string[];
+  @IsOptional()
+  @IsArray()
+  bondExpiryDate: string[];
+  @IsOptional()
+  @IsArray()
+  contractSettlementAmount: string[];
+  @IsOptional()
+  @IsArray()
+  accountsReceivable: string[];
+  @IsOptional()
+  @IsArray()
+  contractExecutionStatus: ContractExecutionStatus[];
+
   @IsOptional()
   @ValidateNested()
   @Type(() => PaginationDto)
