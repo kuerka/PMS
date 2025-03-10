@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  ParseIntPipe,
+  Post,
+  Query,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { Roles } from 'src/auth/auth.decorators';
 import { LimitsMap } from 'src/auth/constants';
@@ -12,11 +21,12 @@ import { FailedCause } from '@/response-formatter/response-formatter.interceptor
 
 @Controller('user')
 @Roles(LimitsMap.admin, LimitsMap.edit, LimitsMap.view)
+@UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  async getUsersById(@Query('id') id: number) {
+  async getUsersById(@Query('id', ParseIntPipe) id: number) {
     const user = await this.userService.findById(id);
     if (!user) return new FailedCause('User not found');
     return plainToClass(UserNoPasswordDto, user);

@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  ParseIntPipe,
   Post,
   Query,
   UsePipes,
@@ -48,11 +49,11 @@ export class ContractController {
     return await this.contractService.getContractPage(queryContractDto);
   }
   @Get('simple')
-  async getContractSimple(@Query('id') id: number) {
+  async getContractSimple(@Query('id', ParseIntPipe) id: number) {
     return await this.contractService.getContractSimpleById(id);
   }
   @Get('detail')
-  async getContractDetail(@Query('id') id: number) {
+  async getContractDetail(@Query('id', ParseIntPipe) id: number) {
     return await this.contractService.getContractDetailsById(id);
   }
   @Post('update')
@@ -61,7 +62,7 @@ export class ContractController {
     return await this.contractService.updateContractTransition(contract);
   }
   @Post('delete')
-  async deleteContract(@Body('id') id: number) {
+  async deleteContract(@Body('id', ParseIntPipe) id: number) {
     return await this.contractService.deleteContractTransition(id);
   }
 }
@@ -77,9 +78,8 @@ export class PaymentController {
     return await this.paymentService.addPaymentMethod(payment);
   }
   @Get('list')
-  async getPaymentByContractId(@Query('contractId') contractId: number) {
-    if (!contractId) return [];
-    return await this.paymentService.getPaymentMethodByContractId(contractId);
+  async getPaymentByContractId(@Query('contractId', ParseIntPipe) id: number) {
+    return await this.paymentService.getPaymentMethodByContractId(id);
   }
   @Post('update')
   async updatePaymentByContractId(@Body() paymentDto: UpdatePaymentDto) {
@@ -88,7 +88,7 @@ export class PaymentController {
     return await this.paymentService.updatePaymentMethod(id, payment);
   }
   @Post('delete')
-  async deletePaymentByContractId(@Body('id') id: number) {
+  async deletePaymentByContractId(@Body('id', ParseIntPipe) id: number) {
     return await this.paymentService.deletePaymentMethod(id);
   }
 }
@@ -110,8 +110,7 @@ export class InvoiceHeaderController {
     );
   }
   @Get('list')
-  async getCostFormByContractId(@Query('contractId') id: number) {
-    if (!id) return;
+  async getCostFormByContractId(@Query('contractId', ParseIntPipe) id: number) {
     return await this.invoiceHeaderService.getByContractId(id);
   }
   @Post('update')
@@ -121,7 +120,7 @@ export class InvoiceHeaderController {
     return await this.invoiceHeaderService.update(id, invoiceHeader);
   }
   @Post('delete')
-  async deleteInvoiceHeader(@Body('id') id: number) {
+  async deleteInvoiceHeader(@Body('id', ParseIntPipe) id: number) {
     return await this.invoiceHeaderService.delete(id);
   }
 }
@@ -145,8 +144,9 @@ export class InvoiceRecordController {
   }
 
   @Get('list')
-  async getInvoiceRecordByContractId(@Query('contractId') id: number) {
-    if (!id) return [];
+  async getInvoiceRecordByContractId(
+    @Query('contractId', ParseIntPipe) id: number,
+  ) {
     return await this.invoiceRecordService.getByContractId(id);
   }
 
@@ -158,7 +158,7 @@ export class InvoiceRecordController {
   }
 
   @Post('delete')
-  async deleteInvoiceRecord(@Body('id') id: number) {
+  async deleteInvoiceRecord(@Body('id', ParseIntPipe) id: number) {
     return await this.invoiceRecordService.delete(id);
   }
 }
@@ -182,8 +182,9 @@ export class ReceiptRecordController {
   }
 
   @Get('list')
-  async getReceiptRecordByContractId(@Query('contractId') id: number) {
-    if (!id) return [];
+  async getReceiptRecordByContractId(
+    @Query('contractId', ParseIntPipe) id: number,
+  ) {
     return await this.receiptRecordService.getByContractId(id);
   }
 
@@ -195,7 +196,7 @@ export class ReceiptRecordController {
   }
 
   @Post('delete')
-  async deleteReceiptRecord(@Body('id') id: number) {
+  async deleteReceiptRecord(@Body('id', ParseIntPipe) id: number) {
     return await this.receiptRecordService.delete(id);
   }
 }

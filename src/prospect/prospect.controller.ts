@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  ParseIntPipe,
   Post,
   Query,
   Res,
@@ -30,13 +31,8 @@ export class ProspectController {
     return await this.prospectService.addTransaction(prospect);
   }
   @Get('detail')
-  async getProspectDetail(@Query('id') id: number) {
-    if (!id) return null;
+  async getProspectDetail(@Query('id', ParseIntPipe) id: number) {
     return await this.prospectService.findOneWithCostForm(id);
-  }
-  @Get('list')
-  async getProspectList() {
-    return await this.prospectService.findAllWithCostForm();
   }
   @Post('page')
   async getProspectPage(@Body() prospectQueryDto: ProspectQueryDto) {
@@ -69,7 +65,7 @@ export class ProspectController {
   }
 
   @Post('delete')
-  async deleteProspect(@Body('id') id: number) {
+  async deleteProspect(@Body('id', ParseIntPipe) id: number) {
     return await this.prospectService.delete(id);
   }
 }

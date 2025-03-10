@@ -23,7 +23,10 @@ export class UpdateUserDto implements DTO {
 }
 
 export class UpdatePasswordDto {
+  @IsInt()
   id: number;
+  @IsString()
   oldPassword: string;
+  @IsString()
   password: string;
 }

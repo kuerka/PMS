@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  ParseIntPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
 import {
   CreateCollaborationCompanyDto,
   UpdateCollaborationCompanyDto,
@@ -29,12 +36,12 @@ export class CostFormController {
 export class CompanyController {
   constructor(private companyService: CollaborationCompanyService) {}
   @Get('list')
-  async getCompanyByCostFormId(@Query('costId') id: number) {
+  async getCompanyByCostFormId(@Query('costId', ParseIntPipe) id: number) {
     return await this.companyService.getCompanyByCostFormId(id);
   }
 
   @Get('detail')
-  async getCompanyDetail(@Query('id') id: number) {
+  async getCompanyDetail(@Query('id', ParseIntPipe) id: number) {
     return await this.companyService.getCompanyDetail(id);
   }
   @Post('add')
@@ -51,7 +58,7 @@ export class CompanyController {
     return await this.companyService.updateCompany(company);
   }
   @Post('delete')
-  async deleteCompany(@Body('id') id: number) {
+  async deleteCompany(@Body('id', ParseIntPipe) id: number) {
     return await this.companyService.deleteCompany(id);
   }
 }
@@ -69,8 +76,9 @@ export class CompanyInvoiceController {
     );
   }
   @Get('list')
-  async getCompanyInvoiceByCompanyId(@Query('companyId') id: number) {
-    if (!id) return [];
+  async getCompanyInvoiceByCompanyId(
+    @Query('companyId', ParseIntPipe) id: number,
+  ) {
     return await this.companyService.getCompanyInvoiceByCompanyId(id);
   }
   @Post('update')
@@ -79,7 +87,7 @@ export class CompanyInvoiceController {
     return await this.companyService.updateCompanyInvoice(invoice);
   }
   @Post('delete')
-  async deleteCompanyInvoice(@Body('id') id: number) {
+  async deleteCompanyInvoice(@Body('id', ParseIntPipe) id: number) {
     return await this.companyService.deleteCompanyInvoice(id);
   }
 }
@@ -90,8 +98,9 @@ export class CompanyPaymentController {
   constructor(private companyService: CollaborationCompanyService) {}
 
   @Get('list')
-  async getCompanyPaymentByCompanyId(@Query('companyId') id: number) {
-    if (!id) return [];
+  async getCompanyPaymentByCompanyId(
+    @Query('companyId', ParseIntPipe) id: number,
+  ) {
     return await this.companyService.getCompanyPaymentByCompanyId(id);
   }
   @Post('add')
@@ -108,7 +117,7 @@ export class CompanyPaymentController {
     return await this.companyService.updateCompanyPayment(payment);
   }
   @Post('delete')
-  async deleteCompanyPayment(@Body('id') id: number) {
+  async deleteCompanyPayment(@Body('id', ParseIntPipe) id: number) {
     return await this.companyService.deleteCompanyPayment(id);
   }
 }
@@ -118,7 +127,7 @@ export class CompanyPaymentController {
 export class DepartmentController {
   constructor(private departmentService: CollaborationDepartmentService) {}
   @Get('list')
-  async getDepartmentByCostFormId(@Query('id') id: number) {
+  async getDepartmentByCostFormId(@Query('costId', ParseIntPipe) id: number) {
     return await this.departmentService.getDepartmentByCostFormId(id);
   }
   @Post('add')
@@ -138,7 +147,7 @@ export class DepartmentController {
     return await this.departmentService.updateDepartment(department);
   }
   @Post('delete')
-  async deleteDepartment(@Body('id') id: number) {
+  async deleteDepartment(@Body('id', ParseIntPipe) id: number) {
     return await this.departmentService.deleteDepartment(id);
   }
 }
