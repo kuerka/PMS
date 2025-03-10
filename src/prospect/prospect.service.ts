@@ -86,9 +86,6 @@ export class ProspectService {
         });
       }
     }
-
-    console.log('projectDockingStage:', query.projectDockingStage, query);
-
     if (query.projectDockingStage && query.projectDockingStage.length > 0) {
       queryBuilder.andWhere(
         'p.projectDockingStage IN (:...projectDockingStage)',
@@ -110,13 +107,13 @@ export class ProspectService {
         },
       );
     }
-    if (query.assistingBusinessDepartment) {
+
+    const assistant = query.assistingBusinessDepartment as string[] | undefined;
+    if (assistant && assistant?.length > 0) {
       queryBuilder.andWhere(
         'JSON_CONTAINS(p.assistingBusinessDepartment, :assistingBusinessDepartment)',
         {
-          assistingBusinessDepartment: JSON.stringify(
-            query.assistingBusinessDepartment,
-          ),
+          assistingBusinessDepartment: JSON.stringify(assistant),
         },
       );
     }
@@ -178,13 +175,12 @@ export class ProspectService {
 
   async getTotalAccumulated(prospectQueryDto: ProspectQueryDto) {
     const queryBuilder = this.getProspectQuery(prospectQueryDto);
-    const totalCost: object[] | undefined = await queryBuilder
+    return await queryBuilder
       .select(
         'SUM(p.estimated_contract_amount)',
         'totalEstimatedContractAmount',
       )
-      .getRawOne();
-    return totalCost;
+      .getRawOne<object>();
   }
 
   async getFilterExcel(prospectQueryDto: ProspectQueryDto) {
@@ -229,8 +225,7 @@ export class ProspectService {
       });
     }
 
-    const buffer = await workbook.xlsx.writeBuffer();
-    return buffer;
+    return await workbook.xlsx.writeBuffer();
   }
 
   async updateTransaction(id: number, prospect: ProspectProject) {
