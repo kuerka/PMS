@@ -23,7 +23,7 @@ export type FullDto = ProspectProject;
 export class createProspectDto implements DTO {
   @IsString()
   projectName: string;
-  @IsString()
+  @IsDecimal()
   estimatedContractAmount: string | null;
   @IsString()
   businessPersonnel: string;

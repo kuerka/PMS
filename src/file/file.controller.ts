@@ -2,33 +2,34 @@ import {
   Body,
   Controller,
   Get,
+  ParseIntPipe,
   Post,
   Query,
   Res,
   UploadedFile,
   UseInterceptors,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { Public } from 'src/auth/auth.decorators';
 import { FileService } from './file.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { File as FileEntity } from './file.entity';
-
-type FileType = FileEntity['type'];
+import { UploadFileDTO } from './file.dto';
 
 @Public()
 @Controller('file')
+@UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 export class FileController {
   constructor(private fileService: FileService) {}
 
   @Get('list/prospect')
-  async getProspectFiles(@Query('id') id: number) {
-    if (!id) return [];
+  async getProspectFiles(@Query('id', ParseIntPipe) id: number) {
     return await this.fileService.getProspectFiles(id);
   }
 
   @Get('list/contract')
-  async getContractFiles(@Query('id') id: number) {
+  async getContractFiles(@Query('id', ParseIntPipe) id: number) {
     if (!id) return [];
     return await this.fileService.getContractFiles(id);
   }
@@ -37,9 +38,9 @@ export class FileController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadProspectFile(
     @UploadedFile() file: Express.Multer.File,
-    @Body('id') id: number,
-    @Body('type') type: FileType,
+    @Body() uploadFileDTO: UploadFileDTO,
   ) {
+    const { id, type } = uploadFileDTO;
     return await this.fileService.addProspectFile(file, id, type);
   }
 
@@ -47,21 +48,24 @@ export class FileController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadContractFile(
     @UploadedFile() file: Express.Multer.File,
-    @Body('id') id: number,
-    @Body('type') type: FileType,
+    @Body() uploadFileDTO: UploadFileDTO,
   ) {
+    const { id, type } = uploadFileDTO;
     return await this.fileService.addContractFile(file, id, type);
   }
 
   @Get('download')
-  async downloadFile(@Res() res: Response, @Query('id') id: number) {
+  async downloadFile(
+    @Res() res: Response,
+    @Query('id', ParseIntPipe) id: number,
+  ) {
     await this.fileService.downloadFile(id, res);
   }
 
   @Get('batch/prospect')
   async batchDownloadProspectFiles(
     @Res() res: Response,
-    @Query('id') id: number,
+    @Query('id', ParseIntPipe) id: number,
   ) {
     await this.fileService.batchDownloadProspectFile(id, res);
   }
@@ -69,14 +73,13 @@ export class FileController {
   @Get('batch/contract')
   async batchDownloadContractFiles(
     @Res() res: Response,
-    @Query('id') id: number,
+    @Query('id', ParseIntPipe) id: number,
   ) {
     await this.fileService.batchDownloadContractFile(id, res);
   }
 
   @Post('delete')
-  async deleteFile(@Body('id') id: number) {
-    if (!id) return;
+  async deleteFile(@Body('id', ParseIntPipe) id: number) {
     return await this.fileService.delete(id);
   }
 }
