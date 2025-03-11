@@ -12,6 +12,7 @@ import { ContractService } from './services/contract.service';
 import {
   CreateContractDto,
   QueryContractDto,
+  TransitionContractDto,
   UpdateContractDto,
 } from './dto/contract.dto';
 import { Public } from '@/auth/auth.decorators';
@@ -64,6 +65,13 @@ export class ContractController {
   @Post('delete')
   async deleteContract(@Body('id', ParseIntPipe) id: number) {
     return await this.contractService.deleteContractTransition(id);
+  }
+
+  @Post('transition')
+  async addContractTransition(@Body() contractDto: TransitionContractDto) {
+    const prospectId = contractDto.prospectProjectId;
+    const contract = this.contractService.createContract(contractDto);
+    await this.contractService.createContractTransition(prospectId, contract);
   }
 }
 

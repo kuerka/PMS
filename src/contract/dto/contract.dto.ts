@@ -23,9 +23,6 @@ type BondType = Contract['bondType'];
 type ContractExecutionStatus = Contract['contractExecutionStatus'];
 
 export class CreateContractDto implements DTO {
-  @IsOptional()
-  @IsInt()
-  prospectProjectId?: number | null | undefined;
   @IsString()
   contractNumber: string;
   @IsString()
@@ -63,6 +60,44 @@ export class CreateContractDto implements DTO {
   @ValidateNested()
   @Type(() => createCostFormDto)
   productionCostForm: ProductionCostForm;
+}
+
+export class TransitionContractDto implements DTO {
+  @IsInt()
+  prospectProjectId: number;
+  @IsString()
+  contractNumber: string;
+  @IsString()
+  projectName: string;
+  @IsString()
+  projectType: string;
+  @IsString()
+  projectLocation: string;
+  @IsString()
+  owner: string;
+  @IsString()
+  amountType: AmountType;
+  @IsString()
+  remark: string;
+  @IsBoolean()
+  isPreliminaryNumber: boolean;
+  @IsDateString()
+  projectStartDate: string;
+  @IsDateString()
+  projectEndDate: string;
+
+  @IsString()
+  bondType: BondType;
+  @IsDecimal()
+  cashBondAmount: string;
+  @IsDateString()
+  bondExpiryDate: string;
+  @IsDecimal()
+  contractSettlementAmount: string;
+  @IsDecimal()
+  accountsReceivable: string;
+  @IsString()
+  contractExecutionStatus: ContractExecutionStatus;
 }
 
 export class ContractQuery implements DTO {

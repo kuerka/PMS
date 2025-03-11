@@ -17,6 +17,15 @@ import { QueryContractDto } from '../dto/contract.dto';
 import { InvoiceHeaderService } from './invoice-header.service';
 import { InvoiceRecordService } from './invoice-record.service';
 import { ReceiptRecordService } from './receipt-record.service';
+import { CollaborationDepartment } from '@/cost-form/entities/collaboration-department.entity';
+import {
+  transDto,
+  TransitionCompanyDto,
+  TransitionCostDto,
+  TransitionDepartmentDto,
+  TransitionInvoiceDto,
+  TransitionPaymentDto,
+} from '../dto/transition.dto';
 
 @Injectable()
 export class ContractService {
@@ -317,5 +326,67 @@ export class ContractService {
   async deleteContract(id: number, manager?: EntityManager) {
     if (!manager) manager = this.dataSource.manager;
     return await manager.getRepository(Contract).delete(id);
+  }
+
+  // 通过意向合同迁移
+  async createContractTransition(prospectId: number, contract: Contract) {
+    return await this.dataSource.manager.transaction(async (manager) => {
+      const costForm = await manager.getRepository(ProductionCostForm).findOne({
+        where: { prospectProjectId: prospectId },
+        relations: {
+          collaborationDepartments: true,
+          collaborationCompanies: {
+            collaborationCompanyInvoices: true,
+            collaborationCompanyPayments: true,
+          },
+        },
+      });
+      if (!costForm) return;
+      // contract
+      const con = await manager.getRepository(Contract).save(contract);
+      // cost
+      const cost = transDto(TransitionCostDto, costForm);
+      cost.contractId = con.id;
+      const cf = await manager.getRepository(ProductionCostForm).save(cost);
+      // department
+      const departments = costForm.collaborationDepartments;
+      const deps: TransitionDepartmentDto[] = [];
+      for (const department of departments) {
+        const dep = transDto(TransitionDepartmentDto, department);
+        dep.productionCostFormId = cf.id;
+        deps.push(dep);
+      }
+      await manager.getRepository(CollaborationDepartment).insert(deps);
+      //company
+      const companies = costForm.collaborationCompanies;
+      for (const company of companies) {
+        const cop = transDto(TransitionCompanyDto, company);
+        cop.productionCostFormId = cf.id;
+        const coped = await manager
+          .getRepository(CollaborationCompany)
+          .save(cop);
+
+        const invoices = company.collaborationCompanyInvoices;
+        const inv_s: TransitionInvoiceDto[] = [];
+        for (const invoice of invoices) {
+          const inv = transDto(TransitionInvoiceDto, invoice);
+          inv.companyId = coped.id;
+          inv_s.push(inv);
+        }
+
+        const payments = company.collaborationCompanyPayments;
+        const pay_s: TransitionPaymentDto[] = [];
+        for (const payment of payments) {
+          const pay = transDto(TransitionPaymentDto, payment);
+          pay.companyId = coped.id;
+          pay_s.push(pay);
+        }
+
+        await Promise.all([
+          manager.getRepository(CollaborationCompanyInvoice).insert(inv_s),
+          manager.getRepository(CollaborationCompanyPayment).insert(pay_s),
+        ]);
+      }
+    });
   }
 }
