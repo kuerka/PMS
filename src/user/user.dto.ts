@@ -1,10 +1,18 @@
-import { Exclude } from 'class-transformer';
+import { Expose } from 'class-transformer';
 import { Users } from './user.entity';
 import { IsInt, IsString } from 'class-validator';
 
-export class UserNoPasswordDto extends Users {
-  @Exclude()
-  password: string;
+export class UserInfoDTO extends Users {
+  @Expose()
+  id: number;
+  @Expose()
+  name: string;
+  @Expose()
+  phone: string;
+  @Expose()
+  departmentId: string;
+  @Expose()
+  limits: number;
 }
 
 type DTO = Partial<Users>;

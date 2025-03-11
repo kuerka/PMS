@@ -1,5 +1,5 @@
 import { FailedCause } from '@/response-formatter/response-formatter.interceptor';
-import { UserNoPasswordDto } from '@/user/user.dto';
+import { UserInfoDTO } from '@/user/user.dto';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { plainToClass } from 'class-transformer';
@@ -17,7 +17,9 @@ export class AuthService {
     if (user?.password !== password)
       return new FailedCause('Username or password is incorrect');
 
-    const userDto = plainToClass(UserNoPasswordDto, user);
+    const userDto = plainToClass(UserInfoDTO, user, {
+      excludeExtraneousValues: true,
+    });
     const payload = await this.jwtService.signAsync({ ...userDto });
     return { token: payload };
   }

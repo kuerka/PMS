@@ -2,22 +2,18 @@ import {
   Body,
   Controller,
   Get,
-  ParseIntPipe,
   Post,
-  Query,
+  Req,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Roles } from 'src/auth/auth.decorators';
 import { LimitsMap } from 'src/auth/constants';
-import { plainToClass } from 'class-transformer';
-import {
-  UpdatePasswordDto,
-  UpdateUserDto,
-  UserNoPasswordDto,
-} from './user.dto';
+import { UpdatePasswordDto, UpdateUserDto, UserInfoDTO } from './user.dto';
 import { FailedCause } from '@/response-formatter/response-formatter.interceptor';
+import { Request } from 'express';
+import { plainToClass } from 'class-transformer';
 
 @Controller('user')
 @Roles(LimitsMap.admin, LimitsMap.edit, LimitsMap.view)
@@ -26,10 +22,11 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  async getUsersById(@Query('id', ParseIntPipe) id: number) {
-    const user = await this.userService.findById(id);
-    if (!user) return new FailedCause('User not found');
-    return plainToClass(UserNoPasswordDto, user);
+  getUsersById(@Req() request: Request) {
+    const userInfo = plainToClass(UserInfoDTO, request['user'], {
+      excludeExtraneousValues: true,
+    });
+    return userInfo;
   }
 
   @Post('update/info')
