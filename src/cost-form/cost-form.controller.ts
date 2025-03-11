@@ -25,10 +25,17 @@ import {
   CreatePaymentDto,
   UpdatePaymentDto,
 } from './dto/collaboration-company-payment.dto';
+import { CostFormService } from './cost-form.service';
 
+@Public()
 @Controller('costForm')
 export class CostFormController {
-  constructor(private companyService: CollaborationCompanyService) {}
+  constructor(private costFormService: CostFormService) {}
+
+  @Get('detail')
+  async getCostFormDetail(@Query('id', ParseIntPipe) id: number) {
+    return await this.costFormService.getCostFormDetail(id);
+  }
 }
 
 @Public()

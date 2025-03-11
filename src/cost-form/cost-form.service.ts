@@ -22,6 +22,19 @@ export class CostFormService {
     return await manager.getRepository(ProductionCostForm).save(costForm);
   }
 
+  async getCostFormDetail(id: number) {
+    return await this.datasource.getRepository(ProductionCostForm).findOne({
+      where: { id },
+      relations: {
+        collaborationDepartments: true,
+        collaborationCompanies: {
+          collaborationCompanyInvoices: true,
+          collaborationCompanyPayments: true,
+        },
+      },
+    });
+  }
+
   async findByProspectId(prospectProjectId: number) {
     return await this.datasource
       .getRepository(ProductionCostForm)
@@ -36,9 +49,7 @@ export class CostFormService {
 
   async update(costForm: ProductionCostForm, manager?: EntityManager) {
     if (!manager) manager = this.datasource.manager;
-    return await this.datasource
-      .getRepository(ProductionCostForm)
-      .save(costForm);
+    return await manager.getRepository(ProductionCostForm).save(costForm);
   }
 
   async updateByContractId(

@@ -273,7 +273,13 @@ export class ContractService {
       },
       relations: {
         prospectProject: true,
-        productionCostForm: true,
+        productionCostForm: {
+          collaborationDepartments: true,
+          collaborationCompanies: {
+            collaborationCompanyInvoices: true,
+            collaborationCompanyPayments: true,
+          },
+        },
         invoiceHeader: true,
         contractInvoiceRecords: true,
         contractReceiptRecords: true,
