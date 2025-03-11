@@ -14,6 +14,7 @@ export class CollaborationCompanyService {
     private costFormService: CostFormService,
   ) {}
 
+  // Company
   createCompany(company: DeepPartial<CollaborationCompany>) {
     return this.datasource.manager
       .getRepository(CollaborationCompany)
@@ -23,12 +24,6 @@ export class CollaborationCompanyService {
     return await this.datasource.manager
       .getRepository(CollaborationCompany)
       .find({ where: { productionCostFormId: id } });
-  }
-  // Company
-  async getCompanyByCostForm(costFormId: number) {
-    return await this.datasource.manager
-      .getRepository(CollaborationCompany)
-      .findOneBy({ productionCostFormId: costFormId });
   }
 
   async getCompanyDetail(id: number) {
@@ -169,7 +164,7 @@ export class CollaborationCompanyService {
   }
   async getCompanyPaymentByCompanyId(id: number) {
     return await this.datasource.manager
-      .getRepository(CollaborationCompanyInvoice)
+      .getRepository(CollaborationCompanyPayment)
       .find({ where: { companyId: id } });
   }
   async getCompanyByPaymentId(id: number) {
