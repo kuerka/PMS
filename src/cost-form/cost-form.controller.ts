@@ -26,6 +26,8 @@ import {
   UpdatePaymentDto,
 } from './dto/collaboration-company-payment.dto';
 import { CostFormService } from './cost-form.service';
+import { CollaborationCompanyInvoiceService } from './services/collaboration-company-invoice.service';
+import { CollaborationCompanyPaymentService } from './services/collaboration-company-payment.service';
 
 @Public()
 @Controller('costForm')
@@ -73,11 +75,11 @@ export class CompanyController {
 @Public()
 @Controller('costForm/company/invoice')
 export class CompanyInvoiceController {
-  constructor(private companyService: CollaborationCompanyService) {}
+  constructor(private invoiceService: CollaborationCompanyInvoiceService) {}
   @Post('add')
   async addCompanyInvoice(@Body() invoiceDto: CreateInvoiceDto) {
-    const invoice = this.companyService.createInvoice(invoiceDto);
-    return await this.companyService.addCompanyInvoiceByCompanyId(
+    const invoice = this.invoiceService.createInvoice(invoiceDto);
+    return await this.invoiceService.addCompanyInvoiceByCompanyId(
       invoiceDto.companyId,
       invoice,
     );
@@ -86,46 +88,46 @@ export class CompanyInvoiceController {
   async getCompanyInvoiceByCompanyId(
     @Query('companyId', ParseIntPipe) id: number,
   ) {
-    return await this.companyService.getCompanyInvoiceByCompanyId(id);
+    return await this.invoiceService.getCompanyInvoiceByCompanyId(id);
   }
   @Post('update')
   async updateCompanyInvoice(@Body() invoiceDto: UpdateInvoiceDto) {
-    const invoice = this.companyService.createInvoice(invoiceDto);
-    return await this.companyService.updateCompanyInvoice(invoice);
+    const invoice = this.invoiceService.createInvoice(invoiceDto);
+    return await this.invoiceService.updateCompanyInvoice(invoice);
   }
   @Post('delete')
   async deleteCompanyInvoice(@Body('id', ParseIntPipe) id: number) {
-    return await this.companyService.deleteCompanyInvoice(id);
+    return await this.invoiceService.deleteCompanyInvoice(id);
   }
 }
 
 @Public()
 @Controller('costForm/company/payment')
 export class CompanyPaymentController {
-  constructor(private companyService: CollaborationCompanyService) {}
+  constructor(private paymentService: CollaborationCompanyPaymentService) {}
 
   @Get('list')
   async getCompanyPaymentByCompanyId(
     @Query('companyId', ParseIntPipe) id: number,
   ) {
-    return await this.companyService.getCompanyPaymentByCompanyId(id);
+    return await this.paymentService.getCompanyPaymentByCompanyId(id);
   }
   @Post('add')
   async addCompanyPayment(@Body() paymentDto: CreatePaymentDto) {
-    const payment = this.companyService.createPayment(paymentDto);
-    return await this.companyService.addCompanyPaymentByCompanyId(
+    const payment = this.paymentService.createPayment(paymentDto);
+    return await this.paymentService.addCompanyPaymentByCompanyId(
       paymentDto.companyId,
       payment,
     );
   }
   @Post('update')
   async updateCompanyPayment(@Body() paymentDto: UpdatePaymentDto) {
-    const payment = this.companyService.createPayment(paymentDto);
-    return await this.companyService.updateCompanyPayment(payment);
+    const payment = this.paymentService.createPayment(paymentDto);
+    return await this.paymentService.updateCompanyPayment(payment);
   }
   @Post('delete')
   async deleteCompanyPayment(@Body('id', ParseIntPipe) id: number) {
-    return await this.companyService.deleteCompanyPayment(id);
+    return await this.paymentService.deleteCompanyPayment(id);
   }
 }
 
