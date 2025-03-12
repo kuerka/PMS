@@ -43,11 +43,10 @@ export class ProspectProject {
   @Column('json', { name: 'assisting_business_department', nullable: true })
   assistingBusinessDepartment: object | null;
 
-  @Column('tinyint', {
+  @Column('boolean', {
     name: 'is_prior_work_started',
     nullable: true,
     comment: '如果选择“是”，自动扩展附件表单',
-    width: 1,
   })
   isPriorWorkStarted: boolean | null;
 

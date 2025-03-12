@@ -1,6 +1,6 @@
 import { PaginationDto, SortDTO } from '@/pagination/pagination.dto';
 import { ProspectProject } from './prospect.entity';
-import { Exclude, Type } from 'class-transformer';
+import { Exclude, Transform, Type } from 'class-transformer';
 import { ProductionCostForm } from '@/cost-form/entities/cost-form.entity';
 import {
   IsArray,
@@ -99,6 +99,10 @@ class ProspectQuery {
   @IsOptional()
   @IsArray()
   createdAt?: Date[];
+  @IsOptional()
+  @Transform(({ value }): boolean | null => (value === '' ? null : value))
+  @IsBoolean()
+  isPriorWorkStarted: boolean;
 
   @IsOptional()
   @ValidateNested()

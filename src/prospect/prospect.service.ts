@@ -117,7 +117,11 @@ export class ProspectService {
         },
       );
     }
-
+    if (query.isPriorWorkStarted != undefined) {
+      queryBuilder.andWhere('p.isPriorWorkStarted = :isPriorWorkStarted', {
+        isPriorWorkStarted: query.isPriorWorkStarted,
+      });
+    }
     if (
       query.estimatedContractAmount &&
       Array.isArray(query.estimatedContractAmount)
