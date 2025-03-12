@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ProspectProject } from './prospect.entity';
 import { DataSource, DeepPartial, EntityManager } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
@@ -7,9 +7,11 @@ import { CostFormService } from '@/cost-form/cost-form.service';
 import { DepartmentCodeToName } from '@/config/const';
 import * as exceljs from 'exceljs';
 import { arrayNotEmpty, isNotEmpty } from 'class-validator';
+import { Request } from 'express';
 
 @Injectable()
 export class ProspectService {
+  logger = new Logger();
   constructor(
     @InjectDataSource() private dataSource: DataSource,
     private costFormService: CostFormService,
@@ -266,5 +268,13 @@ export class ProspectService {
       await this.costFormService.deleteByProspectId(id, manager);
       await manager.delete(ProspectProject, id);
     });
+  }
+
+  async logHandleProspect(req: Request, id: number, type: string) {
+    const prospect = await this.findById(id);
+    if (!prospect) return;
+
+    const log = `意向合同 [${id}]:"${prospect.projectName}" 将被处理 操作类型: ${type} 请求来源: ${req.ip} 用户: ${JSON.stringify(req['user'])} 项目详情: ${JSON.stringify(prospect)}`;
+    this.logger.log(log);
   }
 }

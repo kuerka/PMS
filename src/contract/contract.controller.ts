@@ -5,6 +5,7 @@ import {
   ParseIntPipe,
   Post,
   Query,
+  Req,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -33,6 +34,7 @@ import {
   CreateReceiptRecordDto,
   UpdateReceiptRecordDto,
 } from './dto/receipt_record.dto';
+import { Request } from 'express';
 
 @Public()
 @Controller('contract')
@@ -58,12 +60,20 @@ export class ContractController {
     return await this.contractService.getContractDetailsById(id);
   }
   @Post('update')
-  async updateContract(@Body() contractDto: UpdateContractDto) {
+  async updateContract(
+    @Body() contractDto: UpdateContractDto,
+    @Req() req: Request,
+  ) {
     const contract = this.contractService.createContract(contractDto);
+    await this.contractService.logHandleCompany(req, contract.id, '修改');
     return await this.contractService.updateContractTransition(contract);
   }
   @Post('delete')
-  async deleteContract(@Body('id', ParseIntPipe) id: number) {
+  async deleteContract(
+    @Body('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+  ) {
+    await this.contractService.logHandleCompany(req, id, '删除');
     return await this.contractService.deleteContractTransition(id);
   }
 

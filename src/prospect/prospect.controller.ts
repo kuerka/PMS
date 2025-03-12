@@ -5,11 +5,12 @@ import {
   ParseIntPipe,
   Post,
   Query,
+  Req,
   Res,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { ProspectService } from './prospect.service';
 import { Public } from '@/auth/auth.decorators';
 import {
@@ -59,13 +60,21 @@ export class ProspectController {
   }
 
   @Post('update')
-  async updateProspect(@Body() prospectDto: UpdateProspectDto) {
+  async updateProspect(
+    @Body() prospectDto: UpdateProspectDto,
+    @Req() req: Request,
+  ) {
     const prospect = this.prospectService.create(prospectDto);
+    await this.prospectService.logHandleProspect(req, prospect.id, '更新');
     return await this.prospectService.updateTransaction(prospect.id, prospect);
   }
 
   @Post('delete')
-  async deleteProspect(@Body('id', ParseIntPipe) id: number) {
+  async deleteProspect(
+    @Body('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+  ) {
+    await this.prospectService.logHandleProspect(req, id, '删除');
     return await this.prospectService.delete(id);
   }
 }
