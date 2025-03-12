@@ -205,9 +205,12 @@ export class ProspectService {
     ];
 
     for (const row of rows) {
+      let leadingName = row.leadingBusinessDepartment;
+      if (row.leadingBusinessDepartment)
+        leadingName = DepartmentCodeToName[row.leadingBusinessDepartment];
+
       const assisting: string[] =
         (row.assistingBusinessDepartment as string[]) ?? [];
-      console.log('assisting:', assisting);
       const assistingBusinessDepartment = assisting
         .map((id) => DepartmentCodeToName[id] ?? id)
         .join(',');
@@ -217,7 +220,7 @@ export class ProspectService {
         projectName: row.projectName,
         estimatedContractAmount: row.estimatedContractAmount,
         businessPersonnel: row.businessPersonnel,
-        leadingBusinessDepartment: row.leadingBusinessDepartment,
+        leadingBusinessDepartment: leadingName,
         assistingBusinessDepartment: assistingBusinessDepartment,
         isPriorWorkStarted: row.isPriorWorkStarted ? '是' : '否',
         projectDockingStage: row.projectDockingStage,
