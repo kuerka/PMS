@@ -6,6 +6,7 @@ import { ProspectQueryDto } from './prospect.dto';
 import { CostFormService } from '@/cost-form/cost-form.service';
 import { DepartmentCodeToName } from '@/config/const';
 import * as exceljs from 'exceljs';
+import { arrayNotEmpty, isNotEmpty } from 'class-validator';
 
 @Injectable()
 export class ProspectService {
@@ -75,7 +76,7 @@ export class ProspectService {
     if (hasCostForm)
       queryBuilder.leftJoinAndSelect('p.productionCostForm', 'costForm');
 
-    if (query.searchValues) {
+    if (arrayNotEmpty(query.searchValues)) {
       const queryStr = query.searchValues
         .filter((val) => val.trim() !== '')
         .map((val) => `(?=.*${val})`)
@@ -86,7 +87,7 @@ export class ProspectService {
         });
       }
     }
-    if (query.projectDockingStage && query.projectDockingStage.length > 0) {
+    if (arrayNotEmpty(query.projectDockingStage)) {
       queryBuilder.andWhere(
         'p.projectDockingStage IN (:...projectDockingStage)',
         {
@@ -109,7 +110,7 @@ export class ProspectService {
     }
 
     const assistant = query.assistingBusinessDepartment as string[] | undefined;
-    if (assistant && assistant?.length > 0) {
+    if (arrayNotEmpty(assistant)) {
       queryBuilder.andWhere(
         'JSON_CONTAINS(p.assistingBusinessDepartment, :assistingBusinessDepartment)',
         {
@@ -117,36 +118,33 @@ export class ProspectService {
         },
       );
     }
-    if (query.isPriorWorkStarted != undefined) {
+    if (isNotEmpty(query.isPriorWorkStarted)) {
       queryBuilder.andWhere('p.isPriorWorkStarted = :isPriorWorkStarted', {
         isPriorWorkStarted: query.isPriorWorkStarted,
       });
     }
-    if (
-      query.estimatedContractAmount &&
-      Array.isArray(query.estimatedContractAmount)
-    ) {
-      if (query.estimatedContractAmount[0] != undefined) {
+    if (arrayNotEmpty(query.estimatedContractAmount)) {
+      if (isNotEmpty(query.estimatedContractAmount[0])) {
         queryBuilder.andWhere('p.estimatedContractAmount >= :minAmount', {
           minAmount: query.estimatedContractAmount[0],
         });
       }
-      if (query.estimatedContractAmount[1] != undefined) {
+      if (isNotEmpty(query.estimatedContractAmount[1])) {
         queryBuilder.andWhere('p.estimatedContractAmount <= :maxAmount', {
           maxAmount: query.estimatedContractAmount[1],
         });
       }
     }
 
-    if (query.createdAt && Array.isArray(query.createdAt)) {
-      if (query.createdAt[0] != undefined) {
+    if (arrayNotEmpty(query.createdAt)) {
+      if (isNotEmpty(query.createdAt?.[0])) {
         queryBuilder.andWhere('p.createdAt >= :startDate', {
-          startDate: query.createdAt[0],
+          startDate: query.createdAt?.[0],
         });
       }
-      if (query.createdAt[1] != undefined) {
+      if (isNotEmpty(query.createdAt?.[1])) {
         queryBuilder.andWhere('p.createdAt <= :endDate', {
-          endDate: query.createdAt[1],
+          endDate: query.createdAt?.[1],
         });
       }
     }

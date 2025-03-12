@@ -26,6 +26,7 @@ import {
   TransitionInvoiceDto,
   TransitionPaymentDto,
 } from '../dto/transition.dto';
+import { arrayNotEmpty, isNotEmpty } from 'class-validator';
 
 @Injectable()
 export class ContractService {
@@ -66,7 +67,7 @@ export class ContractService {
       .getRepository(Contract)
       .createQueryBuilder('c');
 
-    if (query.searchValues) {
+    if (arrayNotEmpty(query.searchValues)) {
       const queryStr = query.searchValues
         .filter((val) => val.trim() !== '')
         .map((val) => `(?=.*${val})`)
@@ -78,7 +79,7 @@ export class ContractService {
       }
     }
 
-    if (query.projectType && query.projectType.length > 0) {
+    if (arrayNotEmpty(query.projectType)) {
       queryBuilder.andWhere('c.projectType IN (:...projectType)', {
         projectType: query.projectType,
       });
@@ -98,13 +99,13 @@ export class ContractService {
         amountType: query.amountType,
       });
     }
-    if (query.projectDate && Array.isArray(query.projectDate)) {
-      if (query.projectDate[0] != undefined) {
+    if (arrayNotEmpty(query.projectDate)) {
+      if (isNotEmpty(query.projectDate[0])) {
         queryBuilder.andWhere('c.projectStartDate >= :startDate', {
           startDate: query.projectDate[0],
         });
       }
-      if (query.projectDate[1] != undefined) {
+      if (isNotEmpty(query.projectDate[1])) {
         queryBuilder.andWhere('c.projectEndDate <= :endDate', {
           endDate: query.projectDate[1],
         });
@@ -115,35 +116,32 @@ export class ContractService {
         bondType: query.bondType,
       });
     }
-    if (query.cashBondAmount && Array.isArray(query.cashBondAmount)) {
-      if (query.cashBondAmount[0] != undefined) {
+    if (arrayNotEmpty(query.cashBondAmount)) {
+      if (isNotEmpty(query.cashBondAmount[0])) {
         queryBuilder.andWhere('c.cashBondAmount >= :minCashBondAmount', {
           minCashBondAmount: query.cashBondAmount[0],
         });
       }
-      if (query.cashBondAmount[1] != undefined) {
+      if (arrayNotEmpty(query.cashBondAmount[1])) {
         queryBuilder.andWhere('c.cashBondAmount <= :maxCashBondAmount', {
           maxCashBondAmount: query.cashBondAmount[1],
         });
       }
     }
-    if (query.bondExpiryDate && Array.isArray(query.bondExpiryDate)) {
-      if (query.bondExpiryDate[0] != undefined) {
+    if (arrayNotEmpty(query.bondExpiryDate)) {
+      if (isNotEmpty(query.bondExpiryDate[0])) {
         queryBuilder.andWhere('c.bondExpiryDate >= :minBondExpiryDate', {
           minBondExpiryDate: query.bondExpiryDate[0],
         });
       }
-      if (query.bondExpiryDate[1] != undefined) {
+      if (isNotEmpty(query.bondExpiryDate[1])) {
         queryBuilder.andWhere('c.bondExpiryDate <= :maxBondExpiryDate', {
           maxBondExpiryDate: query.bondExpiryDate[1],
         });
       }
     }
-    if (
-      query.contractSettlementAmount &&
-      Array.isArray(query.contractSettlementAmount)
-    ) {
-      if (query.contractSettlementAmount[0] != undefined) {
+    if (arrayNotEmpty(query.contractSettlementAmount)) {
+      if (isNotEmpty(query.contractSettlementAmount[0])) {
         queryBuilder.andWhere(
           'c.contractSettlementAmount >= :minSettlementAmount',
           {
@@ -151,7 +149,7 @@ export class ContractService {
           },
         );
       }
-      if (query.contractSettlementAmount[1] != undefined) {
+      if (isNotEmpty(query.contractSettlementAmount[1])) {
         queryBuilder.andWhere(
           'c.contractSettlementAmount <= :maxSettlementAmount',
           {
@@ -160,8 +158,8 @@ export class ContractService {
         );
       }
     }
-    if (query.accountsReceivable && Array.isArray(query.accountsReceivable)) {
-      if (query.accountsReceivable[0] != undefined) {
+    if (arrayNotEmpty(query.accountsReceivable)) {
+      if (isNotEmpty(query.accountsReceivable[0])) {
         queryBuilder.andWhere(
           'c.accountsReceivable >= :minAccountsReceivable',
           {
@@ -169,7 +167,7 @@ export class ContractService {
           },
         );
       }
-      if (query.accountsReceivable[1] != undefined) {
+      if (isNotEmpty(query.accountsReceivable[1])) {
         queryBuilder.andWhere(
           'c.accountsReceivable <= :maxAccountsReceivable',
           {
@@ -178,10 +176,7 @@ export class ContractService {
         );
       }
     }
-    if (
-      query.contractExecutionStatus &&
-      query.contractExecutionStatus.length > 0
-    ) {
+    if (arrayNotEmpty(query.contractExecutionStatus)) {
       queryBuilder.andWhere(
         'c.contractExecutionStatus IN (:...contractExecutionStatus)',
         {
