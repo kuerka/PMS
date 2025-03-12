@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { CollaborationCompanyInvoiceService } from './collaboration-company-invoice.service';
 import { CollaborationCompanyPaymentService } from './collaboration-company-payment.service';
+import { CostFormAccumulatedService } from './costForm-accumulated.service';
 
 @Injectable()
 export class CollaborationCompanyService {
@@ -11,6 +12,7 @@ export class CollaborationCompanyService {
     @InjectDataSource() private datasource: DataSource,
     private invoiceService: CollaborationCompanyInvoiceService,
     private paymentService: CollaborationCompanyPaymentService,
+    private accumulatedService: CostFormAccumulatedService,
   ) {}
 
   // Company
@@ -57,10 +59,22 @@ export class CollaborationCompanyService {
 
   async deleteCompany(id: number, manager?: EntityManager) {
     if (!manager) manager = this.datasource.manager;
+    const company = await manager
+      .getRepository(CollaborationCompany)
+      .findOneBy({ id });
+    if (!company) return;
+    const costId = company.productionCostFormId;
+
     return await manager.transaction(async (manager) => {
-      await this.invoiceService.deleteInvoiceByCompanyId(id, manager);
-      await this.paymentService.deletePaymentByCompanyId(id, manager);
+      await Promise.all([
+        this.invoiceService.deleteInvoiceByCompanyId(id, manager),
+        this.paymentService.deletePaymentByCompanyId(id, manager),
+      ]);
       await manager.delete(CollaborationCompany, id);
+      await Promise.all([
+        this.accumulatedService.updateAccumulatedInvoice(costId!, manager),
+        this.accumulatedService.updateAccumulatedReceipt(costId!, manager),
+      ]);
     });
   }
 

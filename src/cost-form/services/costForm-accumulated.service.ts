@@ -5,13 +5,13 @@ import { DataSource, EntityManager } from 'typeorm';
 @Injectable()
 export class CostFormAccumulatedService {
   constructor(@InjectDataSource() private datasource: DataSource) {}
-  async updateAccumulatedInvoice(id: number, manager?: EntityManager) {
+  async updateAccumulatedInvoice(costId: number, manager?: EntityManager) {
     if (!manager) manager = this.datasource.manager;
-    await manager.query('CALL sum_collaboration_invoice(?)', [id]);
+    await manager.query('CALL sum_collaboration_invoice(?)', [costId]);
   }
 
-  async updateAccumulatedReceipt(id: number, manager: EntityManager) {
+  async updateAccumulatedReceipt(costId: number, manager: EntityManager) {
     if (!manager) manager = this.datasource.manager;
-    await manager.query('CALL sum_collaboration_payment(?)', [id]);
+    await manager.query('CALL sum_collaboration_payment(?)', [costId]);
   }
 }
