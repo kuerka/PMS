@@ -1,15 +1,19 @@
+import { handleRequestLogger } from '@/logger/logger';
 import {
   ArgumentsHost,
   Catch,
   ExceptionFilter,
   HttpException,
+  Logger,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 @Catch()
 export class ResponseFormatterFilter implements ExceptionFilter {
+  private readonly logger = new Logger();
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
+    const request: Request = ctx.getRequest();
     const response: Response = ctx.getResponse();
 
     console.log(exception);
@@ -22,6 +26,8 @@ export class ResponseFormatterFilter implements ExceptionFilter {
       message,
       data: null,
     };
+
+    handleRequestLogger(this.logger, request, status);
 
     response.status(status);
     response.send(errorResponse);

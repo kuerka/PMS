@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import {
   DataSource,
@@ -27,9 +27,11 @@ import {
   TransitionPaymentDto,
 } from '../dto/transition.dto';
 import { arrayNotEmpty, isNotEmpty } from 'class-validator';
+import { Request } from 'express';
 
 @Injectable()
 export class ContractService {
+  private readonly logger = new Logger();
   constructor(
     @InjectDataSource() private dataSource: DataSource,
     private costFormService: CostFormService,
@@ -55,6 +57,12 @@ export class ContractService {
   async addContract(contract: Contract, manager?: EntityManager) {
     if (!manager) manager = this.dataSource.manager;
     return await manager.getRepository(Contract).save(contract);
+  }
+
+  async getById(id: number) {
+    return await this.dataSource.manager
+      .getRepository(Contract)
+      .findOneBy({ id });
   }
 
   async getContractPage(queryDto: QueryContractDto) {
@@ -383,5 +391,13 @@ export class ContractService {
         ]);
       }
     });
+  }
+
+  async logHandleCompany(req: Request, id: number, type: string) {
+    const company = await this.getById(id);
+    if (!company) return;
+
+    const log = `意向合同 [${id}]:"${company.projectName}" 将被处理 操作类型: ${type} 请求来源: ${req.ip} 用户: ${JSON.stringify(req['user'])} 项目详情: ${JSON.stringify(company)}`;
+    this.logger.log(log);
   }
 }
