@@ -7,17 +7,22 @@ import {
   Query,
   Res,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { Public } from 'src/auth/auth.decorators';
+import { Public, Roles } from 'src/auth/auth.decorators';
 import { FileService } from './file.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadFileDTO } from './file.dto';
+import { AuthCookieGuard } from '@/auth/auth-cookie.gurad';
+import { AnyRole } from '@/auth/constants';
 
 @Public()
+@Roles(...AnyRole)
+@UseGuards(AuthCookieGuard)
 @Controller('file')
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 export class FileController {

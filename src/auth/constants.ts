@@ -4,6 +4,7 @@ export const LimitsMap: Record<string, limits> = {
   edit: 1,
   view: 2,
 };
+export const AnyRole = Object.values(LimitsMap);
 
 export type JwtUserInfo = {
   id: number;

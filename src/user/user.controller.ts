@@ -9,14 +9,14 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Roles } from 'src/auth/auth.decorators';
-import { LimitsMap } from 'src/auth/constants';
+import { AnyRole } from 'src/auth/constants';
 import { UpdatePasswordDto, UpdateUserDto, UserInfoDTO } from './user.dto';
 import { FailedCause } from '@/response-formatter/response-formatter.interceptor';
 import { Request } from 'express';
 import { plainToClass } from 'class-transformer';
 
 @Controller('user')
-@Roles(LimitsMap.admin, LimitsMap.edit, LimitsMap.view)
+@Roles(...AnyRole)
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 export class UserController {
   constructor(private readonly userService: UserService) {}
