@@ -19,7 +19,7 @@ export class InvoiceHeaderService {
     if (!manager) manager = this.dataSource.manager;
 
     invoiceHeader.contractId = id;
-    return await manager.getRepository(InvoiceHeader).insert(invoiceHeader);
+    return await manager.getRepository(InvoiceHeader).save(invoiceHeader);
   }
 
   async getByContractId(id: number, manager?: EntityManager) {

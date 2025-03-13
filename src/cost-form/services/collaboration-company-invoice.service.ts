@@ -41,7 +41,7 @@ export class CollaborationCompanyInvoiceService {
   }
   async addCompanyInvoiceByCompanyId(
     companyId: number,
-    companyInvoice: CollaborationCompanyInvoice,
+    invoice: CollaborationCompanyInvoice,
     manager?: EntityManager,
   ) {
     if (!manager) manager = this.datasource.manager;
@@ -51,8 +51,9 @@ export class CollaborationCompanyInvoiceService {
     const cId = company.productionCostFormId;
 
     return await manager.transaction(async (manager) => {
-      await manager.insert(CollaborationCompanyInvoice, companyInvoice);
+      const saved = await manager.save(CollaborationCompanyInvoice, invoice);
       await this.accumulatedService.updateAccumulatedInvoice(cId!, manager);
+      return saved;
     });
   }
   async updateCompanyInvoice(

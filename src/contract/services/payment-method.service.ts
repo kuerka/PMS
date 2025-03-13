@@ -19,7 +19,7 @@ export class PaymentMethodService {
 
     return await manager
       .getRepository(ContractPaymentMethod)
-      .insert(paymentMethod);
+      .save(paymentMethod);
   }
 
   async getPaymentMethodByContractId(

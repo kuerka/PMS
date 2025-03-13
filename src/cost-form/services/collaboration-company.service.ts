@@ -46,7 +46,7 @@ export class CollaborationCompanyService {
   ) {
     if (!manager) manager = this.datasource.manager;
 
-    await manager.getRepository(CollaborationCompany).insert(company);
+    return await manager.getRepository(CollaborationCompany).save(company);
   }
 
   async updateCompany(company: CollaborationCompany, manager?: EntityManager) {

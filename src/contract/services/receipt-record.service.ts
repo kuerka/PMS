@@ -25,8 +25,11 @@ export class ReceiptRecordService {
 
     receiptRecord.contractId = id;
     await manager.transaction(async (manager) => {
-      await manager.getRepository(ContractReceiptRecord).insert(receiptRecord);
+      const saved = await manager
+        .getRepository(ContractReceiptRecord)
+        .insert(receiptRecord);
       await this.accumulateService.updateAccumulateReceipt(id, manager);
+      return saved;
     });
   }
 

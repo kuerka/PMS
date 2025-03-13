@@ -8,6 +8,7 @@ import { DepartmentCodeToName } from '@/config/const';
 import * as exceljs from 'exceljs';
 import { arrayNotEmpty, isNotEmpty } from 'class-validator';
 import { Request } from 'express';
+import { ProductionCostForm } from '@/cost-form/entities/cost-form.entity';
 
 @Injectable()
 export class ProspectService {
@@ -23,12 +24,15 @@ export class ProspectService {
 
   async addTransaction(prospect: ProspectProject) {
     return await this.dataSource.manager.transaction(async (manager) => {
-      await this.add(prospect, manager);
+      const saved = await this.add(prospect, manager);
+      let savedForm: ProductionCostForm | null = null;
       if (prospect.isPriorWorkStarted) {
         const form = this.costFormService.create(prospect.productionCostForm);
         form.prospectProject = prospect;
-        await this.costFormService.add(form, manager);
+        savedForm = await this.costFormService.add(form, manager);
       }
+      if (savedForm) saved.productionCostForm.id = savedForm.id;
+      return saved;
     });
   }
 
