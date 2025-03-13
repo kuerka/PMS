@@ -12,3 +12,10 @@ export class UploadFileDTO {
   @IsString()
   type: FileType;
 }
+
+export class UpdateTypeDTO {
+  @IsInt()
+  id: number;
+  @IsString()
+  type: FileType;
+}
