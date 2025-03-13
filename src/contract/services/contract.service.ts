@@ -48,10 +48,12 @@ export class ContractService {
   async addContractTransition(contract: Contract) {
     return await this.dataSource.manager.transaction(async (manager) => {
       const { productionCostForm } = contract;
-      const res = await this.addContract(contract, manager);
+      const saved = await this.addContract(contract, manager);
       const costForm = this.costFormService.create(productionCostForm);
-      costForm.contract = res;
-      await this.costFormService.add(costForm, manager);
+      costForm.contract = contract;
+      const savedForm = await this.costFormService.add(costForm, manager);
+      if (savedForm) saved.productionCostForm.id = savedForm.id;
+      return saved;
     });
   }
   async addContract(contract: Contract, manager?: EntityManager) {
