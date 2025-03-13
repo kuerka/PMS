@@ -54,6 +54,12 @@ export class FileController {
     return await this.fileService.addContractFile(file, id, type);
   }
 
+  @Post('update/type')
+  async updateFileType(@Body() updateDTO: UploadFileDTO) {
+    const { id, type } = updateDTO;
+    return await this.fileService.updateFileType(id, type);
+  }
+
   @Get('download')
   async downloadFile(
     @Res() res: Response,

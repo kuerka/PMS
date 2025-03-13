@@ -36,7 +36,7 @@ export class FileService {
     const fileEntity = this.fileRepository.create();
     fileEntity.prospectProjectId = id;
     fileEntity.type = type;
-    const prefix = `prospect/${id}/${type}`;
+    const prefix = `prospect/${id}`;
     await this.add(file, fileEntity, prefix);
   }
 
@@ -44,7 +44,7 @@ export class FileService {
     const fileEntity = this.fileRepository.create();
     fileEntity.contractId = id;
     fileEntity.type = type;
-    const prefix = `contract/${id}/${type}`;
+    const prefix = `contract/${id}`;
     await this.add(file, fileEntity, prefix);
   }
 
@@ -71,10 +71,14 @@ export class FileService {
     });
   }
 
+  async updateFileType(id: number, type: FileType) {
+    return await this.fileRepository.update(id, { type });
+  }
+
   async downloadFile(id: number, res: Response) {
     const fileEntity = await this.fileRepository.findOneBy({ id });
-    if (!fileEntity) return;
-    if (!fs.existsSync(fileEntity.path!)) return;
+    if (!fileEntity) throw new Error('File not found');
+    if (!fs.existsSync(fileEntity.path!)) throw new Error('File not found');
 
     const filename = encodeURIComponent(fileEntity.name!);
     res.setHeader('Content-Type', 'application/octet-stream');
