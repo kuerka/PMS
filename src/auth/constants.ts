@@ -4,6 +4,10 @@ export const LimitsMap: Record<string, limits> = {
   edit: 1,
   view: 2,
 };
+export const LIMIT_ADMIN = LimitsMap.admin;
+export const LIMIT_EDIT = LimitsMap.edit;
+export const LIMIT_VIEW = LimitsMap.view;
+export const ANY_ROLE = Object.values(LimitsMap);
 
 export type JwtUserInfo = {
   id: number;

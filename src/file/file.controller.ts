@@ -12,12 +12,13 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { Public } from 'src/auth/auth.decorators';
+import { Roles } from 'src/auth/auth.decorators';
 import { FileService } from './file.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadFileDTO } from './file.dto';
+import { ANY_ROLE, LIMIT_ADMIN } from '@/auth/constants';
 
-@Public()
+@Roles(...ANY_ROLE)
 @Controller('file')
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 export class FileController {
@@ -34,6 +35,7 @@ export class FileController {
     return await this.fileService.getContractFiles(id);
   }
 
+  @Roles(LIMIT_ADMIN)
   @Post('upload/prospect')
   @UseInterceptors(FileInterceptor('file'))
   async uploadProspectFile(
@@ -44,6 +46,7 @@ export class FileController {
     return await this.fileService.addProspectFile(file, id, type);
   }
 
+  @Roles(LIMIT_ADMIN)
   @Post('upload/contract')
   @UseInterceptors(FileInterceptor('file'))
   async uploadContractFile(
@@ -54,6 +57,7 @@ export class FileController {
     return await this.fileService.addContractFile(file, id, type);
   }
 
+  @Roles(LIMIT_ADMIN)
   @Post('update/type')
   async updateFileType(@Body() updateDTO: UploadFileDTO) {
     const { id, type } = updateDTO;
@@ -84,6 +88,7 @@ export class FileController {
     await this.fileService.batchDownloadContractFile(id, res);
   }
 
+  @Roles(LIMIT_ADMIN)
   @Post('delete')
   async deleteFile(@Body('id', ParseIntPipe) id: number) {
     return await this.fileService.delete(id);

@@ -12,25 +12,27 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ProspectService } from './prospect.service';
-import { Public } from '@/auth/auth.decorators';
+import { Roles } from '@/auth/auth.decorators';
 import {
   createProspectDto,
   ProspectQueryDto,
   UpdateProspectDto,
 } from './prospect.dto';
+import { ANY_ROLE, LIMIT_ADMIN } from '@/auth/constants';
 
-// TODO 后续添加权限
-@Public()
+@Roles(...ANY_ROLE)
 @Controller('prospect')
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 export class ProspectController {
   constructor(private prospectService: ProspectService) {}
 
+  @Roles(LIMIT_ADMIN)
   @Post('add')
   async createProspect(@Body() prospectDto: createProspectDto) {
     const prospect = this.prospectService.create(prospectDto);
     return await this.prospectService.addTransaction(prospect);
   }
+  @Roles(LIMIT_ADMIN)
   @Get('detail')
   async getProspectDetail(@Query('id', ParseIntPipe) id: number) {
     return await this.prospectService.findOneWithCostForm(id);
@@ -58,7 +60,7 @@ export class ProspectController {
     });
     res.end(buffer);
   }
-
+  @Roles(LIMIT_ADMIN)
   @Post('update')
   async updateProspect(
     @Body() prospectDto: UpdateProspectDto,
@@ -69,6 +71,7 @@ export class ProspectController {
     return await this.prospectService.updateTransaction(prospect.id, prospect);
   }
 
+  @Roles(LIMIT_ADMIN)
   @Post('delete')
   async deleteProspect(
     @Body('id', ParseIntPipe) id: number,
