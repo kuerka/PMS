@@ -52,6 +52,22 @@ export class CostFormService {
     return await manager.getRepository(ProductionCostForm).save(costForm);
   }
 
+  async updateCostProgress(
+    id: number,
+    progress: string,
+    description: string,
+    manager?: EntityManager,
+  ) {
+    if (!manager) manager = this.datasource.manager;
+    await manager.getRepository(ProductionCostForm).update(
+      { id },
+      {
+        projectCompletionProgress: progress,
+        projectCompletionDescription: description,
+      },
+    );
+  }
+
   async updateByContractId(
     id: number,
     costForm: ProductionCostForm,

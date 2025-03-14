@@ -1,5 +1,5 @@
 import { ProductionCostForm } from '../entities/cost-form.entity';
-import { IsString } from 'class-validator';
+import { IsInt, IsString } from 'class-validator';
 
 type DTO = Partial<ProductionCostForm>;
 
@@ -35,4 +35,13 @@ export class updateCostFormDto implements DTO {
   totalSettlementAmount: string;
   @IsString()
   remark: string;
+}
+
+export class updateCostProgressDto implements DTO {
+  @IsInt()
+  id: number;
+  @IsString()
+  projectCompletionProgress: string;
+  @IsString()
+  projectCompletionDescription: string;
 }

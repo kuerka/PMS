@@ -28,6 +28,7 @@ import {
 import { CostFormService } from './cost-form.service';
 import { CollaborationCompanyInvoiceService } from './services/collaboration-company-invoice.service';
 import { CollaborationCompanyPaymentService } from './services/collaboration-company-payment.service';
+import { updateCostProgressDto } from './dto/cost-form.dto';
 
 @Public()
 @Controller('costForm')
@@ -37,6 +38,16 @@ export class CostFormController {
   @Get('detail')
   async getCostFormDetail(@Query('id', ParseIntPipe) id: number) {
     return await this.costFormService.getCostFormDetail(id);
+  }
+  @Post('update/progress')
+  async updateProgress(@Body() updateDto: updateCostProgressDto) {
+    const { id, projectCompletionProgress, projectCompletionDescription } =
+      updateDto;
+    return await this.costFormService.updateCostProgress(
+      id,
+      projectCompletionProgress,
+      projectCompletionDescription,
+    );
   }
 }
 
