@@ -14,6 +14,7 @@ import { UpdatePasswordDto, UpdateUserDto, UserInfoDTO } from './user.dto';
 import { FailedCause } from '@/response-formatter/response-formatter.interceptor';
 import { Request } from 'express';
 import { plainToClass } from 'class-transformer';
+import { Users } from './user.entity';
 
 @Controller('user')
 @Roles(LimitsMap.admin, LimitsMap.edit, LimitsMap.view)
@@ -23,21 +24,31 @@ export class UserController {
 
   @Get()
   getUsersById(@Req() request: Request) {
-    const userInfo = plainToClass(UserInfoDTO, request['user'], {
+    const { id } = <Users>request['user'];
+    if (!id) return;
+    const user = this.userService.findById(id);
+    const userInfo = plainToClass(UserInfoDTO, user, {
       excludeExtraneousValues: true,
     });
     return userInfo;
   }
 
   @Post('update/info')
-  async updateInfo(@Body() userDto: UpdateUserDto) {
+  async updateInfo(@Body() userDto: UpdateUserDto, @Req() request: Request) {
+    const { id } = <Users>request['user'];
+    if (!id) return;
     const user = this.userService.create(userDto);
-    await this.userService.updateInfo(userDto.id, user);
+    await this.userService.updateInfo(id, user);
   }
 
   @Post('update/password')
-  async updatePassword(@Body() passwordDto: UpdatePasswordDto) {
-    const { id, oldPassword, password } = passwordDto;
+  async updatePassword(
+    @Body() passwordDto: UpdatePasswordDto,
+    @Req() request: Request,
+  ) {
+    const { id } = <Users>request['user'];
+    if (!id) return;
+    const { oldPassword, password } = passwordDto;
     const users = await this.userService.findById(id);
     if (users?.password !== oldPassword)
       return new FailedCause('Old password is incorrect');
