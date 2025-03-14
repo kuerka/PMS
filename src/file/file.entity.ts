@@ -77,10 +77,10 @@ export class File {
   @Column('int', { name: 'size', nullable: true })
   size: number | null;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: 'created_at', type: 'tinytext' })
   createdAt: Date | null;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: 'updated_at', type: 'tinytext' })
   updatedAt: Date | null;
 
   @ManyToOne(

@@ -36,10 +36,10 @@ export class CollaborationCompanyInvoice {
   @Column('date', { name: 'invoice_time', nullable: true })
   invoiceTime: string | null;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: 'created_at', type: 'tinytext' })
   createdAt: Date | null;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: 'updated_at', type: 'tinytext' })
   updatedAt: Date | null;
 
   @ManyToOne(

@@ -40,10 +40,10 @@ export class InvoiceHeader {
   @Column('mediumtext', { name: 'address', nullable: true })
   address: string | null;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: 'created_at', type: 'tinytext' })
   createdAt: Date | null;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: 'updated_at', type: 'tinytext' })
   updatedAt: Date | null;
 
   @Column('int', { name: 'contract_id', nullable: true })

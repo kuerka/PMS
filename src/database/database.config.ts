@@ -8,6 +8,7 @@ const OrmConfig: TypeOrmModuleOptions = {
   username: 'root',
   password: '25362565k',
   database: 'pms',
+  dateStrings: true,
   entities: [path.join(__dirname, '../**/*.entity{.ts,.js}')],
   synchronize: false,
   logging: ['query'],

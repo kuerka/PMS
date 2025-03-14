@@ -137,10 +137,10 @@ export class Contract {
   })
   accumulatedReceiptAmount: string | null;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: 'created_at', type: 'tinytext' })
   createdAt: Date | null;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: 'updated_at', type: 'tinytext' })
   updatedAt: Date | null;
 
   @Column('mediumtext', { name: 'remark', nullable: true })

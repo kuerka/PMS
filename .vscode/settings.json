@@ -4,6 +4,7 @@
         "GHZX",
         "mediumtext",
         "Streamable",
-        "tinyint"
+        "tinyint",
+        "tinytext"
     ]
 }

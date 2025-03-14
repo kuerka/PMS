@@ -57,10 +57,10 @@ export class ContractPaymentMethod {
   })
   accountsStatus: boolean | null;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: 'created_at', type: 'tinytext' })
   createdAt: Date | null;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: 'updated_at', type: 'tinytext' })
   updatedAt: Date | null;
 
   @ManyToOne(() => Contract, (contract) => contract.contractPaymentMethods, {
