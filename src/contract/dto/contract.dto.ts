@@ -254,6 +254,9 @@ export class UpdateContractDto implements DTO {
   @IsDecimal()
   contractSettlementAmount: string;
   @IsOptional()
+  @IsBoolean()
+  isContractSettled: boolean;
+  @IsOptional()
   @IsDecimal()
   accountsReceivable: string;
   @IsOptional()

@@ -102,6 +102,14 @@ export class Contract {
   })
   contractSettlementAmount: string | null;
 
+  @Column('tinyint', {
+    name: 'is_contract_settled',
+    nullable: true,
+    comment: '标记单价合同结算是否已经完成',
+    width: 1,
+  })
+  isContractSettled: boolean | null;
+
   @Column('decimal', {
     name: 'accounts_receivable',
     nullable: true,

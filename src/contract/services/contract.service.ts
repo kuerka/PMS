@@ -29,6 +29,12 @@ import {
 import { arrayNotEmpty, isNotEmpty } from 'class-validator';
 import { Request } from 'express';
 
+type CompanyCount = {
+  id: number;
+  costId: number;
+  count: number;
+};
+
 @Injectable()
 export class ContractService {
   private readonly logger = new Logger();
@@ -205,7 +211,10 @@ export class ContractService {
 
     const queryBuilder = this.getContractQueryBuilder(queryDto);
 
-    queryBuilder.leftJoinAndSelect('c.productionCostForm', 'costForm');
+    queryBuilder
+      .leftJoinAndSelect('c.productionCostForm', 'costForm')
+      .leftJoinAndSelect('costForm.collaborationDepartments', 'departments')
+      .leftJoinAndSelect('costForm.collaborationCompanies', 'companies');
 
     if (prop && order) {
       const _order = order === 'ASC' ? 'ASC' : 'DESC';
@@ -213,6 +222,9 @@ export class ContractService {
     }
     queryBuilder.skip((page - 1) * limit).take(limit);
     const [data, total] = await queryBuilder.getManyAndCount();
+
+    await this.combineCompanyCount(data);
+
     return {
       data,
       total,
@@ -278,6 +290,60 @@ export class ContractService {
 
     const list: object[] = await resultQuery.getRawMany();
     return list;
+  }
+
+  async getCompanyCount(costIds: number[]) {
+    const queryInvoice = this.dataSource
+      .createQueryBuilder()
+      .select('cc.id', 'id')
+      .addSelect('cc.productionCostFormId', 'costId')
+      .addSelect('SUM(cci.invoiceAmount)', 'count')
+      .from(CollaborationCompany, 'cc')
+      .leftJoin(CollaborationCompanyInvoice, 'cci', 'cci.companyId=cc.id')
+      .where('cc.productionCostFormId IN (:...costIds)', { costIds })
+      .groupBy('cc.id')
+      .getRawMany();
+    const queryPayment = this.dataSource
+      .createQueryBuilder()
+      .select('cc.id', 'id')
+      .addSelect('cc.productionCostFormId', 'costId')
+      .addSelect('SUM(ccp.paymentAmount)', 'count')
+      .from(CollaborationCompany, 'cc')
+      .leftJoin(CollaborationCompanyPayment, 'ccp', 'ccp.companyId=cc.id')
+      .where('cc.productionCostFormId IN (:...costIds)', { costIds })
+      .groupBy('cc.id')
+      .getRawMany();
+    const res = await Promise.all([queryInvoice, queryPayment]);
+    return {
+      invoice: res[0] as CompanyCount[],
+      payment: res[1] as CompanyCount[],
+    };
+  }
+
+  async combineCompanyCount(data: Contract[]) {
+    const costIds = data
+      .map((item) => item.productionCostForm?.id)
+      .filter((i) => i);
+    const { invoice, payment } = await this.getCompanyCount(costIds);
+    console.log(invoice, payment);
+    for (const { id, costId, count } of invoice) {
+      const contract = data.find((c) => c.productionCostForm.id === costId);
+      if (!contract) continue;
+      const cost = contract.productionCostForm;
+
+      const company = cost.collaborationCompanies.find((c) => c.id === id);
+      if (!company) continue;
+      company.invoiceCount = count;
+    }
+    for (const { id, costId, count } of payment) {
+      const contract = data.find((c) => c.productionCostForm.id === costId);
+      if (!contract) continue;
+      const cost = contract.productionCostForm;
+
+      const company = cost.collaborationCompanies.find((c) => c.id === id);
+      if (!company) continue;
+      company.paymentCount = count;
+    }
   }
 
   async getContractDetailsById(id: number) {

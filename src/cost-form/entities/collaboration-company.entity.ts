@@ -101,4 +101,8 @@ export class CollaborationCompany {
       collaborationCompanyPayment.CollaborationCompany,
   )
   collaborationCompanyPayments: CollaborationCompanyPayment[];
+
+  // extra fields
+  invoiceCount?: number;
+  paymentCount?: number;
 }
