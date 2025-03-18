@@ -164,8 +164,8 @@ export class QueryContractDto {
   @IsArray()
   searchValues: string[];
   @IsOptional()
-  @IsArray()
-  projectType: string[];
+  @IsString()
+  projectType: string;
   @IsOptional()
   @IsString()
   projectLocation: string;

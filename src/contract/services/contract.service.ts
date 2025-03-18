@@ -95,17 +95,17 @@ export class ContractService {
       }
     }
 
-    if (arrayNotEmpty(query.projectType)) {
-      queryBuilder.andWhere('c.projectType IN (:...projectType)', {
-        projectType: query.projectType,
+    if (isNotEmpty(query.projectType)) {
+      queryBuilder.andWhere('c.projectType LIKE :projectType', {
+        projectType: `${query.projectType}%`,
       });
     }
-    if (query.projectLocation) {
-      queryBuilder.andWhere('c.projectLocation = :projectLocation', {
-        projectLocation: query.projectLocation,
+    if (isNotEmpty(query.projectLocation)) {
+      queryBuilder.andWhere('c.projectLocation LIKE :projectLocation', {
+        projectLocation: `${query.projectLocation}%`,
       });
     }
-    if (query.owner) {
+    if (isNotEmpty(query.owner)) {
       queryBuilder.andWhere('c.owner LIKE :owner', {
         owner: `%${query.owner}%`,
       });
@@ -324,6 +324,8 @@ export class ContractService {
     const costIds = data
       .map((item) => item.productionCostForm?.id)
       .filter((i) => i);
+
+    if (costIds.length === 0) return;
     const { invoice, payment } = await this.getCompanyCount(costIds);
     console.log(invoice, payment);
     for (const { id, costId, count } of invoice) {
