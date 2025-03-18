@@ -193,9 +193,11 @@ export class ProspectService {
 
   async getFilterExcel(prospectQueryDto: ProspectQueryDto) {
     const queryBuilder = this.getProspectQuery(prospectQueryDto);
+    queryBuilder.leftJoinAndSelect('p.productionCostForm', 'costForm');
     const rows = await queryBuilder.getMany();
     const workbook = new exceljs.Workbook();
     const worksheet = workbook.addWorksheet();
+    console.log(rows);
     worksheet.columns = [
       { header: '项目ID', key: 'id' },
       { header: '项目名称', key: 'projectName' },
@@ -205,12 +207,21 @@ export class ProspectService {
       { header: '辅助业务部门', key: 'assistingBusinessDepartment' },
       { header: '是否已开始前期工作', key: 'isPriorWorkStarted' },
       { header: '项目对接阶段', key: 'projectDockingStage' },
+      { header: '牵头部门', key: 'leadingDepartment' },
+      { header: '项目完成进度', key: 'projectCompletionProgress' },
+      { header: '预算总金额', key: 'totalBudgetAmount' },
+      { header: '预算执行总金额', key: 'totalBudgetExecutionAmount' },
+      { header: '结算总金额', key: 'totalSettlementAmount' },
+      { header: '累计收票金额', key: 'accumulatedInvoiceAmount' },
+      { header: '累计支付金额', key: 'accumulatedPaymentAmount' },
       { header: '创建时间', key: 'createdAt' },
       { header: '更新时间', key: 'updatedAt' },
       { header: '备注', key: 'remark' },
     ];
 
     for (const row of rows) {
+      const costForm = row.productionCostForm;
+
       let leadingName = row.leadingBusinessDepartment;
       if (row.leadingBusinessDepartment)
         leadingName = DepartmentCodeToName[row.leadingBusinessDepartment];
@@ -221,7 +232,7 @@ export class ProspectService {
         .map((id) => DepartmentCodeToName[id] ?? id)
         .join(',');
 
-      worksheet.addRow({
+      const prospect = {
         id: row.id,
         projectName: row.projectName,
         estimatedContractAmount: row.estimatedContractAmount,
@@ -233,7 +244,25 @@ export class ProspectService {
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
         remark: row.remark,
-      });
+      };
+
+      let cost = {};
+      if (costForm) {
+        let leading = costForm.leadingDepartment;
+        if (costForm.leadingDepartment)
+          leading = DepartmentCodeToName[costForm.leadingDepartment];
+        cost = {
+          leadingDepartment: leading,
+          totalBudgetAmount: costForm.totalBudgetAmount,
+          totalBudgetExecutionAmount: costForm.totalBudgetExecutionAmount,
+          totalSettlementAmount: costForm.totalSettlementAmount,
+          accumulatedInvoiceAmount: costForm.accumulatedInvoiceAmount,
+          accumulatedPaymentAmount: costForm.accumulatedPaymentAmount,
+          projectCompletionProgress: costForm.projectCompletionProgress,
+        };
+      }
+
+      worksheet.addRow({ ...prospect, ...cost });
     }
 
     return await workbook.xlsx.writeBuffer();
