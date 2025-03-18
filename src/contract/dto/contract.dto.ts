@@ -171,6 +171,9 @@ export class QueryContractDto {
   projectLocation: string;
   @IsOptional()
   @IsString()
+  leadingDepartment: string;
+  @IsOptional()
+  @IsString()
   owner: string;
   @IsOptional()
   @IsString()

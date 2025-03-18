@@ -203,16 +203,29 @@ export class ContractService {
 
     return queryBuilder;
   }
+
+  handleFilterCost(
+    queryBuilder: SelectQueryBuilder<Contract>,
+    queryDto: QueryContractDto,
+  ) {
+    queryBuilder.leftJoinAndSelect('c.productionCostForm', 'costForm');
+    if (isNotEmpty(queryDto.leadingDepartment)) {
+      queryBuilder.andWhere('costForm.leadingDepartment = :leadingDepartment', {
+        leadingDepartment: queryDto.leadingDepartment,
+      });
+    }
+    return queryBuilder;
+  }
+
   // TODO 后续添加筛选条件
   async getContractPageQuery(queryDto: QueryContractDto) {
     const page = queryDto.pageParams?.currentPage || 1;
     const limit = queryDto.pageParams?.pageSize || 10;
     const { prop, order } = queryDto.sort || {};
 
-    const queryBuilder = this.getContractQueryBuilder(queryDto);
-
+    let queryBuilder = this.getContractQueryBuilder(queryDto);
+    queryBuilder = this.handleFilterCost(queryBuilder, queryDto);
     queryBuilder
-      .leftJoinAndSelect('c.productionCostForm', 'costForm')
       .leftJoinAndSelect('costForm.collaborationDepartments', 'departments')
       .leftJoinAndSelect('costForm.collaborationCompanies', 'companies');
 
@@ -327,7 +340,6 @@ export class ContractService {
 
     if (costIds.length === 0) return;
     const { invoice, payment } = await this.getCompanyCount(costIds);
-    console.log(invoice, payment);
     for (const { id, costId, count } of invoice) {
       const contract = data.find((c) => c.productionCostForm.id === costId);
       if (!contract) continue;
