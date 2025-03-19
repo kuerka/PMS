@@ -31,7 +31,6 @@ import { Request } from 'express';
 
 type CompanyCount = {
   id: number;
-  costId: number;
   count: number;
 };
 
@@ -321,7 +320,6 @@ export class ContractService {
     const queryInvoice = this.dataSource
       .createQueryBuilder()
       .select('cc.id', 'id')
-      .addSelect('cc.productionCostFormId', 'costId')
       .addSelect('SUM(cci.invoiceAmount)', 'count')
       .from(CollaborationCompany, 'cc')
       .leftJoin(CollaborationCompanyInvoice, 'cci', 'cci.companyId=cc.id')
@@ -331,7 +329,6 @@ export class ContractService {
     const queryPayment = this.dataSource
       .createQueryBuilder()
       .select('cc.id', 'id')
-      .addSelect('cc.productionCostFormId', 'costId')
       .addSelect('SUM(ccp.paymentAmount)', 'count')
       .from(CollaborationCompany, 'cc')
       .leftJoin(CollaborationCompanyPayment, 'ccp', 'ccp.companyId=cc.id')
@@ -352,21 +349,21 @@ export class ContractService {
 
     if (costIds.length === 0) return;
     const { invoice, payment } = await this.getCompanyCount(costIds);
-    for (const { id, costId, count } of invoice) {
-      const contract = data.find((c) => c.productionCostForm.id === costId);
-      if (!contract) continue;
-      const cost = contract.productionCostForm;
-
-      const company = cost.collaborationCompanies.find((c) => c.id === id);
+    const companyMap: Record<number, CollaborationCompany> = {};
+    for (const contract of data) {
+      if (!contract.productionCostForm) continue;
+      const costForm = contract.productionCostForm;
+      for (const company of costForm.collaborationCompanies) {
+        if (!companyMap[company.id]) companyMap[company.id] = company;
+      }
+    }
+    for (const { id, count } of invoice) {
+      const company = companyMap[id];
       if (!company) continue;
       company.invoiceCount = count;
     }
-    for (const { id, costId, count } of payment) {
-      const contract = data.find((c) => c.productionCostForm.id === costId);
-      if (!contract) continue;
-      const cost = contract.productionCostForm;
-
-      const company = cost.collaborationCompanies.find((c) => c.id === id);
+    for (const { id, count } of payment) {
+      const company = companyMap[id];
       if (!company) continue;
       company.paymentCount = count;
     }
