@@ -16,8 +16,6 @@ export class TransitionCostDto implements Partial<ProductionCostForm> {
   @Expose()
   totalBudgetAmount: string;
   @Expose()
-  totalBudgetExecutionAmount: string;
-  @Expose()
   totalSettlementAmount: string;
   @Expose()
   accumulatedInvoiceAmount: string;

@@ -1,20 +1,18 @@
 import { ProductionCostForm } from '../entities/cost-form.entity';
-import { IsInt, IsString } from 'class-validator';
+import { IsDecimal, IsInt, IsString } from 'class-validator';
 
 type DTO = Partial<ProductionCostForm>;
 
 export class createCostFormDto implements DTO {
   @IsString()
   leadingDepartment: string;
-  @IsString()
+  @IsDecimal()
   projectCompletionProgress: string;
   @IsString()
   projectCompletionDescription: string;
-  @IsString()
+  @IsDecimal()
   totalBudgetAmount: string;
-  @IsString()
-  totalBudgetExecutionAmount: string;
-  @IsString()
+  @IsDecimal()
   totalSettlementAmount: string;
   @IsString()
   remark: string;
@@ -23,15 +21,13 @@ export class createCostFormDto implements DTO {
 export class updateCostFormDto implements DTO {
   @IsString()
   leadingDepartment: string;
-  @IsString()
+  @IsDecimal()
   projectCompletionProgress: string;
   @IsString()
   projectCompletionDescription: string;
-  @IsString()
+  @IsDecimal()
   totalBudgetAmount: string;
-  @IsString()
-  totalBudgetExecutionAmount: string;
-  @IsString()
+  @IsDecimal()
   totalSettlementAmount: string;
   @IsString()
   remark: string;
@@ -40,7 +36,7 @@ export class updateCostFormDto implements DTO {
 export class updateCostProgressDto implements DTO {
   @IsInt()
   id: number;
-  @IsString()
+  @IsDecimal()
   projectCompletionProgress: string;
   @IsString()
   projectCompletionDescription: string;
