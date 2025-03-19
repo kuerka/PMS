@@ -24,6 +24,7 @@ export class ResponseFormatterFilter implements ExceptionFilter {
       code: status,
       success: false,
       message,
+      error: exception,
       data: null,
     };
 
