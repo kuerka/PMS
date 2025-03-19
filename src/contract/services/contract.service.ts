@@ -132,6 +132,18 @@ export class ContractService {
         bondType: query.bondType,
       });
     }
+    if (arrayNotEmpty(query.contractAmount)) {
+      if (isNotEmpty(query.contractAmount[0])) {
+        queryBuilder.andWhere('c.contractAmount >= :minContractAmount', {
+          minContractAmount: query.contractAmount[0],
+        });
+      }
+      if (isNotEmpty(query.contractAmount[1])) {
+        queryBuilder.andWhere('c.contractAmount <= :maxContractAmount', {
+          maxContractAmount: query.contractAmount[1],
+        });
+      }
+    }
     if (arrayNotEmpty(query.cashBondAmount)) {
       if (isNotEmpty(query.cashBondAmount[0])) {
         queryBuilder.andWhere('c.cashBondAmount >= :minCashBondAmount', {

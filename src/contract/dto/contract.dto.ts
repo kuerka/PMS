@@ -47,6 +47,8 @@ export class CreateContractDto implements DTO {
   @IsString()
   bondType: BondType;
   @IsDecimal()
+  contractAmount: string;
+  @IsDecimal()
   cashBondAmount: string;
   @IsDateString()
   bondExpiryDate: string;
@@ -84,6 +86,8 @@ export class TransitionContractDto implements DTO {
 
   @IsString()
   bondType: BondType;
+  @IsDecimal()
+  contractAmount: string;
   @IsDecimal()
   cashBondAmount: string;
   @IsDateString()
@@ -131,6 +135,9 @@ export class ContractQuery implements DTO {
   bondType: BondType;
   @IsOptional()
   @IsDecimal()
+  contractAmount: string;
+  @IsOptional()
+  @IsDecimal()
   cashBondAmount: string;
   @IsOptional()
   @IsDateString()
@@ -170,6 +177,9 @@ export class QueryContractDto {
   @IsOptional()
   @IsString()
   bondType: string;
+  @IsOptional()
+  @IsArray()
+  contractAmount: string[];
   @IsOptional()
   @IsArray()
   cashBondAmount: string[];
@@ -233,6 +243,9 @@ export class UpdateContractDto implements DTO {
   @IsOptional()
   @IsString()
   bondType: BondType;
+  @IsOptional()
+  @IsDecimal()
+  contractAmount: string;
   @IsOptional()
   @IsDecimal()
   cashBondAmount: string;
