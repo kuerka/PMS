@@ -59,8 +59,8 @@ export class FileService {
       );
       fileEntity.size = file.size;
       fileEntity.name = filename;
-      const fileDir = path.join(UploadDir, prefix, ulid());
-      fileEntity.path = path.join(fileDir, filename);
+      const fileDir = path.posix.join(UploadDir, prefix, ulid());
+      fileEntity.path = path.posix.join(fileDir, filename);
 
       if (!fs.existsSync(fileDir)) fs.mkdirSync(fileDir, { recursive: true });
 
@@ -128,16 +128,21 @@ export class FileService {
   }
 
   async delete(id: number) {
-    return await this.fileRepository.manager.transaction(async (manager) => {
-      const file = await manager.findOneBy(FileEntity, { id });
-      if (!file) return;
-      await manager.delete(FileEntity, { id });
+    const file = await this.fileRepository.findOneBy({ id });
+    if (!file) return;
+    await this.fileRepository.manager.delete(FileEntity, { id });
+    void this.handleRemoveFile(file);
+    return file;
+  }
 
-      if (file.path) {
-        const dirName = path.dirname(file.path);
-        fs.rmSync(dirName, { force: true, recursive: true });
-      }
-      return file;
+  async handleRemoveFile(file: FileEntity) {
+    const filePath = file.path;
+    if (!filePath) return;
+    const res = await this.fileRepository.exists({
+      where: { path: path.posix.join(filePath) },
     });
+    if (res) return;
+    const dirName = path.dirname(filePath);
+    fs.rmSync(dirName, { force: true, recursive: true });
   }
 }
