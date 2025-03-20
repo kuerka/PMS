@@ -20,7 +20,6 @@ import { IsOptionalOrEmpty } from '@/utils/type';
 
 type DTO = Partial<Contract>;
 type AmountType = Contract['amountType'];
-type BondType = Contract['bondType'];
 type ContractExecutionStatus = Contract['contractExecutionStatus'];
 
 export class CreateContractDto implements DTO {
@@ -46,7 +45,7 @@ export class CreateContractDto implements DTO {
   projectEndDate: string;
 
   @IsString()
-  bondType: BondType;
+  bondType: string;
   @IsDecimal()
   contractAmount: string;
   @IsDecimal()
@@ -87,7 +86,7 @@ export class TransitionContractDto implements DTO {
   projectEndDate: string;
 
   @IsString()
-  bondType: BondType;
+  bondType: string;
   @IsDecimal()
   contractAmount: string;
   @IsDecimal()
@@ -134,7 +133,7 @@ export class ContractQuery implements DTO {
   id: number;
   @IsOptional()
   @IsString()
-  bondType: BondType;
+  bondType: string;
   @IsOptional()
   @IsDecimal()
   contractAmount: string;
@@ -247,7 +246,7 @@ export class UpdateContractDto implements DTO {
 
   @IsOptional()
   @IsString()
-  bondType: BondType;
+  bondType: string;
   @IsOptional()
   @IsDecimal()
   contractAmount: string;

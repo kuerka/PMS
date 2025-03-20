@@ -68,13 +68,13 @@ export class Contract {
   @Column('date', { name: 'project_end_date', nullable: true })
   projectEndDate: string | null;
 
-  @Column('enum', {
+  @Column('varchar', {
     name: 'bond_type',
     nullable: true,
     comment: '合约类型',
-    enum: ['现金', '保险/保函'],
+    length: 255,
   })
-  bondType: '现金' | '保险/保函' | null;
+  bondType: string | null;
 
   @Column('decimal', {
     name: 'cash_bond_amount',
