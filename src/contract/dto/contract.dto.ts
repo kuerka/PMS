@@ -16,6 +16,7 @@ import {
   updateCostFormDto,
 } from '@/cost-form/dto/cost-form.dto';
 import { ProductionCostForm } from '@/cost-form/entities/cost-form.entity';
+import { IsOptionalOrEmpty } from '@/utils/type';
 
 type DTO = Partial<Contract>;
 type AmountType = Contract['amountType'];
@@ -50,6 +51,7 @@ export class CreateContractDto implements DTO {
   contractAmount: string;
   @IsDecimal()
   cashBondAmount: string;
+  @IsOptionalOrEmpty()
   @IsDateString()
   bondExpiryDate: string;
   @IsString()
@@ -118,7 +120,7 @@ export class ContractQuery implements DTO {
   @IsOptional()
   @IsString()
   remark?: string;
-  @IsOptional()
+  @IsOptionalOrEmpty()
   @IsBoolean()
   isPreliminaryNumber?: boolean;
   @IsOptional()
@@ -156,6 +158,9 @@ export class QueryContractDto {
   @IsOptional()
   @IsArray()
   searchValues: string[];
+  @IsOptional()
+  @IsString()
+  contractNumber: string;
   @IsOptional()
   @IsString()
   projectType: string;

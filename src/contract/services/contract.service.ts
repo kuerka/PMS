@@ -93,7 +93,11 @@ export class ContractService {
         });
       }
     }
-
+    if (isNotEmpty(query.contractNumber)) {
+      queryBuilder.andWhere('c.contractNumber LIKE :contractNumber', {
+        contractNumber: `%${query.contractNumber}%`,
+      });
+    }
     if (isNotEmpty(query.projectType)) {
       queryBuilder.andWhere('c.projectType LIKE :projectType', {
         projectType: `${query.projectType}%`,

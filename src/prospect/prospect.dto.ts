@@ -1,6 +1,6 @@
 import { PaginationDto, SortDTO } from '@/pagination/pagination.dto';
 import { ProspectProject } from './prospect.entity';
-import { Exclude, Transform, Type } from 'class-transformer';
+import { Exclude, Type } from 'class-transformer';
 import { ProductionCostForm } from '@/cost-form/entities/cost-form.entity';
 import {
   IsArray,
@@ -15,6 +15,7 @@ import {
   createCostFormDto,
   updateCostFormDto,
 } from '@/cost-form/dto/cost-form.dto';
+import { IsOptionalOrEmpty } from '@/utils/type';
 
 type DTO = Partial<ProspectProject>;
 type ProjectDockingStage = ProspectProject['projectDockingStage'];
@@ -99,8 +100,7 @@ class ProspectQuery {
   @IsOptional()
   @IsArray()
   createdAt?: Date[];
-  @IsOptional()
-  @Transform(({ value }): boolean | null => (value === '' ? null : value))
+  @IsOptionalOrEmpty()
   @IsBoolean()
   isPriorWorkStarted: boolean;
 
