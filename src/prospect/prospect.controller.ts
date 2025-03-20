@@ -52,10 +52,11 @@ export class ProspectController {
     @Res() res: Response,
   ) {
     const buffer = await this.prospectService.getFilterExcel(prospectQueryDto);
+    const filename = encodeURIComponent('意向合同') + '.xlsx';
     res.set({
       'Content-Type':
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'Content-Disposition': 'attachment; filename="prospects.xlsx"',
+      'Content-Disposition': `attachment; filename="${filename}"`,
       'Content-Length': buffer.byteLength,
     });
     res.end(buffer);

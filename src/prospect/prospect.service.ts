@@ -197,7 +197,6 @@ export class ProspectService {
     const rows = await queryBuilder.getMany();
     const workbook = new exceljs.Workbook();
     const worksheet = workbook.addWorksheet();
-    console.log(rows);
     worksheet.columns = [
       { header: '项目ID', key: 'id' },
       { header: '项目名称', key: 'projectName' },

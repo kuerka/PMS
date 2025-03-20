@@ -28,6 +28,10 @@ import {
 } from '../dto/transition.dto';
 import { arrayNotEmpty, isNotEmpty } from 'class-validator';
 import { Request } from 'express';
+import * as exceljs from 'exceljs';
+import { DepartmentCodeToName } from '@/config/const';
+import { getProjectTypeStr } from '@/config/projectType';
+import { getLocationStr } from '@/config/location';
 
 type CompanyCount = {
   id: number;
@@ -394,6 +398,95 @@ export class ContractService {
     });
   }
 
+  async getFilterExcel(queryDto: QueryContractDto) {
+    let queryBuilder = this.getContractQueryBuilder(queryDto);
+    queryBuilder = this.handleFilterCost(queryBuilder, queryDto);
+    const rows = await queryBuilder.getMany();
+    const workbook = new exceljs.Workbook();
+    const worksheet = workbook.addWorksheet();
+    worksheet.columns = [
+      { header: '合同ID', key: 'id' },
+      { header: '合同编号', key: 'contractNumber' },
+      { header: '项目名称', key: 'projectName' },
+      { header: '项目类型', key: 'projectType' },
+      { header: '项目地点', key: 'projectLocation' },
+      { header: '业主', key: 'owner' },
+      { header: '合同金额类型', key: 'amountType' },
+      { header: '合同金额', key: 'contractAmount' },
+      { header: '项目开始日期', key: 'projectStartDate' },
+      { header: '项目结束日期', key: 'projectEndDate' },
+      { header: '保证金类型', key: 'bondType' },
+      { header: '保证金额', key: 'cashBondAmount' },
+      { header: '保证金到期日期', key: 'bondExpiryDate' },
+      { header: '合同结算金额', key: 'contractSettlementAmount' },
+      { header: '应收账款', key: 'accountsReceivable' },
+      { header: '合同执行状态', key: 'contractExecutionStatus' },
+      { header: '累计开票金额', key: 'accumulatedInvoiceAmount' },
+      { header: '累计收款金额', key: 'accumulatedReceiptAmount' },
+      { header: '是否为预编号', key: 'isPreliminaryNumber' },
+      { header: '未收账款', key: 'uncollectedAmount' },
+      { header: '牵头部门', key: 'leadingDepartment' },
+      { header: '项目完成进度', key: 'projectCompletionProgress' },
+      { header: '预算总金额', key: 'totalBudgetAmount' },
+      { header: '预算执行总金额', key: 'totalBudgetExecutionAmount' },
+      { header: '结算总金额', key: 'totalSettlementAmount' },
+      { header: '累计开票金额', key: 'accumulatedInvoiceAmount' },
+      { header: '累计支付金额', key: 'accumulatedPaymentAmount' },
+      { header: '备注', key: 'remark' },
+      { header: '创建时间', key: 'createdAt' },
+      { header: '更新时间', key: 'updatedAt' },
+    ];
+
+    for (const row of rows) {
+      const costForm = row.productionCostForm;
+
+      const contract = {
+        id: row.id,
+        contractNumber: row.contractNumber,
+        projectName: row.projectName,
+        projectType: getProjectTypeStr(row.projectType ?? ''),
+        projectLocation: getLocationStr(row.projectLocation ?? ''),
+        owner: row.owner,
+        amountType: row.amountType,
+        contractAmount: row.contractAmount,
+        projectStartDate: row.projectStartDate,
+        projectEndDate: row.projectEndDate,
+        bondType: row.bondType,
+        cashBondAmount: row.cashBondAmount,
+        bondExpiryDate: row.bondExpiryDate,
+        contractSettlementAmount: row.contractSettlementAmount,
+        accountsReceivable: row.accountsReceivable,
+        contractExecutionStatus: row.contractExecutionStatus,
+        accumulatedInvoiceAmount: row.accumulatedInvoiceAmount,
+        accumulatedReceiptAmount: row.accumulatedReceiptAmount,
+        isPreliminaryNumber: row.isPreliminaryNumber ? '是' : '否',
+        uncollectedAmount: row.uncollectedAmount,
+        remark: row.remark,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+      };
+
+      let cost = {};
+      if (costForm) {
+        let leading = costForm.leadingDepartment;
+        if (costForm.leadingDepartment)
+          leading = DepartmentCodeToName[costForm.leadingDepartment];
+        cost = {
+          leadingDepartment: leading,
+          projectCompletionProgress: costForm.projectCompletionProgress,
+          totalBudgetAmount: costForm.totalBudgetAmount,
+          totalBudgetExecutionAmount: costForm.totalBudgetExecutionAmount,
+          totalSettlementAmount: costForm.totalSettlementAmount,
+          accumulatedPaymentAmount: costForm.accumulatedPaymentAmount,
+          accumulatedInvoiceAmount: costForm.accumulatedInvoiceAmount,
+        };
+      }
+
+      worksheet.addRow({ ...contract, ...cost });
+    }
+
+    return await workbook.xlsx.writeBuffer();
+  }
   async updateContractTransition(contract: Contract) {
     return await this.dataSource.manager.transaction(async (manager) => {
       await this.updateContract(contract, manager);
