@@ -266,6 +266,41 @@ export class ContractService {
     };
   }
 
+  async getContractAmountSum(queryDto: QueryContractDto) {
+    let queryBuilder = this.getContractQueryBuilder(queryDto);
+    queryBuilder = this.handleFilterCost(queryBuilder, queryDto);
+
+    return await queryBuilder
+      .select(
+        "SUM(CASE WHEN c.amount_type = '包干总价' THEN c.contract_amount ELSE 0 END)",
+        'sumContractAmount',
+      )
+      .addSelect(
+        'SUM(c.accumulated_invoice_amount)',
+        'sumAccumulatedInvoiceAmount',
+      )
+      .addSelect(
+        'SUM(c.accumulated_receipt_amount)',
+        'sumAccumulatedReceiptAmount',
+      )
+      .addSelect('SUM(c.accounts_receivable)', 'sumAccountsReceivable')
+      .addSelect(
+        'SUM(c.contract_settlement_amount)',
+        'sumContractSettlementAmount',
+      )
+      .addSelect('SUM(c.uncollected_amount)', 'sumUncollectedAmount')
+      .addSelect('SUM(costForm.total_budget_amount)', 'sumTotalBudgetAmount')
+      .addSelect(
+        'SUM(costForm.total_budget_execution_amount)',
+        'sumTotalBudgetExecutionAmount',
+      )
+      .addSelect(
+        'SUM(costForm.total_settlement_amount)',
+        'sumTotalSettlementAmount',
+      )
+      .getRawOne<object>();
+  }
+
   async getContractSimpleById(id: number) {
     return await this.dataSource.manager.findOne(Contract, {
       where: {

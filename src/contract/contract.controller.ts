@@ -54,6 +54,10 @@ export class ContractController {
   async getContractPage(@Body() queryContractDto: QueryContractDto) {
     return await this.contractService.getContractPage(queryContractDto);
   }
+  @Post('sum')
+  async getContractAmountSum(@Body() queryContractDto: QueryContractDto) {
+    return await this.contractService.getContractAmountSum(queryContractDto);
+  }
   @Get('simple')
   async getContractSimple(@Query('id', ParseIntPipe) id: number) {
     return await this.contractService.getContractSimpleById(id);
