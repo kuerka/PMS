@@ -3,8 +3,8 @@ import * as path from 'path';
 
 const OrmConfig: TypeOrmModuleOptions = {
   type: 'mysql',
-  host: '124.220.164.61',
-  port: 3037,
+  host: '1.116.121.38',
+  port: 3039,
   username: 'root',
   password: '25362565k',
   database: 'pms',
