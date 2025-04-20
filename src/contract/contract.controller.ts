@@ -7,6 +7,7 @@ import {
   Query,
   Req,
   Res,
+  StreamableFile,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -29,6 +30,7 @@ import { InvoiceRecordService } from './services/invoice-record.service';
 import { ReceiptRecordService } from './services/receipt-record.service';
 import {
   CreateInvoiceRecordDto,
+  DownloadTemplateDto,
   UpdateInvoiceRecordDto,
 } from './dto/invoice-record.dto';
 import {
@@ -37,6 +39,7 @@ import {
 } from './dto/receipt_record.dto';
 import { Request, Response } from 'express';
 import { ANY_ROLE, LIMIT_ADMIN } from '@/auth/constants';
+import { FailedCause } from '@/response-formatter/response-formatter.interceptor';
 
 @Roles(...ANY_ROLE)
 @Controller('contract')
@@ -212,6 +215,21 @@ export class InvoiceRecordController {
   @Post('delete')
   async deleteInvoiceRecord(@Body('id', ParseIntPipe) id: number) {
     return await this.invoiceRecordService.delete(id);
+  }
+
+  @Post('template')
+  async downloadInvoiceTemplate(@Body() queryDto: DownloadTemplateDto) {
+    const { id, invoiceTemplate } = queryDto;
+    const result = await this.invoiceRecordService.downloadInvoiceTemplate(
+      id,
+      invoiceTemplate,
+    );
+    if (!result) return new FailedCause('发票记录不存在');
+    const filename = encodeURIComponent('发票模板') + '.xlsx';
+    return new StreamableFile(Buffer.from(result), {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      disposition: `attachment; filename="${filename}"`,
+    });
   }
 }
 

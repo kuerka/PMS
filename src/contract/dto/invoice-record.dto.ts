@@ -43,3 +43,10 @@ export class UpdateInvoiceRecordDto implements DTO {
   @IsString()
   remark: string;
 }
+
+export class DownloadTemplateDto {
+  @IsInt()
+  id: number;
+  @IsString()
+  invoiceTemplate: string;
+}

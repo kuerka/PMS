@@ -6,6 +6,7 @@ import {
   Injectable,
   Logger,
   NestInterceptor,
+  StreamableFile,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { map, Observable } from 'rxjs';
@@ -29,6 +30,8 @@ export class ResponseFormatterInterceptor implements NestInterceptor {
         handleRequestLogger(this.logger, request);
         if (data instanceof FailedCause) {
           return { success: false, code: 0, cause: data.cause };
+        } else if (data instanceof StreamableFile) {
+          return data;
         } else {
           return { success: true, code: 0, data };
         }

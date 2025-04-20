@@ -3,6 +3,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, DeepPartial, EntityManager } from 'typeorm';
 import { ContractInvoiceRecord } from '../entities/invoice-record.entity';
 import { AccumulateService } from './contract-accumulated.service';
+import { downloadInvoiceTemplate } from '../utils/invoiceTempalte';
 
 @Injectable()
 export class InvoiceRecordService {
@@ -78,5 +79,26 @@ export class InvoiceRecordService {
     return await manager
       .getRepository(ContractInvoiceRecord)
       .delete({ contractId });
+  }
+
+  async downloadInvoiceTemplate(
+    id: number,
+    template: string,
+    manager?: EntityManager,
+  ) {
+    if (!manager) manager = this.dataSource.manager;
+
+    const res = await manager.getRepository(ContractInvoiceRecord).findOne({
+      where: { id: id },
+      relations: {
+        contract: {
+          productionCostForm: true,
+          invoiceHeader: true,
+        },
+      },
+    });
+    if (!res) return;
+
+    return downloadInvoiceTemplate(res, template);
   }
 }

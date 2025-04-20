@@ -5386,6 +5386,33 @@ export const LOCATION = [
   },
 ];
 
+export const municipality = [
+  {
+    name: '北京市',
+    code: '110000',
+  },
+  {
+    name: '天津市',
+    code: '120000',
+  },
+  {
+    name: '上海市',
+    code: '310000',
+  },
+  {
+    name: '重庆市',
+    code: '500000',
+  },
+  {
+    name: '香港特别行政区',
+    code: '810000',
+  },
+  {
+    name: '澳门特别行政区',
+    code: '820000',
+  },
+];
+
 export const getLocationStr = (codeStr: string) => {
   const codes = codeStr.split(',');
   const province = LOCATION.find((p) => p.code === codes[0]);
