@@ -47,6 +47,7 @@ export class ProspectController {
     return await this.prospectService.getTotalAccumulated(prospectQueryDto);
   }
 
+  @Roles(LIMIT_ADMIN)
   @Post('excel')
   async exportProspectExcel(@Body() prospectQueryDto: ProspectQueryDto) {
     const buffer = await this.prospectService.getFilterExcel(prospectQueryDto);
