@@ -6,11 +6,11 @@ import {
   Post,
   Query,
   Req,
-  Res,
+  StreamableFile,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { ProspectService } from './prospect.service';
 import { Roles } from '@/auth/auth.decorators';
 import {
@@ -19,6 +19,7 @@ import {
   UpdateProspectDto,
 } from './prospect.dto';
 import { ANY_ROLE, LIMIT_ADMIN } from '@/auth/constants';
+import { FailedCause } from '@/response-formatter/response-formatter.interceptor';
 
 @Roles(...ANY_ROLE)
 @Controller('prospect')
@@ -47,19 +48,15 @@ export class ProspectController {
   }
 
   @Post('excel')
-  async exportProspectExcel(
-    @Body() prospectQueryDto: ProspectQueryDto,
-    @Res() res: Response,
-  ) {
+  async exportProspectExcel(@Body() prospectQueryDto: ProspectQueryDto) {
     const buffer = await this.prospectService.getFilterExcel(prospectQueryDto);
     const filename = encodeURIComponent('意向合同') + '.xlsx';
-    res.set({
-      'Content-Type':
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'Content-Disposition': `attachment; filename="${filename}"`,
-      'Content-Length': buffer.byteLength,
+    if (!buffer) return new FailedCause('导出失败');
+
+    return new StreamableFile(Buffer.from(buffer), {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      disposition: `attachment; filename="${filename}"`,
     });
-    res.end(buffer);
   }
   @Roles(LIMIT_ADMIN)
   @Post('update')

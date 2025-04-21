@@ -6,7 +6,6 @@ import {
   Post,
   Query,
   Req,
-  Res,
   StreamableFile,
   UsePipes,
   ValidationPipe,
@@ -37,7 +36,7 @@ import {
   CreateReceiptRecordDto,
   UpdateReceiptRecordDto,
 } from './dto/receipt_record.dto';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { ANY_ROLE, LIMIT_ADMIN } from '@/auth/constants';
 import { FailedCause } from '@/response-formatter/response-formatter.interceptor';
 
@@ -96,19 +95,14 @@ export class ContractController {
     await this.contractService.createContractTransition(prospectId, contract);
   }
   @Post('excel')
-  async exportProspectExcel(
-    @Body() queryDto: QueryContractDto,
-    @Res() res: Response,
-  ) {
+  async exportProspectExcel(@Body() queryDto: QueryContractDto) {
     const buffer = await this.contractService.getFilterExcel(queryDto);
     const filename = encodeURIComponent('合同') + '.xlsx';
-    res.set({
-      'Content-Type':
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'Content-Disposition': `attachment; filename="${filename}"`,
-      'Content-Length': buffer.byteLength,
+    if (!buffer) return new FailedCause('导出失败');
+    return new StreamableFile(Buffer.from(buffer), {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      disposition: `attachment; filename="${filename}"`,
     });
-    res.end(buffer);
   }
 }
 

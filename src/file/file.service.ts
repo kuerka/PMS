@@ -13,6 +13,10 @@ import { Response } from 'express';
 const UploadDir = 'uploads';
 type FileType = FileEntity['type'];
 
+const handleFileError = (res: Response, error: Error) => {
+  res.status(500).json({ code: 500, success: false, message: error.message });
+};
+
 @Injectable()
 export class FileService {
   constructor(
@@ -78,37 +82,52 @@ export class FileService {
   }
 
   async downloadFile(id: number, res: Response) {
-    const fileEntity = await this.fileRepository.findOneBy({ id });
-    if (!fileEntity) throw new Error('File not found');
-    if (!fs.existsSync(fileEntity.path!)) throw new Error('File not found');
+    try {
+      const fileEntity = await this.fileRepository.findOneBy({ id });
+      if (!fileEntity) throw new Error('File not found');
+      if (!fs.existsSync(fileEntity.path!)) throw new Error('File not found');
 
-    const filename = encodeURIComponent(fileEntity.name!);
-    res.setHeader('Content-Type', 'application/octet-stream');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      const filename = encodeURIComponent(fileEntity.name!);
+      res.setHeader('Content-Type', 'application/octet-stream');
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${filename}"`,
+      );
 
-    fs.createReadStream(fileEntity.path!).pipe(res);
+      fs.createReadStream(fileEntity.path!).pipe(res);
+    } catch (error) {
+      handleFileError(res, error as Error);
+    }
   }
 
   async batchDownloadProspectFile(id: number, res: Response) {
-    const prospect = await this.prospectService.findById(id);
-    if (!prospect) return;
+    try {
+      const prospect = await this.prospectService.findById(id);
+      if (!prospect) throw new Error('Prospect not found');
 
-    const fileEntities = await this.fileRepository.findBy({
-      prospectProjectId: id,
-    });
+      const fileEntities = await this.fileRepository.findBy({
+        prospectProjectId: id,
+      });
 
-    await this.batchDownload(fileEntities, res, prospect.projectName);
+      await this.batchDownload(fileEntities, res, prospect.projectName);
+    } catch (error) {
+      handleFileError(res, error as Error);
+    }
   }
 
   async batchDownloadContractFile(id: number, res: Response) {
-    const contract = await this.contractService.getById(id);
-    if (!contract) return;
+    try {
+      const contract = await this.contractService.getById(id);
+      if (!contract) throw new Error('Contract not found');
 
-    const fileEntities = await this.fileRepository.findBy({
-      contractId: id,
-    });
+      const fileEntities = await this.fileRepository.findBy({
+        contractId: id,
+      });
 
-    await this.batchDownload(fileEntities, res, contract.projectName!);
+      await this.batchDownload(fileEntities, res, contract.projectName!);
+    } catch (error) {
+      handleFileError(res, error as Error);
+    }
   }
 
   async batchDownload(
