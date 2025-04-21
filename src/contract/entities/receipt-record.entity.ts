@@ -36,6 +36,9 @@ export class ContractReceiptRecord {
   })
   receiptAmount: string | null;
 
+  @Column('mediumtext', { name: 'remark', nullable: true })
+  remark: string | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'tinytext' })
   createdAt: Date | null;
 
