@@ -45,6 +45,17 @@ export class PaymentMethodService {
       .update(id, paymentMethod);
   }
 
+  async updateConditionProcessStatus(
+    id: number,
+    conditionProcessStatus: boolean,
+    manager?: EntityManager,
+  ) {
+    if (!manager) manager = this.dataSource.manager;
+    return await manager
+      .getRepository(ContractPaymentMethod)
+      .update(id, { conditionProcessStatus });
+  }
+
   async deletePaymentMethod(id: number, manager?: EntityManager) {
     if (!manager) manager = this.dataSource.manager;
 

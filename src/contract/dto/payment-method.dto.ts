@@ -33,3 +33,10 @@ export class UpdatePaymentDto implements DTO {
   @IsDecimal()
   accounts: string;
 }
+
+export class UpdateConditionProcessStatusDto {
+  @IsInt()
+  id: number;
+  @IsBoolean()
+  conditionProcessStatus: boolean;
+}

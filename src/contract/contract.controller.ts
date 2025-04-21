@@ -19,7 +19,11 @@ import {
 } from './dto/contract.dto';
 import { Roles } from '@/auth/auth.decorators';
 import { PaymentMethodService } from './services/payment-method.service';
-import { CreatePaymentDto, UpdatePaymentDto } from './dto/payment-method.dto';
+import {
+  CreatePaymentDto,
+  UpdateConditionProcessStatusDto,
+  UpdatePaymentDto,
+} from './dto/payment-method.dto';
 import { InvoiceHeaderService } from './services/invoice-header.service';
 import {
   CreateInvoiceHeaderDto,
@@ -37,7 +41,7 @@ import {
   UpdateReceiptRecordDto,
 } from './dto/receipt_record.dto';
 import { Request } from 'express';
-import { ANY_ROLE, LIMIT_ADMIN } from '@/auth/constants';
+import { ABOVE_EDIT, ANY_ROLE, LIMIT_ADMIN } from '@/auth/constants';
 import { FailedCause } from '@/response-formatter/response-formatter.interceptor';
 
 @Roles(...ANY_ROLE)
@@ -127,6 +131,14 @@ export class PaymentController {
     const payment = this.paymentService.create(paymentDto);
     const { id } = payment;
     return await this.paymentService.updatePaymentMethod(id, payment);
+  }
+  @Roles(...ABOVE_EDIT)
+  @Post('update/conditionProcessStatus')
+  async updateConditionProcessStatus(
+    @Body() paymentDto: UpdateConditionProcessStatusDto,
+  ) {
+    const { id, conditionProcessStatus: status } = paymentDto;
+    return await this.paymentService.updateConditionProcessStatus(id, status);
   }
   @Roles(LIMIT_ADMIN)
   @Post('delete')
