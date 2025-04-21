@@ -209,4 +209,7 @@ export class Contract {
     (productionCostForm) => productionCostForm.contract,
   )
   productionCostForm: ProductionCostForm;
+
+  // extra fields
+  isNeedReceive: boolean;
 }

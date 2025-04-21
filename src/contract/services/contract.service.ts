@@ -38,6 +38,11 @@ type CompanyCount = {
   count: number;
 };
 
+type isNeedReceive = {
+  id: number;
+  isNeedReceive: '0' | '1';
+};
+
 @Injectable()
 export class ContractService {
   private readonly logger = new Logger();
@@ -255,7 +260,10 @@ export class ContractService {
     queryBuilder.skip((page - 1) * limit).take(limit);
     const [data, total] = await queryBuilder.getManyAndCount();
 
-    await this.combineCompanyCount(data);
+    await Promise.all([
+      this.combineCompanyCount(data),
+      this.combineIsNeedReceive(data),
+    ]);
 
     return {
       data,
@@ -359,6 +367,38 @@ export class ContractService {
     return list;
   }
 
+  async getCompanyIsNeedReceive(ids: number[]) {
+    const subquery = this.dataSource
+      .createQueryBuilder()
+      .subQuery()
+      .select('1')
+      .from('contract_payment_method', 'cpm')
+      .where('cpm.contract_id = c.id')
+      .andWhere('cpm.condition_process_status = true')
+      .andWhere('cpm.accounts > c.accumulated_receipt_amount');
+    const res: isNeedReceive[] = await this.dataSource
+      .createQueryBuilder()
+      .from(Contract, 'c')
+      .select('c.id', 'id')
+      .addSelect(
+        `CASE WHEN EXISTS ${subquery.getQuery()} THEN 0 ELSE 1 END`,
+        'isNeedReceive',
+      )
+      .where('c.id IN (:...ids)', { ids })
+      .getRawMany();
+
+    const resMap: Record<string, boolean> = {};
+    for (const item of res) resMap[item.id] = !!+item.isNeedReceive;
+
+    return resMap;
+  }
+
+  async combineIsNeedReceive(data: Contract[]) {
+    const ids = data.map(({ id }) => id);
+    const isNeedReceive = await this.getCompanyIsNeedReceive(ids);
+    for (const item of data) item.isNeedReceive = isNeedReceive[item.id];
+  }
+
   async getCompanyCount(costIds: number[]) {
     const queryInvoice = this.dataSource
       .createQueryBuilder()
@@ -440,7 +480,6 @@ export class ContractService {
     const workbook = new exceljs.Workbook();
     const worksheet = workbook.addWorksheet();
     worksheet.columns = [
-      { header: '合同ID', key: 'id' },
       { header: '合同编号', key: 'contractNumber' },
       { header: '项目名称', key: 'projectName' },
       { header: '项目类型', key: 'projectType' },
@@ -465,7 +504,7 @@ export class ContractService {
       { header: '预算总金额', key: 'totalBudgetAmount' },
       { header: '预算执行总金额', key: 'totalBudgetExecutionAmount' },
       { header: '结算总金额', key: 'totalSettlementAmount' },
-      { header: '累计开票金额', key: 'accumulatedInvoiceAmount' },
+      { header: '累计收票金额', key: 'accumulatedCostInvoiceAmount' },
       { header: '累计支付金额', key: 'accumulatedPaymentAmount' },
       { header: '备注', key: 'remark' },
       { header: '创建时间', key: 'createdAt' },
@@ -476,7 +515,6 @@ export class ContractService {
       const costForm = row.productionCostForm;
 
       const contract = {
-        id: row.id,
         contractNumber: row.contractNumber,
         projectName: row.projectName,
         projectType: getProjectTypeStr(row.projectType ?? ''),
@@ -505,7 +543,9 @@ export class ContractService {
       if (costForm) {
         let leading = costForm.leadingDepartment;
         if (costForm.leadingDepartment)
-          leading = DepartmentCodeToName[costForm.leadingDepartment];
+          leading =
+            DepartmentCodeToName[costForm.leadingDepartment] ||
+            costForm.leadingDepartment;
         cost = {
           leadingDepartment: leading,
           projectCompletionProgress: costForm.projectCompletionProgress,
@@ -513,7 +553,7 @@ export class ContractService {
           totalBudgetExecutionAmount: costForm.totalBudgetExecutionAmount,
           totalSettlementAmount: costForm.totalSettlementAmount,
           accumulatedPaymentAmount: costForm.accumulatedPaymentAmount,
-          accumulatedInvoiceAmount: costForm.accumulatedInvoiceAmount,
+          accumulatedCostInvoiceAmount: costForm.accumulatedInvoiceAmount,
         };
       }
 
