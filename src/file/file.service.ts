@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { ulid } from 'ulid';
 import * as archiver from 'archiver';
+import { ContractService } from '@/contract/services/contract.service';
 import { ProspectService } from '@/prospect/prospect.service';
 import { Response } from 'express';
 
@@ -18,6 +19,7 @@ export class FileService {
     @InjectRepository(FileEntity)
     private fileRepository: Repository<FileEntity>,
     private prospectService: ProspectService,
+    private contractService: ContractService,
   ) {}
 
   async getProspectFiles(id: number) {
@@ -99,14 +101,14 @@ export class FileService {
   }
 
   async batchDownloadContractFile(id: number, res: Response) {
-    const contract = await this.prospectService.findById(id);
+    const contract = await this.contractService.getById(id);
     if (!contract) return;
 
     const fileEntities = await this.fileRepository.findBy({
       contractId: id,
     });
 
-    await this.batchDownload(fileEntities, res, contract.projectName);
+    await this.batchDownload(fileEntities, res, contract.projectName!);
   }
 
   async batchDownload(
