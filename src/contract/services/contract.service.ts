@@ -260,10 +260,12 @@ export class ContractService {
     queryBuilder.skip((page - 1) * limit).take(limit);
     const [data, total] = await queryBuilder.getManyAndCount();
 
-    await Promise.all([
-      this.combineCompanyCount(data),
-      this.combineIsNeedReceive(data),
-    ]);
+    if (total > 0) {
+      await Promise.all([
+        this.combineCompanyCount(data),
+        this.combineIsNeedReceive(data),
+      ]);
+    }
 
     return {
       data,
