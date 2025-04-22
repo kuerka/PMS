@@ -46,13 +46,18 @@ export const downloadInvoiceTemplate = (
   query: ContractInvoiceRecord,
   templateType: string,
 ) => {
-  if (templateType === 'CHY') return handleCHYTemplate(query);
-  else if (templateType === 'GHZX') return handleGHZXTemplate(query);
+  if (templateType === 'CHY')
+    return handleCHYTemplate(query, `./assests/invoice_template/CHY.xlsx`);
+  else if (templateType === 'GHZX')
+    return handleCHYTemplate(query, './assests/invoice_template/GHZX.xlsx');
 };
 
-export const handleCHYTemplate = async (query: ContractInvoiceRecord) => {
+export const handleCHYTemplate = async (
+  query: ContractInvoiceRecord,
+  path: string,
+) => {
   const workbook = new exceljs.Workbook();
-  await workbook.xlsx.readFile(`./assests/invoice_template/CHY.xlsx`);
+  await workbook.xlsx.readFile(path);
   const worksheet = workbook.getWorksheet(1)!;
 
   const invoiceType = query.invoiceType;
@@ -110,11 +115,14 @@ export const handleCHYTemplate = async (query: ContractInvoiceRecord) => {
   const toggle2 = invoiceType === '增值税普通发票' ? '☑' : '☐';
   content[1].text = `${toggle1}`;
   content[3].text = `${toggle2}`;
-  content[5].text = '☑';
   return await workbook.xlsx.writeBuffer();
 };
 
-const handleGHZXTemplate = async (query: ContractInvoiceRecord) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const handleGHZXTemplate = async (
+  query: ContractInvoiceRecord,
+  path: string,
+) => {
   const invoiceType = query.invoiceType;
   const companyName = query.contract.invoiceHeader.companyName;
   const contractNumber = query.contract.contractNumber;
@@ -129,7 +137,7 @@ const handleGHZXTemplate = async (query: ContractInvoiceRecord) => {
   const applicationDate = dayjs(query.invoiceTime);
 
   const workbook = new exceljs.Workbook();
-  await workbook.xlsx.readFile('./assests/invoice_template/GHZX.xlsx');
+  await workbook.xlsx.readFile(path);
 
   const worksheet = workbook.getWorksheet(1)!;
   worksheet.getCell('I4').value = companyName;
