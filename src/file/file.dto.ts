@@ -11,6 +11,8 @@ export class UploadFileDTO {
   id: number;
   @IsString()
   type: FileType;
+  @IsString()
+  name: string;
 }
 
 export class UpdateTypeDTO {

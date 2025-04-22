@@ -37,36 +37,43 @@ export class FileService {
     });
   }
 
-  async addProspectFile(file: Express.Multer.File, id: number, type: FileType) {
+  async addProspectFile(
+    file: Express.Multer.File,
+    id: number,
+    type: FileType,
+    name: string,
+  ) {
     const fileEntity = this.fileRepository.create();
     fileEntity.prospectProjectId = id;
     fileEntity.type = type;
     const prefix = `prospect/${id}`;
-    await this.add(file, fileEntity, prefix);
+    await this.add(file, fileEntity, prefix, name);
   }
 
-  async addContractFile(file: Express.Multer.File, id: number, type: FileType) {
+  async addContractFile(
+    file: Express.Multer.File,
+    id: number,
+    type: FileType,
+    name: string,
+  ) {
     const fileEntity = this.fileRepository.create();
     fileEntity.contractId = id;
     fileEntity.type = type;
     const prefix = `contract/${id}`;
-    await this.add(file, fileEntity, prefix);
+    await this.add(file, fileEntity, prefix, name);
   }
 
   async add(
     file: Express.Multer.File,
     fileEntity: FileEntity,
     prefix: string = '',
+    name: string,
   ) {
     return await this.fileRepository.manager.transaction(async (manager) => {
-      const filename = Buffer.from(file.originalname, 'latin1').toString(
-        'utf8',
-      );
-      // const filename = file.originalname;
       fileEntity.size = file.size;
-      fileEntity.name = filename;
+      fileEntity.name = name;
       const fileDir = path.posix.join(UploadDir, prefix, ulid());
-      fileEntity.path = path.posix.join(fileDir, filename);
+      fileEntity.path = path.posix.join(fileDir, name);
 
       if (!fs.existsSync(fileDir)) fs.mkdirSync(fileDir, { recursive: true });
 

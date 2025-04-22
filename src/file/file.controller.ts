@@ -42,8 +42,8 @@ export class FileController {
     @UploadedFile() file: Express.Multer.File,
     @Body() uploadFileDTO: UploadFileDTO,
   ) {
-    const { id, type } = uploadFileDTO;
-    return await this.fileService.addProspectFile(file, id, type);
+    const { id, type, name } = uploadFileDTO;
+    return await this.fileService.addProspectFile(file, id, type, name);
   }
 
   @Roles(LIMIT_ADMIN)
@@ -53,8 +53,8 @@ export class FileController {
     @UploadedFile() file: Express.Multer.File,
     @Body() uploadFileDTO: UploadFileDTO,
   ) {
-    const { id, type } = uploadFileDTO;
-    return await this.fileService.addContractFile(file, id, type);
+    const { id, type, name } = uploadFileDTO;
+    return await this.fileService.addContractFile(file, id, type, name);
   }
 
   @Roles(LIMIT_ADMIN)
