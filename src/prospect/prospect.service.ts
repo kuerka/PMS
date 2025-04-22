@@ -10,6 +10,20 @@ import { arrayNotEmpty, isNotEmpty } from 'class-validator';
 import { Request } from 'express';
 import { ProductionCostForm } from '@/cost-form/entities/cost-form.entity';
 import { FileService } from '@/file/file.service';
+import { Contract } from '@/contract/entities/contract.entity';
+import {
+  transDto,
+  TransitionCompanyDto,
+  TransitionCostDto,
+  TransitionDepartmentDto,
+  TransitionInvoiceDto,
+  TransitionPaymentDto,
+} from '@/contract/dto/transition.dto';
+import { CollaborationDepartment } from '@/cost-form/entities/collaboration-department.entity';
+import { CollaborationCompany } from '@/cost-form/entities/collaboration-company.entity';
+import { CollaborationCompanyInvoice } from '@/cost-form/entities/collaboration-company-invoice.entity';
+import { CollaborationCompanyPayment } from '@/cost-form/entities/collaboration-company-payment.entity';
+import { File as FileEntity } from '@/file/file.entity';
 
 @Injectable()
 export class ProspectService {
@@ -289,6 +303,90 @@ export class ProspectService {
         updateForm.prospectProjectId = id;
         await this.costFormService.add(updateForm, manager);
       }
+
+      console.log('updateForm', prospect.contract);
+      const stage = prospect.projectDockingStage;
+      if (stage !== '中标') return;
+      await this.createContractTransition(id, prospect.contract, manager);
+    });
+  }
+
+  // 通过意向合同迁移
+  async createContractTransition(
+    prospectId: number,
+    contract: Contract,
+    manager?: EntityManager,
+  ) {
+    if (!manager) manager = this.dataSource.manager;
+    return manager.transaction(async (manager) => {
+      let costForm = await manager.getRepository(ProductionCostForm).findOne({
+        where: { prospectProjectId: prospectId },
+        relations: {
+          collaborationDepartments: true,
+          collaborationCompanies: {
+            collaborationCompanyInvoices: true,
+            collaborationCompanyPayments: true,
+          },
+        },
+      });
+      // contract
+      const con = await manager.getRepository(Contract).save(contract);
+      // cost
+      const hasCostForm = !!costForm;
+      if (!costForm) costForm = new ProductionCostForm();
+      const cost = transDto(TransitionCostDto, costForm);
+      cost.contractId = con.id;
+      const cf = await manager.getRepository(ProductionCostForm).save(cost);
+      if (hasCostForm) {
+        // department
+        const departments = costForm.collaborationDepartments;
+        const deps: TransitionDepartmentDto[] = [];
+        for (const department of departments) {
+          const dep = transDto(TransitionDepartmentDto, department);
+          dep.productionCostFormId = cf.id;
+          deps.push(dep);
+        }
+        await manager.getRepository(CollaborationDepartment).insert(deps);
+        //company
+        const companies = costForm.collaborationCompanies;
+        for (const company of companies) {
+          const cop = transDto(TransitionCompanyDto, company);
+          cop.productionCostFormId = cf.id;
+          const coped = await manager
+            .getRepository(CollaborationCompany)
+            .save(cop);
+
+          const invoices = company.collaborationCompanyInvoices;
+          const inv_s: TransitionInvoiceDto[] = [];
+          for (const invoice of invoices) {
+            const inv = transDto(TransitionInvoiceDto, invoice);
+            inv.companyId = coped.id;
+            inv_s.push(inv);
+          }
+
+          const payments = company.collaborationCompanyPayments;
+          const pay_s: TransitionPaymentDto[] = [];
+          for (const payment of payments) {
+            const pay = transDto(TransitionPaymentDto, payment);
+            pay.companyId = coped.id;
+            pay_s.push(pay);
+          }
+
+          await Promise.all([
+            manager.getRepository(CollaborationCompanyInvoice).insert(inv_s),
+            manager.getRepository(CollaborationCompanyPayment).insert(pay_s),
+          ]);
+        }
+      }
+
+      // file
+      const files = await this.fileService.getProspectFiles(prospectId);
+      const new_files = files.map((file) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { id, prospectProjectId, contractId, ...rest } = file;
+        return { ...rest, contractId: con.id };
+      });
+      await manager.getRepository(FileEntity).insert(new_files);
     });
   }
 

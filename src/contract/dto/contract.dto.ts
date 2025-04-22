@@ -62,6 +62,7 @@ export class CreateContractDto implements DTO {
 }
 
 export class TransitionContractDto implements DTO {
+  @IsOptional()
   @IsInt()
   prospectProjectId: number;
   @IsString()

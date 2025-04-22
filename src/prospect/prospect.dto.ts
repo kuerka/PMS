@@ -16,6 +16,8 @@ import {
   updateCostFormDto,
 } from '@/cost-form/dto/cost-form.dto';
 import { IsOptionalOrEmpty } from '@/utils/type';
+import { TransitionContractDto } from '@/contract/dto/contract.dto';
+import { Contract } from '@/contract/entities/contract.entity';
 
 type DTO = Partial<ProspectProject>;
 type ProjectDockingStage = ProspectProject['projectDockingStage'];
@@ -45,7 +47,7 @@ export class createProspectDto implements DTO {
   productionCostForm: ProductionCostForm;
 }
 
-export class UpdateProspectDto implements DTO {
+export class UpdateProspectDto {
   @IsInt()
   id: number;
   @IsString()
@@ -69,6 +71,11 @@ export class UpdateProspectDto implements DTO {
   @ValidateNested()
   @Type(() => updateCostFormDto)
   productionCostForm: ProductionCostForm;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => TransitionContractDto)
+  contract: Contract;
 }
 
 export class prospectDto extends ProspectProject {

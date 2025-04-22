@@ -65,6 +65,9 @@ export class ProspectController {
     @Body() prospectDto: UpdateProspectDto,
     @Req() req: Request,
   ) {
+    const stage = prospectDto.projectDockingStage;
+    if (stage === '中标' && !prospectDto.contract)
+      return new FailedCause('中标时，合同信息不能为空');
     const prospect = this.prospectService.create(prospectDto);
     await this.prospectService.logHandleProspect(req, prospect.id, '更新');
     return await this.prospectService.updateTransaction(prospect.id, prospect);

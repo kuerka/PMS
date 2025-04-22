@@ -33,6 +33,7 @@ import { DepartmentCodeToName } from '@/config/const';
 import { getProjectTypeStr } from '@/config/projectType';
 import { getLocationStr } from '@/config/location';
 import { FileService } from '@/file/file.service';
+import { File as FileEntity } from '@/file/file.entity';
 
 type CompanyCount = {
   id: number;
@@ -602,7 +603,7 @@ export class ContractService {
   // 通过意向合同迁移
   async createContractTransition(prospectId: number, contract: Contract) {
     return await this.dataSource.manager.transaction(async (manager) => {
-      const costForm = await manager.getRepository(ProductionCostForm).findOne({
+      let costForm = await manager.getRepository(ProductionCostForm).findOne({
         where: { prospectProjectId: prospectId },
         relations: {
           collaborationDepartments: true,
@@ -612,52 +613,64 @@ export class ContractService {
           },
         },
       });
-      if (!costForm) return;
       // contract
       const con = await manager.getRepository(Contract).save(contract);
       // cost
+      const hasCostForm = !!costForm;
+      if (!costForm) costForm = new ProductionCostForm();
       const cost = transDto(TransitionCostDto, costForm);
       cost.contractId = con.id;
       const cf = await manager.getRepository(ProductionCostForm).save(cost);
-      // department
-      const departments = costForm.collaborationDepartments;
-      const deps: TransitionDepartmentDto[] = [];
-      for (const department of departments) {
-        const dep = transDto(TransitionDepartmentDto, department);
-        dep.productionCostFormId = cf.id;
-        deps.push(dep);
-      }
-      await manager.getRepository(CollaborationDepartment).insert(deps);
-      //company
-      const companies = costForm.collaborationCompanies;
-      for (const company of companies) {
-        const cop = transDto(TransitionCompanyDto, company);
-        cop.productionCostFormId = cf.id;
-        const coped = await manager
-          .getRepository(CollaborationCompany)
-          .save(cop);
-
-        const invoices = company.collaborationCompanyInvoices;
-        const inv_s: TransitionInvoiceDto[] = [];
-        for (const invoice of invoices) {
-          const inv = transDto(TransitionInvoiceDto, invoice);
-          inv.companyId = coped.id;
-          inv_s.push(inv);
+      if (hasCostForm) {
+        // department
+        const departments = costForm.collaborationDepartments;
+        const deps: TransitionDepartmentDto[] = [];
+        for (const department of departments) {
+          const dep = transDto(TransitionDepartmentDto, department);
+          dep.productionCostFormId = cf.id;
+          deps.push(dep);
         }
+        await manager.getRepository(CollaborationDepartment).insert(deps);
+        //company
+        const companies = costForm.collaborationCompanies;
+        for (const company of companies) {
+          const cop = transDto(TransitionCompanyDto, company);
+          cop.productionCostFormId = cf.id;
+          const coped = await manager
+            .getRepository(CollaborationCompany)
+            .save(cop);
 
-        const payments = company.collaborationCompanyPayments;
-        const pay_s: TransitionPaymentDto[] = [];
-        for (const payment of payments) {
-          const pay = transDto(TransitionPaymentDto, payment);
-          pay.companyId = coped.id;
-          pay_s.push(pay);
+          const invoices = company.collaborationCompanyInvoices;
+          const inv_s: TransitionInvoiceDto[] = [];
+          for (const invoice of invoices) {
+            const inv = transDto(TransitionInvoiceDto, invoice);
+            inv.companyId = coped.id;
+            inv_s.push(inv);
+          }
+
+          const payments = company.collaborationCompanyPayments;
+          const pay_s: TransitionPaymentDto[] = [];
+          for (const payment of payments) {
+            const pay = transDto(TransitionPaymentDto, payment);
+            pay.companyId = coped.id;
+            pay_s.push(pay);
+          }
+
+          await Promise.all([
+            manager.getRepository(CollaborationCompanyInvoice).insert(inv_s),
+            manager.getRepository(CollaborationCompanyPayment).insert(pay_s),
+          ]);
         }
-
-        await Promise.all([
-          manager.getRepository(CollaborationCompanyInvoice).insert(inv_s),
-          manager.getRepository(CollaborationCompanyPayment).insert(pay_s),
-        ]);
       }
+
+      // file
+      const files = await this.fileService.getProspectFiles(prospectId);
+      const new_files = files.map((file) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { id, prospectProjectId, contractId, ...rest } = file;
+        return { ...rest, contractId: con.id };
+      });
+      await manager.getRepository(FileEntity).insert(new_files);
     });
   }
 
