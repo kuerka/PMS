@@ -13,9 +13,10 @@ import {
 } from './contract.controller';
 import { CostFormModule } from '@/cost-form/cost-form.module';
 import { AccumulateService } from './services/contract-accumulated.service';
+import { FileModule } from '@/file/file.module';
 
 @Module({
-  imports: [CostFormModule],
+  imports: [CostFormModule, FileModule],
   providers: [
     ContractService,
     PaymentMethodService,

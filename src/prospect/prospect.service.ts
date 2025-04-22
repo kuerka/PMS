@@ -9,6 +9,7 @@ import * as exceljs from 'exceljs';
 import { arrayNotEmpty, isNotEmpty } from 'class-validator';
 import { Request } from 'express';
 import { ProductionCostForm } from '@/cost-form/entities/cost-form.entity';
+import { FileService } from '@/file/file.service';
 
 @Injectable()
 export class ProspectService {
@@ -16,6 +17,7 @@ export class ProspectService {
   constructor(
     @InjectDataSource() private dataSource: DataSource,
     private costFormService: CostFormService,
+    private fileService: FileService,
   ) {}
 
   create(prospect: DeepPartial<ProspectProject>) {
@@ -297,7 +299,10 @@ export class ProspectService {
 
   async delete(id: number) {
     return await this.dataSource.manager.transaction(async (manager) => {
-      await this.costFormService.deleteByProspectId(id, manager);
+      await Promise.all([
+        this.costFormService.deleteByProspectId(id, manager),
+        this.fileService.deleteByProspectId(id, manager),
+      ]);
       await manager.delete(ProspectProject, id);
     });
   }

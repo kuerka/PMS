@@ -32,6 +32,7 @@ import * as exceljs from 'exceljs';
 import { DepartmentCodeToName } from '@/config/const';
 import { getProjectTypeStr } from '@/config/projectType';
 import { getLocationStr } from '@/config/location';
+import { FileService } from '@/file/file.service';
 
 type CompanyCount = {
   id: number;
@@ -53,6 +54,7 @@ export class ContractService {
     private invoiceHeaderService: InvoiceHeaderService,
     private invoiceRecordService: InvoiceRecordService,
     private receiptService: ReceiptRecordService,
+    private fileService: FileService,
   ) {}
 
   createContract(contract: DeepPartial<Contract>) {
@@ -582,12 +584,13 @@ export class ContractService {
 
   async deleteContractTransition(id: number) {
     return await this.dataSource.manager.transaction(async (manager) => {
+      const file = this.fileService.deleteByContractId(id, manager);
       const form = this.costFormService.deleteByContractId(id, manager);
       const payment = this.paymentService.deleteByContractId(id, manager);
       const header = this.invoiceHeaderService.deleteByContractId(id, manager);
       const record = this.invoiceRecordService.deleteByContractId(id, manager);
       const receipt = this.receiptService.deleteByContractId(id, manager);
-      await Promise.all([form, payment, header, record, receipt]);
+      await Promise.all([file, form, payment, header, record, receipt]);
       await this.deleteContract(id, manager);
     });
   }

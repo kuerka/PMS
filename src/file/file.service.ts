@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { File as FileEntity } from './file.entity';
-import { Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
 import { ulid } from 'ulid';
 import * as archiver from 'archiver';
-import { ContractService } from '@/contract/services/contract.service';
-import { ProspectService } from '@/prospect/prospect.service';
 import { Response } from 'express';
+import { ProspectProject } from '@/prospect/prospect.entity';
+import { Contract } from '@/contract/entities/contract.entity';
 
 const UploadDir = 'uploads';
 type FileType = FileEntity['type'];
@@ -22,8 +22,7 @@ export class FileService {
   constructor(
     @InjectRepository(FileEntity)
     private fileRepository: Repository<FileEntity>,
-    private prospectService: ProspectService,
-    private contractService: ContractService,
+    @InjectDataSource() private dataSource: DataSource,
   ) {}
 
   async getProspectFiles(id: number) {
@@ -63,6 +62,7 @@ export class FileService {
       const filename = Buffer.from(file.originalname, 'latin1').toString(
         'utf8',
       );
+      // const filename = file.originalname;
       fileEntity.size = file.size;
       fileEntity.name = filename;
       const fileDir = path.posix.join(UploadDir, prefix, ulid());
@@ -102,7 +102,9 @@ export class FileService {
 
   async batchDownloadProspectFile(id: number, res: Response) {
     try {
-      const prospect = await this.prospectService.findById(id);
+      const prospect = await this.dataSource
+        .getRepository(ProspectProject)
+        .findOneBy({ id });
       if (!prospect) throw new Error('Prospect not found');
 
       const fileEntities = await this.fileRepository.findBy({
@@ -117,7 +119,9 @@ export class FileService {
 
   async batchDownloadContractFile(id: number, res: Response) {
     try {
-      const contract = await this.contractService.getById(id);
+      const contract = await this.dataSource
+        .getRepository(Contract)
+        .findOneBy({ id });
       if (!contract) throw new Error('Contract not found');
 
       const fileEntities = await this.fileRepository.findBy({
@@ -146,6 +150,36 @@ export class FileService {
       archive.file(path!, { name: `${type}/${name}` });
     }
     await archive.finalize();
+  }
+
+  async deleteByProspectId(id: number, manager?: EntityManager) {
+    if (!manager) manager = this.fileRepository.manager;
+    const files = await this.fileRepository.findBy({
+      prospectProjectId: id,
+    });
+    if (!files.length) return;
+    await this.fileRepository.manager.delete(FileEntity, {
+      prospectProjectId: id,
+    });
+    for (const file of files) {
+      void this.handleRemoveFile(file);
+    }
+    return files;
+  }
+
+  async deleteByContractId(id: number, manager?: EntityManager) {
+    if (!manager) manager = this.fileRepository.manager;
+    const files = await this.fileRepository.findBy({
+      contractId: id,
+    });
+    if (!files.length) return;
+    await this.fileRepository.manager.delete(FileEntity, {
+      contractId: id,
+    });
+    for (const file of files) {
+      void this.handleRemoveFile(file);
+    }
+    return files;
   }
 
   async delete(id: number) {
