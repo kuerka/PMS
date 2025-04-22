@@ -53,8 +53,16 @@ export class ProspectProject {
   @Column('enum', {
     name: 'project_docking_stage',
     nullable: true,
-    unique: true,
-    enum: ['预算申请', '预算已落实', '意向公示', '招投标', '中标', '已签合同'],
+    enum: [
+      '预算申请',
+      '预算已落实',
+      '意向公示',
+      '招投标',
+      '中标',
+      '已签合同',
+      '未中标',
+      '对接失败',
+    ],
   })
   projectDockingStage:
     | '预算申请'
@@ -63,6 +71,8 @@ export class ProspectProject {
     | '招投标'
     | '中标'
     | '已签合同'
+    | '未中标'
+    | '对接失败'
     | null;
 
   @CreateDateColumn({ name: 'created_at', type: 'tinytext' })
