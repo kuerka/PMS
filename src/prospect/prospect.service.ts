@@ -283,7 +283,11 @@ export class ProspectService {
     return await workbook.xlsx.writeBuffer();
   }
 
-  async updateTransaction(id: number, prospect: ProspectProject) {
+  async updateTransaction(
+    id: number,
+    prospect: ProspectProject,
+    toSign: boolean,
+  ) {
     return await this.dataSource.manager.transaction(async (manager) => {
       await this.update(prospect, manager);
 
@@ -306,8 +310,9 @@ export class ProspectService {
 
       console.log('updateForm', prospect.contract);
       const stage = prospect.projectDockingStage;
-      if (stage !== '中标') return;
-      await this.createContractTransition(id, prospect.contract, manager);
+      if (stage === '已签合同' && toSign) {
+        await this.createContractTransition(id, prospect.contract, manager);
+      }
     });
   }
 

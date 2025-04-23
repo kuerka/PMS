@@ -92,6 +92,7 @@ export class ContractController {
     return await this.contractService.deleteContractTransition(id);
   }
 
+  @Roles(LIMIT_ADMIN)
   @Post('transition')
   async addContractTransition(@Body() contractDto: TransitionContractDto) {
     const prospectId = contractDto.prospectProjectId;
