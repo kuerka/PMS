@@ -15,7 +15,7 @@ import { Response } from 'express';
 import { Roles } from 'src/auth/auth.decorators';
 import { FileService } from './file.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UploadFileDTO } from './file.dto';
+import { UpdateTypeDTO, UploadFileDTO } from './file.dto';
 import { ANY_ROLE, LIMIT_ADMIN } from '@/auth/constants';
 
 @Roles(...ANY_ROLE)
@@ -59,7 +59,7 @@ export class FileController {
 
   @Roles(LIMIT_ADMIN)
   @Post('update/type')
-  async updateFileType(@Body() updateDTO: UploadFileDTO) {
+  async updateFileType(@Body() updateDTO: UpdateTypeDTO) {
     const { id, type } = updateDTO;
     return await this.fileService.updateFileType(id, type);
   }
