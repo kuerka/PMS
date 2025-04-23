@@ -293,22 +293,20 @@ export class ProspectService {
 
       if (!prospect.isPriorWorkStarted) {
         await this.costFormService.deleteByProspectId(id, manager);
-        return;
-      }
-
-      const updateForm = prospect.productionCostForm;
-      if (!updateForm) return;
-
-      const form = await this.costFormService.findByProspectId(id);
-      if (form) {
-        updateForm.id = form.id;
-        await this.costFormService.update(updateForm, manager);
       } else {
-        updateForm.prospectProjectId = id;
-        await this.costFormService.add(updateForm, manager);
+        const updateForm = prospect.productionCostForm;
+        if (updateForm) {
+          const form = await this.costFormService.findByProspectId(id);
+          if (form) {
+            updateForm.id = form.id;
+            await this.costFormService.update(updateForm, manager);
+          } else {
+            updateForm.prospectProjectId = id;
+            await this.costFormService.add(updateForm, manager);
+          }
+        }
       }
 
-      console.log('updateForm', prospect.contract);
       const stage = prospect.projectDockingStage;
       if (stage === '已签合同' && toSign) {
         await this.createContractTransition(id, prospect.contract, manager);
