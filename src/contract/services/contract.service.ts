@@ -105,10 +105,16 @@ export class ContractService {
         });
       }
     }
-    if (isNotEmpty(query.contractNumber)) {
-      queryBuilder.andWhere('c.contractNumber LIKE :contractNumber', {
-        contractNumber: `%${query.contractNumber}%`,
-      });
+    if (arrayNotEmpty(query.contractNumber)) {
+      const queryStr = query.contractNumber
+        .filter((val) => val.trim() !== '')
+        .map((val) => `(?=.*${val})`)
+        .join('');
+      if (queryStr) {
+        queryBuilder.andWhere('c.contractNumber REGEXP :contractNumber', {
+          contractNumber: queryStr,
+        });
+      }
     }
     if (isNotEmpty(query.projectType)) {
       queryBuilder.andWhere('c.projectType LIKE :projectType', {
@@ -244,6 +250,25 @@ export class ContractService {
     return queryBuilder;
   }
 
+  getQueryOrder(
+    queryBuilder: SelectQueryBuilder<Contract>,
+    prop: string,
+    order: string,
+  ) {
+    if (!prop || !order) return queryBuilder;
+
+    const _order = order === 'ASC' ? 'ASC' : 'DESC';
+    let orderProp = `c.${prop}`;
+    if (prop === 'contractNumber') {
+      const colExpress = 'CAST(RIGHT(c.contractNumber, 7) AS UNSIGNED)';
+      queryBuilder.addSelect(colExpress, 'c_offsetNumber');
+      orderProp = 'c_offsetNumber';
+    }
+    queryBuilder.orderBy(orderProp, _order);
+
+    return queryBuilder;
+  }
+
   // TODO 后续添加筛选条件
   async getContractPageQuery(queryDto: QueryContractDto) {
     const page = queryDto.pageParams?.currentPage || 1;
@@ -256,10 +281,7 @@ export class ContractService {
       .leftJoinAndSelect('costForm.collaborationDepartments', 'departments')
       .leftJoinAndSelect('costForm.collaborationCompanies', 'companies');
 
-    if (prop && order) {
-      const _order = order === 'ASC' ? 'ASC' : 'DESC';
-      queryBuilder.orderBy(`c.${prop}`, _order);
-    }
+    queryBuilder = this.getQueryOrder(queryBuilder, prop, order);
     queryBuilder.skip((page - 1) * limit).take(limit);
     const [data, total] = await queryBuilder.getManyAndCount();
 

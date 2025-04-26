@@ -159,8 +159,8 @@ export class QueryContractDto {
   @IsArray()
   searchValues: string[];
   @IsOptional()
-  @IsString()
-  contractNumber: string;
+  @IsArray()
+  contractNumber: string[];
   @IsOptional()
   @IsString()
   projectType: string;
