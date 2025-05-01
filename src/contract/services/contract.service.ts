@@ -45,6 +45,11 @@ type isNeedReceive = {
   isNeedReceive: '0' | '1';
 };
 
+type FileTypes = {
+  id: number;
+  fileType: string;
+};
+
 @Injectable()
 export class ContractService {
   private readonly logger = new Logger();
@@ -269,7 +274,6 @@ export class ContractService {
     return queryBuilder;
   }
 
-  // TODO 后续添加筛选条件
   async getContractPageQuery(queryDto: QueryContractDto) {
     const page = queryDto.pageParams?.currentPage || 1;
     const limit = queryDto.pageParams?.pageSize || 10;
@@ -289,6 +293,7 @@ export class ContractService {
       await Promise.all([
         this.combineCompanyCount(data),
         this.combineIsNeedReceive(data),
+        this.combineFileType(data),
       ]);
     }
 
@@ -424,6 +429,28 @@ export class ContractService {
     const ids = data.map(({ id }) => id);
     const isNeedReceive = await this.getCompanyIsNeedReceive(ids);
     for (const item of data) item.isNeedReceive = isNeedReceive[item.id];
+  }
+
+  async getContractFileTypes(ids: number[]) {
+    const res: FileTypes[] = await this.dataSource
+      .createQueryBuilder()
+      .select('c.id', 'id')
+      .addSelect('GROUP_CONCAT(DISTINCT f.type)', 'fileType')
+      .from(Contract, 'c')
+      .leftJoin(FileEntity, 'f', 'f.contract_id=c.id')
+      .where('c.id IN (:...ids)', { ids })
+      .groupBy('c.id')
+      .getRawMany();
+
+    const resMap: Record<string, string[]> = {};
+    for (const item of res) resMap[item.id] = item.fileType?.split(',') ?? [];
+    return resMap;
+  }
+
+  async combineFileType(data: Contract[]) {
+    const ids = data.map(({ id }) => id);
+    const fileTypes = await this.getContractFileTypes(ids);
+    for (const item of data) item.fileTypes = fileTypes[item.id];
   }
 
   async getCompanyCount(costIds: number[]) {

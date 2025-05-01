@@ -212,4 +212,5 @@ export class Contract {
 
   // extra fields
   isNeedReceive: boolean;
+  fileTypes: string[];
 }
