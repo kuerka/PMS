@@ -53,6 +53,7 @@ type FileTypes = {
 @Injectable()
 export class ContractService {
   private readonly logger = new Logger();
+
   constructor(
     @InjectDataSource() private dataSource: DataSource,
     private costFormService: CostFormService,
@@ -78,6 +79,7 @@ export class ContractService {
       return saved;
     });
   }
+
   async addContract(contract: Contract, manager?: EntityManager) {
     if (!manager) manager = this.dataSource.manager;
     return await manager.getRepository(Contract).save(contract);
@@ -237,6 +239,17 @@ export class ContractService {
           contractExecutionStatus: query.contractExecutionStatus,
         },
       );
+    }
+    if (arrayNotEmpty(query.remark)) {
+      const queryStr = query.remark
+        .filter((val) => val.trim() !== '')
+        .map((val) => `(?=.*${val})`)
+        .join('');
+      if (queryStr) {
+        queryBuilder.andWhere('c.remark REGEXP :remark', {
+          remark: queryStr,
+        });
+      }
     }
 
     return queryBuilder;
@@ -616,6 +629,7 @@ export class ContractService {
 
     return await workbook.xlsx.writeBuffer();
   }
+
   async updateContractTransition(contract: Contract) {
     return await this.dataSource.manager.transaction(async (manager) => {
       await this.updateContract(contract, manager);
@@ -627,6 +641,7 @@ export class ContractService {
       );
     });
   }
+
   async updateContract(contract: Contract, manager?: EntityManager) {
     if (!manager) manager = this.dataSource.manager;
     return await manager.getRepository(Contract).save(contract);
@@ -644,6 +659,7 @@ export class ContractService {
       await this.deleteContract(id, manager);
     });
   }
+
   async deleteContract(id: number, manager?: EntityManager) {
     if (!manager) manager = this.dataSource.manager;
     return await manager.getRepository(Contract).delete(id);

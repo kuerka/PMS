@@ -200,6 +200,9 @@ export class QueryContractDto {
   @IsOptional()
   @IsArray()
   contractExecutionStatus: ContractExecutionStatus[];
+  @IsOptional()
+  @IsArray()
+  remark: string[];
 
   @IsOptional()
   @ValidateNested()
