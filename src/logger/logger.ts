@@ -61,7 +61,10 @@ export const handleRequestLogger = (
   if (noLogUrls.some((url) => request.url.match(url))) return;
   if (request.method.toLowerCase() !== 'post') return;
   const urlInfo = `${request.method} ${request.url}`;
-  let log = `请求接口: ${urlInfo}, 请求来源: ${request.ip} 用户: ${JSON.stringify(request['user'])}`;
+  let log = `请求接口: ${urlInfo} 请求来源: ${request.ip}`;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const userInfo = request['user'];
+  if (userInfo) log += ` 用户: ${JSON.stringify(userInfo)}`;
   if (!noParamsUrls.some((url) => url.test(request.url)))
     log += ` 请求参数：${JSON.stringify(request.body)}`;
   if (code === 0) {

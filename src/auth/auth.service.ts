@@ -1,12 +1,13 @@
 import { FailedCause } from '@/response-formatter/response-formatter.interceptor';
 import { UserInfoDTO } from '@/user/user.dto';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { plainToClass } from 'class-transformer';
 import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger();
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
@@ -21,6 +22,7 @@ export class AuthService {
       excludeExtraneousValues: true,
     });
     const payload = await this.jwtService.signAsync({ ...userDto });
+    this.logger.log(`登录用户: ${JSON.stringify(userDto)}`);
     return { token: payload };
   }
 }
