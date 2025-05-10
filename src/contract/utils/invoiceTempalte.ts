@@ -2,7 +2,7 @@ import { ContractInvoiceRecord } from '../entities/invoice-record.entity';
 import * as exceljs from 'exceljs';
 import * as dayjs from 'dayjs';
 import { getProjectTypeStr } from '@/config/projectType';
-import { DepartmentCodeToName } from '@/config/const';
+import { DepartmentMap } from '@/config/department';
 import { getLocationStr, municipality } from '@/config/location';
 import { CellRichTextValue } from 'exceljs';
 
@@ -29,6 +29,15 @@ const NumberToChinese = (numStr: string) => {
     console.log(e);
     return '';
   }
+};
+
+const getDepartmentFromNumber = (numStr: string) => {
+  const pattern = /([A-Z]{2})(\d{4}\d{3})$/;
+  const lastSeven = numStr.slice(-9);
+  const match = pattern.exec(lastSeven);
+  if (!match) return '';
+  const departmentCode = match[1].toUpperCase();
+  return DepartmentMap[departmentCode] ?? '';
 };
 
 const filterMunicipality = (locations: string[]) => {
@@ -63,8 +72,7 @@ export const handleCHYTemplate = async (
   const invoiceType = query.invoiceType;
   const companyName = query.contract.invoiceHeader.companyName;
   const contractNumber = query.contract.contractNumber;
-  const leadingDepartment =
-    DepartmentCodeToName[query.contract.productionCostForm.leadingDepartment!];
+  const leadingDepartment = getDepartmentFromNumber(contractNumber);
   const projectType = getProjectTypeStr(query.contract.projectType ?? '');
   const invoiceAmount = query.invoiceAmount;
   const projectName = query.contract.projectName;
