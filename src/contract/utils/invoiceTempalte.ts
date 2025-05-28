@@ -75,6 +75,7 @@ export const handleCHYTemplate = async (
   const leadingDepartment = getDepartmentFromNumber(contractNumber);
   const projectType = getProjectTypeStr(query.contract.projectType ?? '');
   const invoiceAmount = query.invoiceAmount;
+  const contractAmount = query.contract.contractAmount;
   const projectName = query.contract.projectName;
   const contactPhone = query.contract.invoiceHeader.contactPhone;
   const taxpayerIdentificationNumber =
@@ -100,7 +101,7 @@ export const handleCHYTemplate = async (
   if (locations[1]) worksheet.getCell('U9').value = locations[1];
   if (locations[2]) worksheet.getCell('AB9').value = locations[2];
 
-  worksheet.getCell('AO9').value = `${invoiceAmount}元`;
+  worksheet.getCell('AO9').value = `${contractAmount}元`;
   worksheet.getCell('N10').value = companyName;
   worksheet.getCell('AO10').value = taxpayerIdentificationNumber;
   worksheet.getCell('N11').value = bankName;
