@@ -2,7 +2,7 @@ import { ContractInvoiceRecord } from '../entities/invoice-record.entity';
 import * as exceljs from 'exceljs';
 import * as dayjs from 'dayjs';
 import { getProjectTypeStr } from '@/config/projectType';
-import { DepartmentMap } from '@/config/department';
+import { DepartmentMultiMap } from '@/config/department';
 import { getLocationStr, municipality } from '@/config/location';
 import { CellRichTextValue } from 'exceljs';
 
@@ -31,13 +31,23 @@ const NumberToChinese = (numStr: string) => {
   }
 };
 
-const getDepartmentFromNumber = (numStr: string) => {
+const getDepartmentFromNumber = (templateType: string, numStr: string) => {
   const pattern = /([A-Z]{2})(\d{4}\d{3})$/;
   const lastSeven = numStr.slice(-9);
   const match = pattern.exec(lastSeven);
   if (!match) return '';
   const departmentCode = match[1].toUpperCase();
-  return DepartmentMap[departmentCode] ?? '';
+
+  let departmentIndex: 901 | 902 | undefined;
+  if (templateType === 'GHZX') departmentIndex = 901;
+  else if (templateType === 'CHY') departmentIndex = 902;
+  if (!departmentIndex) return '';
+
+  const department = DepartmentMultiMap.find(
+    (item) => item.departmentCode === departmentCode,
+  );
+  if (!department) return '';
+  return department[departmentIndex];
 };
 
 const filterMunicipality = (locations: string[]) => {
@@ -55,14 +65,18 @@ export const downloadInvoiceTemplate = (
   query: ContractInvoiceRecord,
   templateType: string,
 ) => {
+  let templatePath: string = '';
   if (templateType === 'CHY')
-    return handleCHYTemplate(query, `./assests/invoice_template/CHY.xlsx`);
+    templatePath = `./assests/invoice_template/CHY.xlsx`;
   else if (templateType === 'GHZX')
-    return handleCHYTemplate(query, './assests/invoice_template/GHZX.xlsx');
+    templatePath = './assests/invoice_template/GHZX.xlsx';
+  if (!templatePath) return;
+  return handleCHYTemplate(query, templateType, templatePath);
 };
 
 export const handleCHYTemplate = async (
   query: ContractInvoiceRecord,
+  templateType: string,
   path: string,
 ) => {
   const workbook = new exceljs.Workbook();
@@ -72,7 +86,10 @@ export const handleCHYTemplate = async (
   const invoiceType = query.invoiceType;
   const companyName = query.contract.invoiceHeader.companyName;
   const contractNumber = query.contract.contractNumber;
-  const leadingDepartment = getDepartmentFromNumber(contractNumber);
+  const leadingDepartment = getDepartmentFromNumber(
+    templateType,
+    contractNumber,
+  );
   const projectType = getProjectTypeStr(query.contract.projectType ?? '');
   const invoiceAmount = query.invoiceAmount;
   const contractAmount = query.contract.contractAmount;
