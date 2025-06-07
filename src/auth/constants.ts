@@ -1,3 +1,6 @@
+import { isEmpty } from 'class-validator';
+import * as config from 'config';
+
 export type limits = 0 | 1 | 2; // 0:admin, 1:edit, 2:view
 export const LimitsMap: Record<string, limits> = {
   admin: 0,
@@ -16,6 +19,15 @@ export type JwtUserInfo = {
   limits: limits;
 };
 
+type PMSConfig = {
+  secret: string;
+};
+
+const pmsConfig = config.get<PMSConfig>('pms');
+if (isEmpty(pmsConfig.secret)) {
+  throw new Error('PMS secret is not defined in the configuration.');
+}
+
 export const jwtConstants = {
-  secret: 'secret_key',
+  secret: pmsConfig.secret,
 };

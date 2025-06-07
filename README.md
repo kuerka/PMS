@@ -99,6 +99,9 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 在 ```config/default.json``` 文件下，配置内容如下：
 ```json
 {
+    "pms": {
+      "secret": "secret_key"
+    },
     "database": {
         "type": "mysql",
         "host": "127.0.0.1",
@@ -110,6 +113,7 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
     }
 }
 ```
+其中 `pms.secret` 为 `jwt` 密钥，请自行修改。
 
 ## License
 
