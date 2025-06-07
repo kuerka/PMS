@@ -34,6 +34,10 @@ import { getProjectTypeStr } from '@/config/projectType';
 import { getLocationStr } from '@/config/location';
 import { FileService } from '@/file/file.service';
 import { File as FileEntity } from '@/file/file.entity';
+import { RequestContext } from 'nestjs-request-context';
+import { Users } from '@/user/user.entity';
+import { LIMIT_ADMIN } from '@/auth/constants';
+import { safeLeftJoinAndSelect } from '@/utils/sql';
 
 type CompanyCount = {
   id: number;
@@ -259,7 +263,7 @@ export class ContractService {
     queryBuilder: SelectQueryBuilder<Contract>,
     queryDto: QueryContractDto,
   ) {
-    queryBuilder.leftJoinAndSelect('c.productionCostForm', 'costForm');
+    safeLeftJoinAndSelect(queryBuilder, 'c.productionCostForm', 'costForm');
     if (isNotEmpty(queryDto.leadingDepartment)) {
       queryBuilder.andWhere('costForm.leadingDepartment = :leadingDepartment', {
         leadingDepartment: queryDto.leadingDepartment,
@@ -284,6 +288,19 @@ export class ContractService {
     }
     queryBuilder.orderBy(orderProp, _order);
 
+    return queryBuilder;
+  }
+
+  handleFilterUserDepartment(queryBuilder: SelectQueryBuilder<Contract>) {
+    const req = <Request>RequestContext.currentContext.req;
+    const userInfo = <Users>req['user'];
+    if (userInfo.limits === LIMIT_ADMIN) return queryBuilder;
+
+    // 仅查询用户所在部门的合同
+    safeLeftJoinAndSelect(queryBuilder, 'c.productionCostForm', 'costForm');
+    queryBuilder.andWhere('costForm.leadingDepartment = :departments', {
+      departments: userInfo.departmentId,
+    });
     return queryBuilder;
   }
 
@@ -543,6 +560,7 @@ export class ContractService {
   async getFilterExcel(queryDto: QueryContractDto) {
     let queryBuilder = this.getContractQueryBuilder(queryDto);
     queryBuilder = this.handleFilterCost(queryBuilder, queryDto);
+    queryBuilder = this.handleFilterUserDepartment(queryBuilder);
     const rows = await queryBuilder.getMany();
     const workbook = new exceljs.Workbook();
     const worksheet = workbook.addWorksheet();

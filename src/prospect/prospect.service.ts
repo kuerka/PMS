@@ -1,6 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ProspectProject } from './prospect.entity';
-import { DataSource, DeepPartial, EntityManager } from 'typeorm';
+import {
+  DataSource,
+  DeepPartial,
+  EntityManager,
+  SelectQueryBuilder,
+} from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { ProspectQueryDto } from './prospect.dto';
 import { CostFormService } from '@/cost-form/cost-form.service';
@@ -24,6 +29,10 @@ import { CollaborationCompany } from '@/cost-form/entities/collaboration-company
 import { CollaborationCompanyInvoice } from '@/cost-form/entities/collaboration-company-invoice.entity';
 import { CollaborationCompanyPayment } from '@/cost-form/entities/collaboration-company-payment.entity';
 import { File as FileEntity } from '@/file/file.entity';
+import { LIMIT_ADMIN } from '@/auth/constants';
+import { Users } from '@/user/user.entity';
+import { RequestContext } from 'nestjs-request-context';
+import { safeLeftJoinAndSelect } from '@/utils/sql';
 
 @Injectable()
 export class ProspectService {
@@ -207,9 +216,23 @@ export class ProspectService {
       .getRawOne<object>();
   }
 
+  handleFilterUserDepartment(
+    queryBuilder: SelectQueryBuilder<ProspectProject>,
+  ) {
+    const req = <Request>RequestContext.currentContext.req;
+    const userInfo = <Users>req['user'];
+    if (userInfo.limits === LIMIT_ADMIN) return queryBuilder;
+
+    queryBuilder.andWhere('p.leadingBusinessDepartment = :departments', {
+      departments: userInfo.departmentId,
+    });
+    return queryBuilder;
+  }
+
   async getFilterExcel(prospectQueryDto: ProspectQueryDto) {
-    const queryBuilder = this.getProspectQuery(prospectQueryDto);
-    queryBuilder.leftJoinAndSelect('p.productionCostForm', 'costForm');
+    let queryBuilder = this.getProspectQuery(prospectQueryDto);
+    safeLeftJoinAndSelect(queryBuilder, 'p.productionCostForm', 'costForm');
+    queryBuilder = this.handleFilterUserDepartment(queryBuilder);
     const rows = await queryBuilder.getMany();
     const workbook = new exceljs.Workbook();
     const worksheet = workbook.addWorksheet();

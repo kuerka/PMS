@@ -99,7 +99,7 @@ export class ContractController {
     const contract = this.contractService.createContract(contractDto);
     await this.contractService.createContractTransition(prospectId, contract);
   }
-  @Roles(LIMIT_ADMIN)
+  @Roles(...ABOVE_EDIT)
   @Post('excel')
   async exportProspectExcel(@Body() queryDto: QueryContractDto) {
     const buffer = await this.contractService.getFilterExcel(queryDto);

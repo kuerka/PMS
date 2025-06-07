@@ -10,10 +10,12 @@ import { ProspectModule } from './prospect/prospect.module';
 import { ContractModule } from './contract/contract.module';
 import { CostFormModule } from './cost-form/cost-form.module';
 import { ResponseFormatterModule } from './response-formatter/response-formatter.module';
+import { RequestContextModule } from 'nestjs-request-context';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(OrmConfig),
+    RequestContextModule,
     UserModule,
     AuthModule,
     FileModule,

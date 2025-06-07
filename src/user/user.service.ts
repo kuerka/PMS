@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DeepPartial, Repository } from 'typeorm';
 import { Users } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { isEmpty } from 'class-validator';
 
 @Injectable()
 export class UserService {
@@ -14,18 +15,22 @@ export class UserService {
   }
 
   async findById(id: number): Promise<Users | null> {
+    if (isEmpty(id)) return null;
     return this.userRepository.findOneBy({ id });
   }
 
   async findByName(username: string): Promise<Users | null> {
+    if (isEmpty(username)) return null;
     return this.userRepository.findOneBy({ username });
   }
 
   async updateInfo(id: number, data: Partial<Users>): Promise<void> {
+    if (isEmpty(id)) return;
     await this.userRepository.update(id, data);
   }
 
   async updatePassword(id: number, password: string): Promise<void> {
+    if (isEmpty(id) || isEmpty(password)) return;
     await this.userRepository.update(id, { password });
   }
 }

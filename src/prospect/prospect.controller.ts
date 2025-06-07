@@ -18,7 +18,7 @@ import {
   ProspectQueryDto,
   UpdateProspectDto,
 } from './prospect.dto';
-import { ANY_ROLE, LIMIT_ADMIN } from '@/auth/constants';
+import { ABOVE_EDIT, ANY_ROLE, LIMIT_ADMIN } from '@/auth/constants';
 import { FailedCause } from '@/response-formatter/response-formatter.interceptor';
 
 @Roles(...ANY_ROLE)
@@ -47,7 +47,7 @@ export class ProspectController {
     return await this.prospectService.getTotalAccumulated(prospectQueryDto);
   }
 
-  @Roles(LIMIT_ADMIN)
+  @Roles(...ABOVE_EDIT)
   @Post('excel')
   async exportProspectExcel(@Body() prospectQueryDto: ProspectQueryDto) {
     const buffer = await this.prospectService.getFilterExcel(prospectQueryDto);
