@@ -5,6 +5,7 @@ import { getProjectTypeStr } from '@/config/projectType';
 import { DepartmentMultiMap } from '@/config/department';
 import { getLocationStr, municipality } from '@/config/location';
 import { CellRichTextValue } from 'exceljs';
+import { replacePlaceholdersInExcel } from './excelPlaceholderReplacer';
 
 const NumberToChinese = (numStr: string) => {
   try {
@@ -71,7 +72,78 @@ export const downloadInvoiceTemplate = (
   else if (templateType === 'GHZX')
     templatePath = './assests/invoice_template/GHZX.xlsx';
   if (!templatePath) return;
-  return handleCHYTemplate(query, templateType, templatePath);
+  return handleCHYTemplateByPlaceHolder(query, templateType, templatePath);
+};
+
+export const handleCHYTemplateByPlaceHolder = async (
+  query: ContractInvoiceRecord,
+  templateType: string,
+  path: string,
+) => {
+  const workbook = new exceljs.Workbook();
+  await workbook.xlsx.readFile(path);
+
+  const invoiceType = query.invoiceType;
+  const companyName = query.contract.invoiceHeader.companyName;
+  const contractNumber = query.contract.contractNumber;
+  const leadingDepartment = getDepartmentFromNumber(
+    templateType,
+    contractNumber,
+  );
+  const projectType = getProjectTypeStr(query.contract.projectType ?? '');
+  const invoiceAmount = query.invoiceAmount;
+  const contractAmount = query.contract.contractAmount;
+  const projectName = query.contract.projectName;
+  const contactPhone = query.contract.invoiceHeader.contactPhone;
+  const taxpayerIdentificationNumber =
+    query.contract.invoiceHeader.taxpayerIdentificationNumber;
+  const bankAccount = query.contract.invoiceHeader.bankAccount;
+  const address = query.contract.invoiceHeader.address;
+  const bankName = query.contract.invoiceHeader.bankName;
+  const applicationDate = dayjs(query.invoiceTime);
+  let locations = getLocationStr(query.contract.projectLocation!).split('-');
+  locations = filterMunicipality(locations).map(removeProvinceCityCounty);
+
+  // 准备替换映射
+  const replacements: Record<string, any> = {
+    'applicationDate.year': applicationDate.get('year').toString(),
+    'applicationDate.month': (applicationDate.get('months') + 1).toString(),
+    'applicationDate.day': applicationDate.get('date').toString(),
+    'project.name': projectName || '',
+    'contract.number': contractNumber,
+    'leading.department': leadingDepartment,
+    'project.type': projectType,
+    'location.province': locations[0] || '',
+    'location.city': locations[1] || '',
+    'location.district': locations[2] || '',
+    'contract.amount': `${contractAmount}元`,
+    'company.name': companyName || '',
+    'taxpayer.id': taxpayerIdentificationNumber || '',
+    'bank.name': bankName || '',
+    'bank.account': bankAccount || '',
+    'company.address': address || '',
+    'contact.phone': contactPhone || '',
+    'invoice.type.special': invoiceType === '增值税专用发票' ? '☑' : '☐',
+    'invoice.type.general': invoiceType === '增值税普通发票' ? '☑' : '☐',
+  };
+
+  // 添加发票金额的数字位
+  const floatStr = [...parseFloat(invoiceAmount!).toFixed(2)]
+    .filter((item) => item !== '.')
+    .reverse();
+  const range = 10;
+  // const w_range = Math.min(floatStr.length, range.length);
+  for (let i = 0; i < range; i++) {
+    replacements[`invoice.amount.${i}`] = floatStr?.[i] ? +floatStr?.[i] : null;
+  }
+
+  // 使用replacePlaceholdersInExcel替换占位符
+  replacePlaceholdersInExcel(workbook, replacements, {
+    placeholderPrefix: '${',
+    placeholderSuffix: '}',
+  });
+
+  return await workbook.xlsx.writeBuffer();
 };
 
 export const handleCHYTemplate = async (
