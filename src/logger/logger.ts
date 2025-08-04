@@ -23,7 +23,7 @@ export const logger = WinstonModule.createLogger({
       datePattern: 'YYYY-MM-DD', // 每天生成新的日志文件
       zippedArchive: true, // 是否压缩历史日志
       maxSize: '20m', // 每个日志文件最大 20MB
-      maxFiles: '60d', // 只保留最近 60 天的日志
+      maxFiles: '180d', // 只保留最近 180 天的日志
       format: logFormat,
     }),
     // 记录错误日志
@@ -34,7 +34,7 @@ export const logger = WinstonModule.createLogger({
       datePattern: 'YYYY-MM-DD',
       zippedArchive: true,
       maxSize: '20m',
-      maxFiles: '30d',
+      maxFiles: '180d',
       format: logFormat,
     }),
     // 控制台日志
